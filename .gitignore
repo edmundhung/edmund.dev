@@ -1,0 +1,13 @@
+# Node
+node_modules
+
+# Remix build
+/.cache
+/build
+/public/build
+
+# Worker
+worker.js
+
+# Misc
+.DS_Store

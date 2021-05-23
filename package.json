@@ -1,0 +1,40 @@
+{
+  "private": true,
+  "name": "remix-cloudflare-workers-template",
+  "main": "./worker.js",
+  "description": "",
+  "license": "",
+  "scripts": {
+    "build:remix": "remix build",
+    "build:worker": "node ./worker/build.js",
+    "build": "npm run build:remix && npm run build:worker",
+    "dev": "remix run",
+    "start": "remix-serve build",
+    "preview": "wrangler dev",
+    "publish": "wrangler publish"
+  },
+  "dependencies": {
+    "@cloudflare/kv-asset-handler": "^0.1.1",
+    "@remix-run/node": "^0.17.3",
+    "@remix-run/react": "^0.17.3",
+    "@remix-run/serve": "^0.17.3",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-router-dom": "^6.0.0-beta.0",
+    "remix": "^0.17.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^2.2.2",
+    "@cloudflare/wrangler": "^1.16.1",
+    "@remix-run/dev": "^0.17.3",
+    "@types/react": "^17.0.4",
+    "@types/react-dom": "^17.0.4",
+    "esbuild": "^0.12.1",
+    "esbuild-plugin-alias": "^0.1.2",
+    "typescript": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "sideEffects": false
+}

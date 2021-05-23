@@ -1,0 +1,15 @@
+name = "blog"
+type = "javascript"
+account_id = "c63d756a160ad09cd9a82553c77e9174"
+workers_dev = true
+
+[site]
+bucket = "./public"
+entry-point = "."
+
+[build]
+command = "npm run build"
+watch_dir = "app"
+
+[build.upload]
+format="service-worker"
