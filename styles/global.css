@@ -1,17 +1,28 @@
 @tailwind base;
+
+@layer base {
+  h1 {
+    @apply mb-16;
+  }
+  h2 {
+    @apply my-12;
+  }
+  a {
+    @apply underline;
+  }
+  p {
+    @apply leading-loose;
+  }
+  p:not(:last-child)  {
+    @apply mb-6;
+  }
+  ul {
+    @apply list-disc list-inside;
+  }
+  ol {
+    @apply list-decimal list-inside;
+  }
+}
+
 @tailwind components;
 @tailwind utilities;
-
-:focus:not(:focus-visible) {
-  outline: none;
-}
-
-body {
-  font-family: sans-serif;
-}
-
-footer {
-  text-align: center;
-  color: #ccc;
-  padding-top: 80px;
-}

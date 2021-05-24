@@ -9,7 +9,8 @@ node_modules
 # Postcss build
 /app/styles
 
-# Worker
+# Worker related
+posts.json
 worker.js
 
 # Misc

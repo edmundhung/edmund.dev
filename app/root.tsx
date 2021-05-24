@@ -1,15 +1,20 @@
-import type { LinksFunction, LoaderFunction } from "remix";
+import type { LinksFunction } from "remix";
 import { Meta, Links, Scripts, useRouteData, LiveReload } from "remix";
 import { Outlet } from "react-router-dom";
 
 import stylesUrl from "./styles/global.css";
 
-export let links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: stylesUrl }];
+export let meta: MetaFunction = () => {
+  return {
+    title: "EdStudio",
+    description: "I'm Edmund, a web engineer specialised in frontend development. Currently working as a frontend developer at @PPRO. Enjoy biking and photography in my leisure time.",
+    author: "Edmund Hung",
+    keywords: "web,engineer,react",
+  };
 };
 
-export let loader: LoaderFunction = async () => {
-  return { date: new Date() };
+export let links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesUrl }];
 };
 
 function Document({ children }: { children: React.ReactNode }) {
@@ -17,11 +22,12 @@ function Document({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="font-open-sans font-light bg-gray-100 pt-32 pb-8 px-20">
         {children}
 
         <Scripts />
@@ -36,8 +42,8 @@ export default function App() {
   return (
     <Document>
       <Outlet />
-      <footer>
-        <p>This page was rendered at {data.date.toLocaleString()}</p>
+      <footer className="pt-12 text-xs">
+        Copyright &copy; 2021
       </footer>
     </Document>
   );

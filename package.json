@@ -13,17 +13,19 @@
     "watch:css": "postcss styles --base styles --dir app/styles -w",
     "dev": "concurrently \"npm:watch:*\"",
     "start": "remix-serve build",
-    "preview": "wrangler preview",
-    "publish": "wrangler publish"
+    "wrangler": "wrangler"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.1.1",
     "@remix-run/node": "^0.17.3",
     "@remix-run/react": "^0.17.3",
     "@remix-run/serve": "^0.17.3",
+    "front-matter": "^4.0.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^6.0.0-beta.0",
+    "remark": "^13.0.0",
+    "remark-html": "^13.0.1",
     "remix": "^0.17.3"
   },
   "devDependencies": {
@@ -36,6 +38,7 @@
     "concurrently": "^6.1.0",
     "esbuild": "^0.12.1",
     "esbuild-plugin-alias": "^0.1.2",
+    "nodegit": "^0.27.0",
     "postcss": "^8.3.0",
     "postcss-cli": "^8.3.1",
     "tailwindcss": "^2.1.2",
