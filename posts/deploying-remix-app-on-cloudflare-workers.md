@@ -1,5 +1,8 @@
 ---
 title: Deploying remix app on Cloudflare Workers
+tags:
+- remix
+- cloudflare worker
 ---
 # Deploying remix app on Cloudflare Workers
 
