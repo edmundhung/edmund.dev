@@ -11,31 +11,27 @@ import {
 
 async function handleAsset(event: FetchEvent, mode: string): Promise<Response | null> {
   try {
-    const options: Parameters<typeof getAssetFromKV>[1] = {};
-
     if (mode === 'development') {
-      options.cacheControl = {
-        bypassCache: true,
-      };
+      return await getAssetFromKV(event, {
+        cacheControl: {
+          bypassCache: true,
+        },
+      });
     }
 
-    const asset = await getAssetFromKV(event, options);
-    const response = new Response(asset.body, asset);
-
-    response.headers.set("X-XSS-Protection", "1; mode=block");
-    response.headers.set("X-Content-Type-Options", "nosniff");
-    response.headers.set("X-Frame-Options", "DENY");
-    response.headers.set("Referrer-Policy", "unsafe-url");
-    response.headers.set("Feature-Policy", "none");
-
-    return response;
+    return await getAssetFromKV(event, {
+      cacheControl: {
+        browserTTL: 365 * 60 * 60 * 24,
+        edgeTTL: 365 * 60 * 60 * 24,
+      },
+    });
   } catch (error) {
-    if (!(error instanceof MethodNotAllowedError || error instanceof NotFoundError)) {
-      console.log('handleAssetRequest throw error', error.message);
-      throw error;
+    if (error instanceof MethodNotAllowedError || error instanceof NotFoundError) {
+      return null;
     }
 
-    return null;
+    console.log('handleAssetRequest throw error', error.message);
+    throw error;
   }
 };
 
@@ -77,7 +73,7 @@ export function createEventListener({
 
   return (event: FetchEvent) => {
     try {
-      event.respondWith(handleEvent(event, typeof getLoadContext === "function" ? getLoadContext(event) : undefined));
+      event.respondWith(handleEvent(event, getLoadContext?.(event)));
     } catch (e) {
       if (mode === "development") {
         event.respondWith(
