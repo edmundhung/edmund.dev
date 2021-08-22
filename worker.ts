@@ -6,7 +6,7 @@ import {
 import { createRequestHandler, ServerBuild } from "@remix-run/node";
 import build from "./build/index.js";
 
-async function handleAsset(event: FetchEvent): Promise<Response | null> {
+async function handleAsset(event: FetchEvent): Promise<Response> {
   try {
     if (process.env.NODE_ENV === 'development') {
       return await getAssetFromKV(event, {
@@ -24,10 +24,9 @@ async function handleAsset(event: FetchEvent): Promise<Response | null> {
     });
   } catch (error) {
     if (error instanceof MethodNotAllowedError || error instanceof NotFoundError) {
-      return null;
+      return new Response('Not Found', { status: 404 });
     }
 
-    console.log('handleAssetRequest throw error', error.message);
     throw error;
   }
 };
@@ -56,10 +55,10 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
   });
 
   const handleEvent = async (event: FetchEvent): Promise<Response> => {
-    let response = await handleAsset(event);
+    let response = await handleRequest(event.request);
 
-    if (!response) {
-      response = await handleRequest(event.request);
+    if (response.status === 404) {
+      response = await handleAsset(event);
     }
 
     return response;
