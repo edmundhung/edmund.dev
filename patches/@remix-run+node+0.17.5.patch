@@ -1,0 +1,785 @@
+diff --git a/node_modules/@remix-run/node/cookies.d.ts b/node_modules/@remix-run/node/cookies.d.ts
+deleted file mode 100644
+index c2ec840..0000000
+--- a/node_modules/@remix-run/node/cookies.d.ts
++++ /dev/null
+@@ -1,57 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-import type { CookieParseOptions, CookieSerializeOptions } from "cookie";
+-export type { CookieParseOptions, CookieSerializeOptions };
+-export interface CookieSignatureOptions {
+-    /**
+-     * An array of secrets that may be used to sign/unsign the value of a cookie.
+-     *
+-     * The array makes it easy to rotate secrets. New secrets should be added to
+-     * the beginning of the array. `cookie.serialize()` will always use the first
+-     * value in the array, but `cookie.parse()` may use any of them so that
+-     * cookies that were signed with older secrets still work.
+-     */
+-    secrets?: string[];
+-}
+-export declare type CookieOptions = CookieParseOptions & CookieSerializeOptions & CookieSignatureOptions;
+-/**
+- * A HTTP cookie.
+- *
+- * A Cookie is a logical container for metadata about a HTTP cookie; its name
+- * and options. But it doesn't contain a value. Instead, it has `parse()` and
+- * `serialize()` methods that allow a single instance to be reused for
+- * parsing/encoding multiple different values.
+- */
+-export interface Cookie {
+-    /**
+-     * The name of the cookie, used in the `Cookie` and `Set-Cookie` headers.
+-     */
+-    readonly name: string;
+-    /**
+-     * True if this cookie uses one or more secrets for verification.
+-     *
+-     * See https://remix.run/dashboard/docs/cookies#signing-cookies
+-     */
+-    readonly isSigned: boolean;
+-    /**
+-     * The Date this cookie expires.
+-     *
+-     * Note: This is calculated at access time using `maxAge` when no `expires`
+-     * option is provided to `createCookie()`.
+-     */
+-    readonly expires?: Date;
+-    /**
+-     * Parses a raw `Cookie` header and returns the value of this cookie or
+-     * `null` if it's not present.
+-     */
+-    parse(cookieHeader: string | null, options?: CookieParseOptions): any;
+-    /**
+-     * Serializes the given value to a string and returns the `Set-Cookie`
+-     * header.
+-     */
+-    serialize(value: any, options?: CookieSerializeOptions): string;
+-}
+-/**
+- * Creates and returns a new Cookie.
+- */
+-export declare function createCookie(name: string, { secrets, ...options }?: CookieOptions): Cookie;
+-export declare function isCookie(object: any): object is Cookie;
+diff --git a/node_modules/@remix-run/node/cookies.js b/node_modules/@remix-run/node/cookies.js
+deleted file mode 100644
+index 93a72c1..0000000
+--- a/node_modules/@remix-run/node/cookies.js
++++ /dev/null
+@@ -1,97 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-'use strict';
+-
+-Object.defineProperty(exports, '__esModule', { value: true });
+-
+-var cookie = require('cookie');
+-var cookieSignature = require('cookie-signature');
+-
+-/**
+- * Creates and returns a new Cookie.
+- */
+-function createCookie(name, {
+-  secrets = [],
+-  ...options
+-} = {}) {
+-  return {
+-    get name() {
+-      return name;
+-    },
+-
+-    get isSigned() {
+-      return secrets.length > 0;
+-    },
+-
+-    get expires() {
+-      // Max-Age takes precedence over Expires
+-      return typeof options.maxAge !== "undefined" ? new Date(Date.now() + options.maxAge * 1000) : options.expires;
+-    },
+-
+-    parse(cookieHeader, parseOptions) {
+-      if (!cookieHeader) return null;
+-      let cookies = cookie.parse(cookieHeader, { ...options,
+-        ...parseOptions
+-      });
+-      return name in cookies ? cookies[name] === "" ? "" : decodeCookieValue(cookies[name], secrets) : null;
+-    },
+-
+-    serialize(value, serializeOptions) {
+-      return cookie.serialize(name, value === "" ? "" : encodeCookieValue(value, secrets), { ...options,
+-        ...serializeOptions
+-      });
+-    }
+-
+-  };
+-}
+-function isCookie(object) {
+-  return object != null && typeof object.name === "string" && typeof object.isSigned === "boolean" && typeof object.parse === "function" && typeof object.serialize === "function";
+-}
+-
+-function encodeCookieValue(value, secrets) {
+-  let encoded = encodeData(value);
+-
+-  if (secrets.length > 0) {
+-    encoded = cookieSignature.sign(encoded, secrets[0]);
+-  }
+-
+-  return encoded;
+-}
+-
+-function decodeCookieValue(value, secrets) {
+-  if (secrets.length > 0) {
+-    for (let secret of secrets) {
+-      let unsignedValue = cookieSignature.unsign(value, secret);
+-
+-      if (unsignedValue !== false) {
+-        return decodeData(unsignedValue);
+-      }
+-    }
+-
+-    return null;
+-  }
+-
+-  return decodeData(value);
+-}
+-
+-function encodeData(value) {
+-  return btoa(JSON.stringify(value));
+-}
+-
+-function decodeData(value) {
+-  try {
+-    return JSON.parse(atob(value));
+-  } catch (error) {
+-    return {};
+-  }
+-}
+-
+-function btoa(b) {
+-  return Buffer.from(b, "binary").toString("base64");
+-}
+-
+-function atob(a) {
+-  return Buffer.from(a, "base64").toString("binary");
+-}
+-
+-exports.createCookie = createCookie;
+-exports.isCookie = isCookie;
+diff --git a/node_modules/@remix-run/node/index.d.ts b/node_modules/@remix-run/node/index.d.ts
+index 2f7f216..438ac03 100644
+--- a/node_modules/@remix-run/node/index.d.ts
++++ b/node_modules/@remix-run/node/index.d.ts
+@@ -15,6 +15,4 @@ export type { RequestHandler } from "./server";
+ export { createRequestHandler } from "./server";
+ export type { SessionData, Session, SessionStorage, SessionIdStorageStrategy } from "./sessions";
+ export { createSession, isSession, createSessionStorage } from "./sessions";
+-export { createCookieSessionStorage } from "./sessions/cookieStorage";
+-export { createFileSessionStorage } from "./sessions/fileStorage";
+ export { createMemorySessionStorage } from "./sessions/memoryStorage";
+diff --git a/node_modules/@remix-run/node/index.js b/node_modules/@remix-run/node/index.js
+index 15cd54a..dbd047a 100644
+--- a/node_modules/@remix-run/node/index.js
++++ b/node_modules/@remix-run/node/index.js
+@@ -3,32 +3,19 @@
+ 
+ Object.defineProperty(exports, '__esModule', { value: true });
+ 
+-var cookies = require('./cookies.js');
+ var fetch = require('./fetch.js');
+ var globals = require('./globals.js');
+ var responses = require('./responses.js');
+ var server = require('./server.js');
+-var sessions = require('./sessions.js');
+-var cookieStorage = require('./sessions/cookieStorage.js');
+-var fileStorage = require('./sessions/fileStorage.js');
+-var memoryStorage = require('./sessions/memoryStorage.js');
+ var nodeFetch = require('node-fetch');
+ 
+ 
+ 
+-exports.createCookie = cookies.createCookie;
+-exports.isCookie = cookies.isCookie;
+ exports.fetch = fetch.fetch;
+ exports.installGlobals = globals.installGlobals;
+ exports.json = responses.json;
+ exports.redirect = responses.redirect;
+ exports.createRequestHandler = server.createRequestHandler;
+-exports.createSession = sessions.createSession;
+-exports.createSessionStorage = sessions.createSessionStorage;
+-exports.isSession = sessions.isSession;
+-exports.createCookieSessionStorage = cookieStorage.createCookieSessionStorage;
+-exports.createFileSessionStorage = fileStorage.createFileSessionStorage;
+-exports.createMemorySessionStorage = memoryStorage.createMemorySessionStorage;
+ Object.defineProperty(exports, 'Headers', {
+   enumerable: true,
+   get: function () {
+diff --git a/node_modules/@remix-run/node/sessions.d.ts b/node_modules/@remix-run/node/sessions.d.ts
+deleted file mode 100644
+index b71efd8..0000000
+--- a/node_modules/@remix-run/node/sessions.d.ts
++++ /dev/null
+@@ -1,125 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-import type { CookieParseOptions, CookieSerializeOptions } from "cookie";
+-import type { Cookie, CookieOptions } from "./cookies";
+-/**
+- * An object of name/value pairs to be used in the session.
+- */
+-export interface SessionData {
+-    [name: string]: any;
+-}
+-/**
+- * Session persists data across HTTP requests.
+- */
+-export interface Session {
+-    /**
+-     * A unique identifier for this session.
+-     *
+-     * Note: This will be the empty string for newly created sessions and
+-     * sessions that are not backed by a database (i.e. cookie-based sessions).
+-     */
+-    readonly id: string;
+-    /**
+-     * The raw data contained in this session.
+-     *
+-     * This is useful mostly for SessionStorage internally to access the raw
+-     * session data to persist.
+-     */
+-    readonly data: SessionData;
+-    /**
+-     * Returns `true` if the session has a value for the given `name`, `false`
+-     * otherwise.
+-     */
+-    has(name: string): boolean;
+-    /**
+-     * Returns the value for the given `name` in this session.
+-     */
+-    get(name: string): any;
+-    /**
+-     * Sets a value in the session for the given `name`.
+-     */
+-    set(name: string, value: any): void;
+-    /**
+-     * Sets a value in the session that is only valid until the next `get()`.
+-     * This can be useful for temporary values, like error messages.
+-     */
+-    flash(name: string, value: any): void;
+-    /**
+-     * Removes a value from the session.
+-     */
+-    unset(name: string): void;
+-}
+-/**
+- * Creates a new Session object.
+- *
+- * Note: This function is typically not invoked directly by application code.
+- * Instead, use a `SessionStorage` object's `getSession` method.
+- */
+-export declare function createSession(initialData?: SessionData, id?: string): Session;
+-export declare function isSession(object: any): object is Session;
+-/**
+- * SessionStorage stores session data between HTTP requests and knows how to
+- * parse and create cookies.
+- *
+- * A SessionStorage creates Session objects using a `Cookie` header as input.
+- * Then, later it generates the `Set-Cookie` header to be used in the response.
+- */
+-export interface SessionStorage {
+-    /**
+-     * Parses a Cookie header from a HTTP request and returns the associated
+-     * Session. If there is no session associated with the cookie, this will
+-     * return a new Session with no data.
+-     */
+-    getSession(cookieHeader?: string | null, options?: CookieParseOptions): Promise<Session>;
+-    /**
+-     * Stores all data in the Session and returns the Set-Cookie header to be
+-     * used in the HTTP response.
+-     */
+-    commitSession(session: Session, options?: CookieSerializeOptions): Promise<string>;
+-    /**
+-     * Deletes all data associated with the Session and returns the Set-Cookie
+-     * header to be used in the HTTP response.
+-     */
+-    destroySession(session: Session, options?: CookieSerializeOptions): Promise<string>;
+-}
+-/**
+- * SessionIdStorageStrategy is designed to allow anyone to easily build their
+- * own SessionStorage using `createSessionStorage(strategy)`.
+- *
+- * This strategy describes a common scenario where the session id is stored in
+- * a cookie but the actual session data is stored elsewhere, usually in a
+- * database or on disk. A set of create, read, update, and delete operations
+- * are provided for managing the session data.
+- */
+-export interface SessionIdStorageStrategy {
+-    /**
+-     * The Cookie used to store the session id, or options used to automatically
+-     * create one.
+-     */
+-    cookie?: Cookie | (CookieOptions & {
+-        name?: string;
+-    });
+-    /**
+-     * Creates a new record with the given data and returns the session id.
+-     */
+-    createData: (data: SessionData, expires?: Date) => Promise<string>;
+-    /**
+-     * Returns data for a given session id, or `null` if there isn't any.
+-     */
+-    readData: (id: string) => Promise<SessionData | null>;
+-    /**
+-     * Updates data for the given session id.
+-     */
+-    updateData: (id: string, data: SessionData, expires?: Date) => Promise<void>;
+-    /**
+-     * Deletes data for a given session id from the data store.
+-     */
+-    deleteData: (id: string) => Promise<void>;
+-}
+-/**
+- * Creates a SessionStorage object using a SessionIdStorageStrategy.
+- *
+- * Note: This is a low-level API that should only be used if none of the
+- * existing session storage options meet your requirements.
+- */
+-export declare function createSessionStorage({ cookie: cookieArg, createData, readData, updateData, deleteData }: SessionIdStorageStrategy): SessionStorage;
+-export declare function warnOnceAboutSigningSessionCookie(cookie: Cookie): void;
+diff --git a/node_modules/@remix-run/node/sessions.js b/node_modules/@remix-run/node/sessions.js
+deleted file mode 100644
+index ea3800b..0000000
+--- a/node_modules/@remix-run/node/sessions.js
++++ /dev/null
+@@ -1,130 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-'use strict';
+-
+-Object.defineProperty(exports, '__esModule', { value: true });
+-
+-var cookies = require('./cookies.js');
+-var warnings = require('./warnings.js');
+-
+-/**
+- * An object of name/value pairs to be used in the session.
+- */
+-
+-function flash(name) {
+-  return `__flash_${name}__`;
+-}
+-/**
+- * Creates a new Session object.
+- *
+- * Note: This function is typically not invoked directly by application code.
+- * Instead, use a `SessionStorage` object's `getSession` method.
+- */
+-
+-
+-function createSession(initialData = {}, id = "") {
+-  let map = new Map(Object.entries(initialData));
+-  return {
+-    get id() {
+-      return id;
+-    },
+-
+-    get data() {
+-      return Object.fromEntries(map);
+-    },
+-
+-    has(name) {
+-      return map.has(name) || map.has(flash(name));
+-    },
+-
+-    get(name) {
+-      if (map.has(name)) return map.get(name);
+-      let flashName = flash(name);
+-
+-      if (map.has(flashName)) {
+-        let value = map.get(flashName);
+-        map.delete(flashName);
+-        return value;
+-      }
+-
+-      return undefined;
+-    },
+-
+-    set(name, value) {
+-      map.set(name, value);
+-    },
+-
+-    flash(name, value) {
+-      map.set(flash(name), value);
+-    },
+-
+-    unset(name) {
+-      map.delete(name);
+-    }
+-
+-  };
+-}
+-function isSession(object) {
+-  return object != null && typeof object.id === "string" && typeof object.data !== "undefined" && typeof object.has === "function" && typeof object.get === "function" && typeof object.set === "function" && typeof object.flash === "function" && typeof object.unset === "function";
+-}
+-/**
+- * SessionStorage stores session data between HTTP requests and knows how to
+- * parse and create cookies.
+- *
+- * A SessionStorage creates Session objects using a `Cookie` header as input.
+- * Then, later it generates the `Set-Cookie` header to be used in the response.
+- */
+-
+-/**
+- * Creates a SessionStorage object using a SessionIdStorageStrategy.
+- *
+- * Note: This is a low-level API that should only be used if none of the
+- * existing session storage options meet your requirements.
+- */
+-function createSessionStorage({
+-  cookie: cookieArg,
+-  createData,
+-  readData,
+-  updateData,
+-  deleteData
+-}) {
+-  let cookie = cookies.isCookie(cookieArg) ? cookieArg : cookies.createCookie(cookieArg && cookieArg.name || "__session", cookieArg);
+-  warnOnceAboutSigningSessionCookie(cookie);
+-  return {
+-    async getSession(cookieHeader, options) {
+-      let id = cookieHeader && cookie.parse(cookieHeader, options);
+-      let data = id && (await readData(id));
+-      return createSession(data || {}, id || "");
+-    },
+-
+-    async commitSession(session, options) {
+-      let {
+-        id,
+-        data
+-      } = session;
+-
+-      if (id) {
+-        await updateData(id, data, cookie.expires);
+-      } else {
+-        id = await createData(data, cookie.expires);
+-      }
+-
+-      return cookie.serialize(id, options);
+-    },
+-
+-    async destroySession(session, options) {
+-      await deleteData(session.id);
+-      return cookie.serialize("", { ...options,
+-        expires: new Date(0)
+-      });
+-    }
+-
+-  };
+-}
+-function warnOnceAboutSigningSessionCookie(cookie) {
+-  warnings.warnOnce(cookie.isSigned, `The "${cookie.name}" cookie is not signed, but session cookies should be ` + `signed to prevent tampering on the client before they are sent back to the ` + `server. See https://remix.run/dashboard/docs/cookies#signing-cookies ` + `for more information.`);
+-}
+-
+-exports.createSession = createSession;
+-exports.createSessionStorage = createSessionStorage;
+-exports.isSession = isSession;
+-exports.warnOnceAboutSigningSessionCookie = warnOnceAboutSigningSessionCookie;
+diff --git a/node_modules/@remix-run/node/sessions/cookieStorage.d.ts b/node_modules/@remix-run/node/sessions/cookieStorage.d.ts
+deleted file mode 100644
+index b2ce01e..0000000
+--- a/node_modules/@remix-run/node/sessions/cookieStorage.d.ts
++++ /dev/null
+@@ -1,20 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-import type { SessionStorage, SessionIdStorageStrategy } from "../sessions";
+-interface CookieSessionStorageOptions {
+-    /**
+-     * The Cookie used to store the session data on the client, or options used
+-     * to automatically create one.
+-     */
+-    cookie?: SessionIdStorageStrategy["cookie"];
+-}
+-/**
+- * Creates and returns a SessionStorage object that stores all session data
+- * directly in the session cookie itself.
+- *
+- * This has the advantage that no database or other backend services are
+- * needed, and can help to simplify some load-balanced scenarios. However, it
+- * also has the limitation that serialized session data may not exceed the
+- * browser's maximum cookie size. Trade-offs!
+- */
+-export declare function createCookieSessionStorage({ cookie: cookieArg }?: CookieSessionStorageOptions): SessionStorage;
+-export {};
+diff --git a/node_modules/@remix-run/node/sessions/cookieStorage.js b/node_modules/@remix-run/node/sessions/cookieStorage.js
+deleted file mode 100644
+index 9e255d0..0000000
+--- a/node_modules/@remix-run/node/sessions/cookieStorage.js
++++ /dev/null
+@@ -1,41 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-'use strict';
+-
+-Object.defineProperty(exports, '__esModule', { value: true });
+-
+-var cookies = require('../cookies.js');
+-var sessions = require('../sessions.js');
+-
+-/**
+- * Creates and returns a SessionStorage object that stores all session data
+- * directly in the session cookie itself.
+- *
+- * This has the advantage that no database or other backend services are
+- * needed, and can help to simplify some load-balanced scenarios. However, it
+- * also has the limitation that serialized session data may not exceed the
+- * browser's maximum cookie size. Trade-offs!
+- */
+-function createCookieSessionStorage({
+-  cookie: cookieArg
+-} = {}) {
+-  let cookie = cookies.isCookie(cookieArg) ? cookieArg : cookies.createCookie(cookieArg && cookieArg.name || "__session", cookieArg);
+-  sessions.warnOnceAboutSigningSessionCookie(cookie);
+-  return {
+-    async getSession(cookieHeader, options) {
+-      return sessions.createSession(cookieHeader && cookie.parse(cookieHeader, options) || {});
+-    },
+-
+-    async commitSession(session, options) {
+-      return cookie.serialize(session.data, options);
+-    },
+-
+-    async destroySession(_session, options) {
+-      return cookie.serialize("", { ...options,
+-        expires: new Date(0)
+-      });
+-    }
+-
+-  };
+-}
+-
+-exports.createCookieSessionStorage = createCookieSessionStorage;
+diff --git a/node_modules/@remix-run/node/sessions/fileStorage.d.ts b/node_modules/@remix-run/node/sessions/fileStorage.d.ts
+deleted file mode 100644
+index 1df3bbd..0000000
+--- a/node_modules/@remix-run/node/sessions/fileStorage.d.ts
++++ /dev/null
+@@ -1,21 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-import type { SessionStorage, SessionIdStorageStrategy } from "../sessions";
+-interface FileSessionStorageOptions {
+-    /**
+-     * The Cookie used to store the session id on the client, or options used
+-     * to automatically create one.
+-     */
+-    cookie?: SessionIdStorageStrategy["cookie"];
+-    /**
+-     * The directory to use to store session files.
+-     */
+-    dir: string;
+-}
+-/**
+- * Creates a SessionStorage that stores session data on a filesystem.
+- *
+- * The advantage of using this instead of cookie session storage is that
+- * files may contain much more data than cookies.
+- */
+-export declare function createFileSessionStorage({ cookie, dir }: FileSessionStorageOptions): SessionStorage;
+-export {};
+diff --git a/node_modules/@remix-run/node/sessions/fileStorage.js b/node_modules/@remix-run/node/sessions/fileStorage.js
+deleted file mode 100644
+index 4e4d4e3..0000000
+--- a/node_modules/@remix-run/node/sessions/fileStorage.js
++++ /dev/null
+@@ -1,104 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-'use strict';
+-
+-Object.defineProperty(exports, '__esModule', { value: true });
+-
+-var crypto = require('crypto');
+-var fs = require('fs');
+-var path = require('path');
+-var sessions = require('../sessions.js');
+-
+-/**
+- * Creates a SessionStorage that stores session data on a filesystem.
+- *
+- * The advantage of using this instead of cookie session storage is that
+- * files may contain much more data than cookies.
+- */
+-function createFileSessionStorage({
+-  cookie,
+-  dir
+-}) {
+-  return sessions.createSessionStorage({
+-    cookie,
+-
+-    async createData(data, expires) {
+-      let content = JSON.stringify({
+-        data,
+-        expires
+-      });
+-
+-      while (true) {
+-        // This storage manages an id space of 2^64 ids, which is far greater
+-        // than the maximum number of files allowed on an NTFS or ext4 volume
+-        // (2^32). However, the larger id space should help to avoid collisions
+-        // with existing ids when creating new sessions, which speeds things up.
+-        let id = crypto.randomBytes(8).toString("hex");
+-
+-        try {
+-          let file = getFile(dir, id);
+-          await fs.promises.mkdir(path.dirname(file), {
+-            recursive: true
+-          });
+-          await fs.promises.writeFile(file, content, {
+-            encoding: "utf-8",
+-            flag: "wx"
+-          });
+-          return id;
+-        } catch (error) {
+-          if (error.code !== "EEXIST") throw error;
+-        }
+-      }
+-    },
+-
+-    async readData(id) {
+-      try {
+-        let file = getFile(dir, id);
+-        let content = JSON.parse(await fs.promises.readFile(file, "utf-8"));
+-        let data = content.data;
+-        let expires = typeof content.expires === "string" ? new Date(content.expires) : null;
+-
+-        if (!expires || expires > new Date()) {
+-          return data;
+-        } // Remove expired session data.
+-
+-
+-        if (expires) await fs.promises.unlink(file);
+-        return null;
+-      } catch (error) {
+-        if (error.code !== "ENOENT") throw error;
+-        return null;
+-      }
+-    },
+-
+-    async updateData(id, data, expires) {
+-      let content = JSON.stringify({
+-        data,
+-        expires
+-      });
+-      let file = getFile(dir, id);
+-      await fs.promises.mkdir(path.dirname(file), {
+-        recursive: true
+-      });
+-      await fs.promises.writeFile(file, content, "utf-8");
+-    },
+-
+-    async deleteData(id) {
+-      try {
+-        await fs.promises.unlink(getFile(dir, id));
+-      } catch (error) {
+-        if (error.code !== "ENOENT") throw error;
+-      }
+-    }
+-
+-  });
+-}
+-
+-function getFile(dir, id) {
+-  // Divide the session id up into a directory (first 2 bytes) and filename
+-  // (remaining 6 bytes) to reduce the chance of having very large directories,
+-  // which should speed up file access. This is a maximum of 2^16 directories,
+-  // each with 2^48 files.
+-  return path.join(dir, id.slice(0, 4), id.slice(4));
+-}
+-
+-exports.createFileSessionStorage = createFileSessionStorage;
+diff --git a/node_modules/@remix-run/node/sessions/memoryStorage.d.ts b/node_modules/@remix-run/node/sessions/memoryStorage.d.ts
+deleted file mode 100644
+index c472f3c..0000000
+--- a/node_modules/@remix-run/node/sessions/memoryStorage.d.ts
++++ /dev/null
+@@ -1,18 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-import type { SessionStorage, SessionIdStorageStrategy } from "../sessions";
+-interface MemorySessionStorageOptions {
+-    /**
+-     * The Cookie used to store the session id on the client, or options used
+-     * to automatically create one.
+-     */
+-    cookie?: SessionIdStorageStrategy["cookie"];
+-}
+-/**
+- * Creates and returns a simple in-memory SessionStorage object, mostly useful
+- * for testing and as a reference implementation.
+- *
+- * Note: This storage does not scale beyond a single process, so it is not
+- * suitable for most production scenarios.
+- */
+-export declare function createMemorySessionStorage({ cookie }?: MemorySessionStorageOptions): SessionStorage;
+-export {};
+diff --git a/node_modules/@remix-run/node/sessions/memoryStorage.js b/node_modules/@remix-run/node/sessions/memoryStorage.js
+deleted file mode 100644
+index 8695512..0000000
+--- a/node_modules/@remix-run/node/sessions/memoryStorage.js
++++ /dev/null
+@@ -1,64 +0,0 @@
+-// Copyright © 2021 React Training LLC. All rights reserved.
+-'use strict';
+-
+-Object.defineProperty(exports, '__esModule', { value: true });
+-
+-var sessions = require('../sessions.js');
+-
+-/**
+- * Creates and returns a simple in-memory SessionStorage object, mostly useful
+- * for testing and as a reference implementation.
+- *
+- * Note: This storage does not scale beyond a single process, so it is not
+- * suitable for most production scenarios.
+- */
+-function createMemorySessionStorage({
+-  cookie
+-} = {}) {
+-  let uniqueId = 0;
+-  let map = new Map();
+-  return sessions.createSessionStorage({
+-    cookie,
+-
+-    async createData(data, expires) {
+-      let id = (++uniqueId).toString();
+-      map.set(id, {
+-        data,
+-        expires
+-      });
+-      return id;
+-    },
+-
+-    async readData(id) {
+-      if (map.has(id)) {
+-        let {
+-          data,
+-          expires
+-        } = map.get(id);
+-
+-        if (!expires || expires > new Date()) {
+-          return data;
+-        } // Remove expired session data.
+-
+-
+-        if (expires) map.delete(id);
+-      }
+-
+-      return null;
+-    },
+-
+-    async updateData(id, data, expires) {
+-      map.set(id, {
+-        data,
+-        expires
+-      });
+-    },
+-
+-    async deleteData(id) {
+-      map.delete(id);
+-    }
+-
+-  });
+-}
+-
+-exports.createMemorySessionStorage = createMemorySessionStorage;
