@@ -8,7 +8,7 @@
     "postinstall": "patch-package",
     "build:css": "postcss styles --base styles --dir app/styles --env production",
     "build:remix": "remix build",
-    "build:worker": "node ./worker/build.js",
+    "build:worker": "esbuild ./worker/index.ts --bundle --minify --define:process.env.NODE_ENV=\"'production'\" --platform=browser --format=esm --outfile=worker.js",
     "build": "npm run build:css && npm run build:remix && npm run build:worker",
     "watch:js": "remix run",
     "watch:css": "postcss styles --base styles --dir app/styles -w",
@@ -16,7 +16,7 @@
     "start": "remix-serve build"
   },
   "dependencies": {
-    "@cloudflare/kv-asset-handler": "^0.1.1",
+    "@cloudflare/kv-asset-handler": "^0.1.3",
     "@remix-run/dev": "^0.17.5",
     "@remix-run/node": "^0.17.5",
     "@remix-run/react": "^0.17.5",
