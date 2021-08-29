@@ -5,15 +5,17 @@
   "description": "",
   "license": "",
   "scripts": {
-    "postinstall": "patch-package",
     "build:css": "postcss styles --base styles --dir app/styles --env production",
     "build:remix": "remix build",
     "build:worker": "esbuild ./worker.ts --bundle --minify --define:process.env.NODE_ENV=\"'production'\" --platform=browser --format=esm --outfile=worker.js",
     "build": "npm run build:css && npm run build:remix && npm run build:worker",
-    "watch:js": "remix run",
-    "watch:css": "postcss styles --base styles --dir app/styles -w",
+    "cleanup": "rimraf .cache ./build ./public/build worker.js",
     "dev": "concurrently \"npm:watch:*\"",
-    "start": "remix-serve build"
+    "postinstall": "patch-package",
+    "prebuild": "npm run cleanup",
+    "start": "remix-serve build",
+    "watch:js": "remix run",
+    "watch:css": "postcss styles --base styles --dir app/styles -w"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.1.3",
