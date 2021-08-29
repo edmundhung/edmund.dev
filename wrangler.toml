@@ -1,10 +1,14 @@
 name = "blog"
 type = "javascript"
 account_id = "c63d756a160ad09cd9a82553c77e9174"
-workers_dev = true
-kv_namespaces = [
-  { binding = "POSTS", id = "7aec258bfb4c46688e950a754d5c01bf", preview_id = "85ef3941609a404a8d493be3b2706e0d" },
-]
+workers_dev = false
+zone_id = "3ceeebfb032fc59001e9ef1d5e816a18"
+route = "edmund.dev/*"
+
+[[kv_namespaces]]
+binding = "POSTS"
+preview_id = "85ef3941609a404a8d493be3b2706e0d"
+id = "7aec258bfb4c46688e950a754d5c01bf"
 
 [site]
 bucket = "./public"
