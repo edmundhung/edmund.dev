@@ -10,12 +10,12 @@
     "build:worker": "esbuild ./worker.ts --bundle --minify --define:process.env.NODE_ENV=\"'production'\" --platform=browser --format=esm --outfile=worker.js",
     "build": "npm run build:css && npm run build:remix && npm run build:worker",
     "cleanup": "rimraf .cache ./build ./public/build worker.js",
-    "dev": "concurrently \"npm:watch:*\"",
+    "dev": "npm run build:remix && esbuild ./worker.ts --bundle --define:process.env.NODE_ENV=\"'development'\" --platform=browser --format=esm --outfile=worker.js",
     "postinstall": "patch-package",
     "prebuild": "npm run cleanup",
-    "start": "remix-serve build",
-    "watch:js": "remix run",
-    "watch:css": "postcss styles --base styles --dir app/styles -w"
+    "start": "concurrently \"npm:watch:*\"",
+    "watch:app": "miniflare --build-command \"npm run dev\" --watch --kv-persist",
+    "watch:style": "postcss styles --base styles --dir app/styles -w"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.1.3",
@@ -39,6 +39,7 @@
     "autoprefixer": "^10.2.5",
     "concurrently": "^6.1.0",
     "esbuild": "^0.12.1",
+    "miniflare": "^1.4.0",
     "postcss": "^8.3.0",
     "postcss-cli": "^8.3.1",
     "tailwindcss": "^2.2.7",
