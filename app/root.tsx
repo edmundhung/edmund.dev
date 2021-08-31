@@ -27,7 +27,7 @@ function Document({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="font-open-sans font-light bg-gray-100 pt-32 pb-8 px-20">
+      <body>
         {children}
 
         <Scripts />
@@ -42,9 +42,6 @@ export default function App() {
   return (
     <Document>
       <Outlet />
-      <footer className="pt-12 text-xs">
-        Copyright &copy; 2021
-      </footer>
     </Document>
   );
 }
