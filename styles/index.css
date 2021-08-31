@@ -1,0 +1,45 @@
+/* @import "https://fonts.googleapis.com/css?family=Josefin+Sans:400,700"; */
+
+body {
+  margin: 0;
+}
+
+.masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 0.5em;
+  grid-auto-rows: minmax(250px, auto);
+  grid-auto-flow: dense;
+  padding: 0.5em;
+}
+
+.masonry > article {
+  padding: 1rem;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #000;
+  background-color: #ccc;
+}
+
+.masonry > aside {
+  background-color: #ebece5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo h1 {
+  margin: 1em 0 0 0;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.w1h2 {
+  grid-row-end: span 2;
+}
+
+.w2h2 {
+  grid-column-end: span 2;
+  grid-row-end: span 2;
+}
