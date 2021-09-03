@@ -18,8 +18,15 @@ module.exports = {
         'open-sans': ['Open Sans', 'sans-serif']
       },
       colors: {
+        primary: '#383835',
+        secondary: '#6c6c67',
+      },
+      textColor: {
         primary: '#52524e',
-        secondary: '#ebece5',
+        // secondary: '#d4d6c8',
+      },
+      backgroundColor: {
+        primary: '#ebece5',
       },
     },
   },
