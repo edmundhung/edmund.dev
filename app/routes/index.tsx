@@ -1,15 +1,35 @@
 import { Link, NavLink } from "react-router-dom";
 import { LoaderFunction } from "remix";
-import { redirect } from "remix";
+import { json, useRouteData } from "remix";
 import stylesUrl from "../styles/index.css";
+
+interface Doc {
+  key: string;
+  metadata: {
+    url?: string;
+    title: string;
+    description?: string;
+    image?: string;
+    tags?: string[];
+  };
+}
 
 export let links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
 
+export let loader: LoaderFunction = async () => {
+  const docs = [
+  ];
+
+  return json({ docs });
+};
+
 export default function Index() {
+  const data = useRouteData<{ docs: Doc[] }>();
+
   return (
-    <div className="grid grid-cols-12 bg-primary font-open-sans text-primary">
+    <div className="min-h-screen grid grid-cols-12 bg-primary font-open-sans text-primary">
       <aside className="py-4 pl-4 col-start-1 col-end-3">
         <div className="sticky top-4">
           <header className="text-center">
@@ -44,13 +64,29 @@ export default function Index() {
           </nav>
         </div>
       </aside>
-      <main className="col-start-3 col-end-13 masonry">
-        <article className="bg-white rounded"></article>
-        <article className="bg-white rounded"></article>
-        <article className="bg-white rounded w2h2"></article>
-        <article className="bg-white rounded w1h2"></article>
-        <article className="bg-white rounded w1h2"></article>
-        <article className="bg-white rounded"></article>
+      <main className="col-start-3 col-end-13">
+        <div className="masonry">
+          {data.docs.map(({ key, metadata }) => (
+            <article key={key} className="flex flex-col rounded overflow-hidden">
+              <Link className="no-underline" to={`/${key}`}>
+                <figure className="relative">
+                  <img src={metadata.image} />
+                  <figcaption className="absolute inset-0 flex items-center p-4 text-white bg-secondary opacity-0 bg-opacity-0 hover:opacity-100 hover:bg-opacity-80 transition-all">
+                    {metadata.description}
+                  </figcaption>
+                </figure>
+              </Link>
+              <footer className="bg-white text-primary p-4 flex-grow">
+                <h2 className="mt-0 mb-2 text-xl">{metadata.title}</h2>
+                {!metadata.tags ? null : (
+                  <div className="-mx-1">
+                    {metadata.tags.map(tag => <span key={tag} className="text-primary bg-primary rounded px-1 mx-1">#{tag}</span>)}
+                  </div>
+                )}
+              </footer>
+            </article>
+          ))}
+        </div>
       </main>
     </div>
   );
