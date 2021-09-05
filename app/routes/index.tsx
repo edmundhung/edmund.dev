@@ -1,7 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { LoaderFunction } from "remix";
 import { json, useRouteData } from "remix";
-import stylesUrl from "../styles/index.css";
 
 interface Metadata {
     url?: string;
@@ -17,10 +16,6 @@ interface Doc {
   metadata: Metadata;
 }
 
-export let links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: stylesUrl }];
-};
-
 export let loader: LoaderFunction = async () => {
   const docs = [
   ];
@@ -31,7 +26,7 @@ export let loader: LoaderFunction = async () => {
 function getDefaultLayout(type: string) {
   switch (type) {
     case 'projects':
-      return 'w2h1';
+      return 'col-span-3';
     default:
       return '';
   }
@@ -53,7 +48,7 @@ function Card({ name, metadata }: { name: string; metadata: Metadata }) {
           </div>
           {!metadata.tags ? null : (
             <div className="-mx-1">
-              {metadata.tags.map(tag => <span key={tag} className="text-primary bg-primary rounded px-1 mx-1">#{tag}</span>)}
+              {metadata.tags.map(tag => <span key={tag} className="text-primary bg-secondary rounded px-1 mx-1">#{tag}</span>)}
             </div>
           )}
         </div>
@@ -66,8 +61,8 @@ export default function Index() {
   const data = useRouteData<{ docs: Doc[] }>();
 
   return (
-    <div className="min-h-screen grid grid-cols-12 bg-primary font-open-sans text-primary">
-      <aside className="py-4 pl-4 col-start-1 col-end-3">
+    <div className="min-h-screen grid grid-cols-layout bg-primary font-open-sans text-primary">
+      <aside className="py-4 pl-4">
         <div className="sticky top-4">
           <header className="text-center">
             <img className="mx-auto w-32" src="logo.svg" alt="logo" />
@@ -101,8 +96,8 @@ export default function Index() {
           </nav>
         </div>
       </aside>
-      <main className="col-start-3 col-end-13">
-        <div className="masonry">
+      <main>
+        <div className="grid grid-cols-masonry grid-flow-row-dense auto-rows-fr gap-4 p-4">
           {data.docs.map(({ key, metadata }) => <Card key={key} name={key} metadata={metadata} />)}
         </div>
       </main>

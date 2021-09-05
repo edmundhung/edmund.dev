@@ -1,11 +1,21 @@
 module.exports = {
   // mode: 'jit',
-  purge: [
-    "./app/**/*.tsx",
-    "./app/**/*.jsx",
-    "./app/**/*.js",
-    "./app/**/*.ts"
-  ],
+  purge: {
+    content: [
+      "./app/**/*.tsx",
+      "./app/**/*.jsx",
+      "./app/**/*.js",
+      "./app/**/*.ts"
+    ],
+    safelist: [
+      'col-span-1',
+      'col-span-2',
+      'col-span-3',
+      'row-span-1',
+      'row-span-2',
+      'row-span-3',
+    ],
+  },
   darkMode: false, // or 'media' or 'class'
   theme: {
     // listStyleType: {
@@ -23,11 +33,15 @@ module.exports = {
       },
       textColor: {
         primary: '#52524e',
-        // secondary: '#d4d6c8',
       },
       backgroundColor: {
         primary: '#ebece5',
+        secondary: '#d4d6c8',
       },
+      gridTemplateColumns: {
+       'layout': '200px auto',
+       'masonry': 'repeat(auto-fill, minmax(180px, 1fr))',
+      }
     },
   },
   variants: {},
