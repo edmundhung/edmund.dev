@@ -36,24 +36,27 @@ function Card({ name, metadata }: { name: string; metadata: Metadata }) {
   const [type, slug] = name.split('/');
 
   return (
-    <Link className={`no-underline ${metadata.layout ?? getDefaultLayout(type)}`.trim()} to={`/${slug}`}>
-      <article className="h-full flex flex-col rounded overflow-hidden bg-white text-primary shadow-sm">
-        <figure className="relative">
-          <img src={metadata.image} />
+    <article className={`flex flex-col rounded overflow-hidden bg-white text-primary shadow-sm ${metadata.layout ?? getDefaultLayout(type)}`.trim()}>
+      <Link className="no-underline flex-grow" to={`/${slug}`}>
+        <figure>
+          <img src={metadata.image} alt="cover" />
         </figure>
-        <div className="p-4 flex-grow flex flex-col justify-between text-sm">
-          <div className="mb-4">
-            <h2 className="my-2 text-xl">{metadata.title}</h2>
-            <p>{metadata.description}</p>
-          </div>
-          {!metadata.tags ? null : (
-            <div className="-mx-1">
-              {metadata.tags.map(tag => <span key={tag} className="text-primary bg-secondary rounded px-1 mx-1">#{tag}</span>)}
-            </div>
+        <section className="p-4">
+          <div className="capitalize text-secondary text-xs font-light my-1">{type}</div>
+          <h2 className="my-0 text-xl">{metadata.title}</h2>
+          {!metadata.description ? null : (
+            <p className="mt-2 text-sm">{metadata.description}</p>
           )}
-        </div>
+        </section>
+      </Link>
+          {!metadata.tags ? null : (
+        <footer className="p-4 text-sm border-t">
+          <div className="divide-x -mx-2">
+            {metadata.tags.map(tag => <Link key={tag} className="no-underline px-2 hover:underline" to={`?tag=${tag}`}>{tag}</Link>)}
+            </div>
+        </footer>
+          )}
       </article>
-    </Link>
   )
 }
 
