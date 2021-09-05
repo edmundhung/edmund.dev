@@ -3,15 +3,18 @@ import { LoaderFunction } from "remix";
 import { json, useRouteData } from "remix";
 import stylesUrl from "../styles/index.css";
 
-interface Doc {
-  key: string;
-  metadata: {
+interface Metadata {
     url?: string;
+  layout?: string;
     title: string;
     description?: string;
     image?: string;
     tags?: string[];
-  };
+}
+
+interface Doc {
+  key: string;
+  metadata: Metadata;
 }
 
 export let links: LinksFunction = () => {
@@ -24,6 +27,40 @@ export let loader: LoaderFunction = async () => {
 
   return json({ docs });
 };
+
+function getDefaultLayout(type: string) {
+  switch (type) {
+    case 'projects':
+      return 'w2h1';
+    default:
+      return '';
+  }
+}
+
+function Card({ name, metadata }: { name: string; metadata: Metadata }) {
+  const [type, slug] = name.split('/');
+
+  return (
+    <Link className={`no-underline ${metadata.layout ?? getDefaultLayout(type)}`.trim()} to={`/${slug}`}>
+      <article className="h-full flex flex-col rounded overflow-hidden bg-white text-primary shadow-sm">
+        <figure className="relative">
+          <img src={metadata.image} />
+        </figure>
+        <div className="p-4 flex-grow flex flex-col justify-between text-sm">
+          <div className="mb-4">
+            <h2 className="my-2 text-xl">{metadata.title}</h2>
+            <p>{metadata.description}</p>
+          </div>
+          {!metadata.tags ? null : (
+            <div className="-mx-1">
+              {metadata.tags.map(tag => <span key={tag} className="text-primary bg-primary rounded px-1 mx-1">#{tag}</span>)}
+            </div>
+          )}
+        </div>
+      </article>
+    </Link>
+  )
+}
 
 export default function Index() {
   const data = useRouteData<{ docs: Doc[] }>();
@@ -66,26 +103,7 @@ export default function Index() {
       </aside>
       <main className="col-start-3 col-end-13">
         <div className="masonry">
-          {data.docs.map(({ key, metadata }) => (
-            <article key={key} className="flex flex-col rounded overflow-hidden">
-              <Link className="no-underline" to={`/${key}`}>
-                <figure className="relative">
-                  <img src={metadata.image} />
-                  <figcaption className="absolute inset-0 flex items-center p-4 text-white bg-secondary opacity-0 bg-opacity-0 hover:opacity-100 hover:bg-opacity-80 transition-all">
-                    {metadata.description}
-                  </figcaption>
-                </figure>
-              </Link>
-              <footer className="bg-white text-primary p-4 flex-grow">
-                <h2 className="mt-0 mb-2 text-xl">{metadata.title}</h2>
-                {!metadata.tags ? null : (
-                  <div className="-mx-1">
-                    {metadata.tags.map(tag => <span key={tag} className="text-primary bg-primary rounded px-1 mx-1">#{tag}</span>)}
-                  </div>
-                )}
-              </footer>
-            </article>
-          ))}
+          {data.docs.map(({ key, metadata }) => <Card key={key} name={key} metadata={metadata} />)}
         </div>
       </main>
     </div>
