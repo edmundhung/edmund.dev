@@ -8,6 +8,8 @@ interface CardProps {
 
 function getDefaultLayout(type: string) {
   switch (type) {
+    case 'blog':
+      return 'col-span-2';
     case 'projects':
       return 'col-span-3';
     default:
@@ -21,9 +23,11 @@ function Card({ name, metadata }: CardProps): ReactElement {
   return (
     <article className={`flex flex-col rounded overflow-hidden bg-white text-primary shadow-sm ${metadata.layout ?? getDefaultLayout(type)}`.trim()}>
       <Link className="no-underline flex-grow" to={`/${name}`}>
-        <figure>
-          <img src={metadata.image} alt="cover" />
-        </figure>
+        {!metadata.image ? null : (
+          <figure>
+            <img src={metadata.image} alt="cover" />
+          </figure>
+        )}
         <section className="p-4">
           <div className="capitalize text-secondary text-xs font-light my-1">{type}</div>
           <h2 className="my-0 text-xl">{metadata.title}</h2>

@@ -1,10 +1,10 @@
 import type { MetaFunction, LinksFunction, LoaderFunction } from "remix";
 import { useRouteData, redirect } from "remix";
-import { parse } from '../../markdown.server';
+import { parse } from '../markdown.server';
 
 export let meta: MetaFunction = ({ data }) => {
   return {
-    title: `${data?.metadata?.title ?? 'Blog'} - EdStudio`,
+    title: `${data?.metadata?.title ?? 'Blog'} - Edmund.dev`,
   };
 };
 
