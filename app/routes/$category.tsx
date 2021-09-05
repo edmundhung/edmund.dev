@@ -5,12 +5,13 @@ import Card from '../components/Card';
 import type { Entry } from '../types';
 
 export let loader: LoaderFunction = async ({ params, context }) => {
-  const entries = await context.list();
+  const { category } = params;
+  const entries = await context.list(category);
 
   return json({ entries }, entries.length > 0 ? 200 : 404);
 };
 
-export default function Index() {
+export default function Category() {
   const data = useRouteData<{ entries: Entry[] }>();
 
   return (

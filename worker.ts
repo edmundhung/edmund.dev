@@ -36,6 +36,16 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
     build,
     getLoadContext() {
       return {
+        async list(category?: string) {
+          const entries = [
+          ];
+
+          if (!category) {
+            return entries;
+          }
+
+          return entries.filter(entry => entry.key.startsWith(`${category}/`));
+        },
         async listPosts() {
           const result = await POSTS.list();
 
