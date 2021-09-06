@@ -1,26 +1,57 @@
-import fs from 'fs';
+import * as fs from 'fs/promises';
 import matter from 'gray-matter';
 import { Miniflare } from "miniflare";
+import { getLinkPreview } from "link-preview-js";
 
-function parseFile(root, path) {
-  const content = fs.readFileSync(path).toString('utf8');
-  const result = matter(content);
+async function getPreviewMetadata(url) {
+  if (!url) {
+    return {};
+  }
+
+  const preview = await getLinkPreview(url);
+
+  switch (preview.siteName) {
+    case 'Flickr':
+      return {
+        title: preview.title,
+        image: preview.images[0],
+      };
+    case 'GitHub':
+      return {
+        image: preview.images[0],
+      };
+    default:
+      return {
+        title: preview.title,
+        description: preview.description,
+        image: preview.images[0],
+      };
+  }
+}
+
+async function parseFile(root, path) {
+  const content = await fs.readFile(path);
+  const result = matter(content.toString('utf8'));
+  const preview = await getPreviewMetadata(result.data?.url);
 
   return {
     key: path.replace(new RegExp(`^${root}/`), '').replace(/\.md$/, ''),
     value: result.content,
-    metadata: result.data,
+    metadata: {
+      ...preview,
+      ...result.data,
+    },
   };
 }
 
-function parseDirectory(root, path = root) {
+async function parseDirectory(root, path = root) {
   const list = [];
 
-  for (const dirent of fs.readdirSync(path, { withFileTypes: true })) {
+  for (const dirent of await fs.readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      list.push(...parseDirectory(root, `${path}/${dirent.name}`));
+      list.push(...await parseDirectory(root, `${path}/${dirent.name}`));
     } else if (dirent.isFile()) {
-      list.push(parseFile(root, `${path}/${dirent.name}`));
+      list.push(await parseFile(root, `${path}/${dirent.name}`));
     }
   }
 
@@ -33,8 +64,9 @@ async function main() {
   });
 
   const Content = await mf.getKVNamespace('Content');
+  const entries = await parseDirectory('content');
 
-  await Promise.all(parseDirectory('content').map(entry => Content.put(entry.key, entry.value, { metadata: entry.metadata })));
+  await Promise.all(entries.map(entry => Content.put(entry.key, entry.value, { metadata: entry.metadata })));
 }
 
 await main();

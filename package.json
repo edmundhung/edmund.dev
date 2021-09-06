@@ -23,6 +23,7 @@
     "@remix-run/node": "^0.17.5",
     "@remix-run/react": "^0.17.5",
     "gray-matter": "^4.0.3",
+    "link-preview-js": "^2.1.8",
     "patch-package": "^6.4.7",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
