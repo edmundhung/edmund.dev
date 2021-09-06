@@ -1,5 +1,5 @@
 export {};
 
 declare global {
-  const POSTS: KVNamespace
+  const Content: KVNamespace;
 }

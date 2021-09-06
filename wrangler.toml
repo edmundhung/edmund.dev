@@ -6,7 +6,7 @@ zone_id = "3ceeebfb032fc59001e9ef1d5e816a18"
 route = "edmund.dev/*"
 
 [[kv_namespaces]]
-binding = "POSTS"
+binding = "Content"
 preview_id = "85ef3941609a404a8d493be3b2706e0d"
 id = "7aec258bfb4c46688e950a754d5c01bf"
 

@@ -8,6 +8,6 @@ export interface Metadata {
 }
 
 export interface Entry {
-  key: string;
+  name: string;
   metadata: Metadata;
 }

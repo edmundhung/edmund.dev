@@ -9,15 +9,15 @@ export let meta: MetaFunction = ({ data }) => {
 };
 
 export let loader: LoaderFunction = async ({ params, context }) => {
-  const post = await context.getPost(params.slug);
+  const [content, metadata] = await context.getContent('blog', params.slug);
 
-  if (post === null) {
+  if (content === null) {
     return redirect('/blog');
   }
 
   return {
-    content: await parse(post.value),
-    metadata: post.metadata,
+    content: await parse(content),
+    metadata,
   };
 };
 
@@ -25,6 +25,6 @@ export default function BlogSlug() {
   const { content } = useRouteData();
 
   return (
-    <div dangerouslySetInnerHTML={{ __html: content }} />
+    <div className="p-4" dangerouslySetInnerHTML={{ __html: content }} />
   );
 }

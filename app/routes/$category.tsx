@@ -6,7 +6,7 @@ import type { Entry } from '../types';
 
 export let loader: LoaderFunction = async ({ params, context }) => {
   const { category } = params;
-  const entries = await context.list(category);
+  const [entries] = await context.listContent(category);
 
   return json({ entries }, entries.length > 0 ? 200 : 404);
 };
@@ -16,7 +16,7 @@ export default function Category() {
 
   return (
     <Masonry>
-      {data.entries.map(({ key, metadata }) => <Card key={key} name={key} metadata={metadata} />)}
+      {data.entries.map(({ name, metadata }) => <Card key={name} name={name} metadata={metadata} />)}
     </Masonry>
   );
 }

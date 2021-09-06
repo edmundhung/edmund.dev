@@ -36,29 +36,18 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
     build,
     getLoadContext() {
       return {
-        async list(category?: string) {
-          const entries = [
-          ];
+        async listContent(category?: string, cursor?: string) {
+          const result = await Content.list({
+            prefix: category ? `${category}/` : '',
+            cursor,
+          });
 
-          if (!category) {
-            return entries;
-          }
-
-          return entries.filter(entry => entry.key.startsWith(`${category}/`));
+          return [result.keys, !result.list_complete ? result.cursor : null];
         },
-        async listPosts() {
-          const result = await POSTS.list();
+        async getContent(category: string, slug: string) {
+          const content = await Content.getWithMetadata(`${category}/${slug}`);
 
-          return result.keys.map<[string, {}]>(key => [key.name, key.metadata]);
-        },
-        async getPost(slug) {
-          const post = await POSTS.getWithMetadata(slug);
-
-          if (post.value === null) {
-            return null;
-          }
-
-          return post;
+          return [content.value, content.metadata];
         },
       };
     }
