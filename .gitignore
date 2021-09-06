@@ -9,9 +9,11 @@ node_modules
 # Postcss build
 /app/styles
 
-# Worker related
-posts.json
+# Worker build
 worker.js
+
+# miniflare
+/.mf
 
 # Misc
 .DS_Store
