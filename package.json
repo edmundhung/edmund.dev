@@ -13,7 +13,7 @@
     "dev": "npm run build:remix && esbuild ./worker.ts --bundle --define:process.env.NODE_ENV=\"'development'\" --platform=browser --format=esm --outfile=worker.js",
     "postinstall": "patch-package",
     "prebuild": "npm run cleanup",
-    "start": "concurrently \"npm:watch:*\"",
+    "start": "node ./updateKV.mjs && concurrently \"npm:watch:*\"",
     "watch:app": "miniflare --build-command \"npm run dev\" --watch --kv-persist",
     "watch:style": "postcss styles --base styles --dir app/styles -w"
   },
@@ -22,6 +22,7 @@
     "@remix-run/dev": "^0.17.5",
     "@remix-run/node": "^0.17.5",
     "@remix-run/react": "^0.17.5",
+    "gray-matter": "^4.0.3",
     "patch-package": "^6.4.7",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

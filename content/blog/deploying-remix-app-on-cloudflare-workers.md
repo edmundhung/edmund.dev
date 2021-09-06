@@ -1,5 +1,6 @@
 ---
 title: Deploying remix app on Cloudflare Workers
+description: I was an early supporter of Remix and have been watching out for its development for a while. With its v1 Beta Launch, I think it is a good time to give it a try and spent a weekend building my first Remix app - a Blog
 tags:
 - remix
 - cloudflare worker
