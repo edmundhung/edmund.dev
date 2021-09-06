@@ -47,7 +47,7 @@ export default function App() {
         <aside className="py-4 pl-4">
           <div className="sticky top-4">
             <header className="text-center">
-              <img className="mx-auto w-32" src="/logo.svg" alt="logo" />
+              <img className="mx-auto w-32" src="/assets/logo.svg" alt="logo" />
               <h1 className="my-4 uppercase">
                 <Link className="no-underline" to="/">Edmund.dev</Link>
               </h1>
