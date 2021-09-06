@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { Link } from "react-router-dom";
+import Hyperlink from '../components/Hyperlink';
 
 interface CardProps {
   name: string;
@@ -22,7 +23,7 @@ function Card({ name, metadata }: CardProps): ReactElement {
 
   return (
     <article className={`flex flex-col rounded overflow-hidden bg-white text-primary shadow-sm ${metadata.layout ?? getDefaultLayout(type)}`.trim()}>
-      <Link className="no-underline flex-grow" to={`/${name}`}>
+      <Hyperlink className="no-underline flex-grow" to={metadata.url ?? `/${name}`}>
         {!metadata.image ? null : (
           <figure>
             <img src={metadata.image} alt="cover" />
@@ -30,12 +31,12 @@ function Card({ name, metadata }: CardProps): ReactElement {
         )}
         <section className="p-4">
           <div className="capitalize text-secondary text-xs font-light my-1">{type}</div>
-          <h2 className="my-0 text-xl">{metadata.title}</h2>
+          <h2 className="my-0 text-xl">{metadata.title ?? slug ?? 'Untitled'}</h2>
           {!metadata.description ? null : (
             <p className="mt-2 text-sm">{metadata.description}</p>
           )}
         </section>
-      </Link>
+      </Hyperlink>
       {!metadata.tags ? null : (
         <footer className="p-4 text-sm border-t">
           <div className="divide-x -mx-2">
