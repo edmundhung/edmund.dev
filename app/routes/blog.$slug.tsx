@@ -1,5 +1,5 @@
 import type { MetaFunction, LinksFunction, LoaderFunction } from "remix";
-import { useRouteData, redirect } from "remix";
+import { useRouteData, json } from "remix";
 import { parse } from '../markdown.server';
 
 export let meta: MetaFunction = ({ data }) => {
@@ -12,7 +12,7 @@ export let loader: LoaderFunction = async ({ params, context }) => {
   const [content, metadata] = await context.getContent('blog', params.slug);
 
   if (content === null) {
-    return redirect('/blog');
+    return json({}, 404);
   }
 
   return {
