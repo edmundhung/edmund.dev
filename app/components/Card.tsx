@@ -1,5 +1,4 @@
 import { ReactElement } from "react";
-import { Link } from "react-router-dom";
 import Hyperlink from '../components/Hyperlink';
 
 interface CardProps {
@@ -32,7 +31,7 @@ function Card({ name, metadata }: CardProps): ReactElement {
       {!metadata.tags ? null : (
         <footer className="p-4 text-sm border-t">
           <div className="whitespace-nowrap overflow-hidden overflow-ellipsis divide-x -mx-2">
-            {metadata.tags.map(tag => <Link key={tag} className="no-underline px-2 hover:underline" to={`?tag=${tag}`}>{tag}</Link>)}
+            {metadata.tags.map(tag => <span key={tag} className="px-2">{tag}</span>)}
           </div>
         </footer>
       )}
