@@ -57,9 +57,7 @@ export default function App() {
           <div className="sticky top-4">
             <header className="text-center">
               <img className="mx-auto w-32" src="/assets/logo.svg" alt="logo" />
-              <h1 className="my-4 uppercase">
-                <Link className="no-underline" to="/">Edmund.dev</Link>
-              </h1>
+              <h1 className="my-4 uppercase">Edmund.dev</h1>
               <address className="my-8">
                 <a className="inline-block rounded-full p-2 mx-1 border border-secondary hover:border-primary text-secondary hover:text-primary" href="mailto:contact@edmund.dev">
                   <svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="at" className="w-6 h-6" role="img" viewBox="0 0 512 512">
@@ -79,7 +77,7 @@ export default function App() {
               </address>
             </header>
             <nav className="text-center font-light">
-              <NavLink className="block no-underline py-1 hover:underline" activeClassName="font-normal" to="/about">About me</NavLink>
+              <NavLink className="block no-underline py-1 hover:underline" activeClassName="font-normal" to="/" end>Home</NavLink>
               <NavLink className="block no-underline py-1 hover:underline" activeClassName="font-normal" to="/bookmarks">Bookmarks</NavLink>
               <NavLink className="block no-underline py-1 hover:underline" activeClassName="font-normal" to="/blog">Blog</NavLink>
               <NavLink className="block no-underline py-1 hover:underline" activeClassName="font-normal" to="/projects">Projects</NavLink>
