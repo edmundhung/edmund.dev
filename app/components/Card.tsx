@@ -7,22 +7,12 @@ interface CardProps {
   metadata: Metadata;
 }
 
-function getDefaultLayout(type: string) {
-  switch (type) {
-    case 'blog':
-      return 'col-span-2';
-    case 'projects':
-      return 'col-span-3';
-    default:
-      return '';
-  }
-}
-
 function Card({ name, metadata }: CardProps): ReactElement {
-  const [type, slug] = name.split('/');
+  const slashIndex = name.indexOf('/');
+  const [type, slug] = slashIndex > -1 ? [name.slice(0, slashIndex), name.slice(slashIndex + 1)] : [null, name];
 
   return (
-    <article className={`flex flex-col rounded overflow-hidden bg-white text-primary shadow-sm ${metadata.layout ?? getDefaultLayout(type)}`.trim()}>
+    <article className={`flex flex-col rounded overflow-hidden bg-white text-primary shadow-sm ${metadata.layout ?? ''}`.trim()}>
       <Hyperlink className="no-underline flex-grow" to={metadata.url ?? `/${name}`}>
         {!metadata.image ? null : (
           <figure>
@@ -30,7 +20,9 @@ function Card({ name, metadata }: CardProps): ReactElement {
           </figure>
         )}
         <section className="p-4">
-          <div className="capitalize text-secondary text-xs font-light my-1">{type}</div>
+          {!type ? null : (
+            <div className="capitalize text-secondary text-xs font-light my-1">{type}</div>
+          )}
           <h2 className="my-0 text-xl">{metadata.title ?? slug ?? 'Untitled'}</h2>
           {!metadata.description ? null : (
             <p className="mt-2 text-sm">{metadata.description}</p>
@@ -39,7 +31,7 @@ function Card({ name, metadata }: CardProps): ReactElement {
       </Hyperlink>
       {!metadata.tags ? null : (
         <footer className="p-4 text-sm border-t">
-          <div className="divide-x -mx-2">
+          <div className="whitespace-nowrap overflow-hidden overflow-ellipsis divide-x -mx-2">
             {metadata.tags.map(tag => <Link key={tag} className="no-underline px-2 hover:underline" to={`?tag=${tag}`}>{tag}</Link>)}
           </div>
         </footer>
