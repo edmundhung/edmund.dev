@@ -6,7 +6,7 @@ interface MasonryProps {
 
 function Masonry({ children }: MasonryProps): ReactElement {
   return (
-    <div className="grid grid-cols-masonry grid-flow-row-dense auto-rows-fr gap-4 p-4">
+    <div className="grid lg:grid-cols-masonry lg:grid-flow-row-dense lg:auto-rows-fr gap-4">
       {children}
     </div>
   );
