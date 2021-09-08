@@ -33,6 +33,6 @@ export default function BlogSlug() {
   const { content } = useRouteData();
 
   return (
-    <div className="p-4" dangerouslySetInnerHTML={{ __html: content }} />
+    <div className="p-4 prose prose-sm" dangerouslySetInnerHTML={{ __html: content }} />
   );
 }

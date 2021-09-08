@@ -36,6 +36,7 @@
     "@cloudflare/workers-types": "^2.2.2",
     "@cloudflare/wrangler": "^1.16.1",
     "@remix-run/serve": "^0.17.5",
+    "@tailwindcss/typography": "^0.4.1",
     "@types/react": "^17.0.4",
     "@types/react-dom": "^17.0.4",
     "autoprefixer": "^10.2.5",
