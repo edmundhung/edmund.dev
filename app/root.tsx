@@ -98,12 +98,11 @@ export default function App() {
 export function ErrorBoundary({ error }: { error: Error }) {
   return (
     <Document>
-      <h1>App Error</h1>
-      <pre>{error.message}</pre>
-      <p>
-        Replace this UI with what you want users to see when your app throws
-        uncaught errors.
-      </p>
+      <div className="min-h-screen bg-primary font-open-sans text-primary py-4 flex flex-col justify-center items-center">
+        <img className="w-32 py-4" src="/assets/logo.svg" alt="logo" />
+        <p>Ooops!</p>
+        <h1 className="p-4">500 Internal server error</h1>
+      </div>
     </Document>
   );
 }

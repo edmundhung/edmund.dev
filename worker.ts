@@ -54,10 +54,10 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
   });
 
   const handleEvent = async (event: FetchEvent): Promise<Response> => {
-    let response = await handleRequest(event.request);
+    let response = await handleAsset(event);
 
     if (response.status === 404) {
-      response = await handleAsset(event);
+      response = await handleRequest(event.request);
     }
 
     return response;
