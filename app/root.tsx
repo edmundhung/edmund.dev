@@ -66,7 +66,7 @@ export default function App() {
           <Outlet />
         </main>
         <nav className="sticky bottom-0 md:static font-light text-center text-xs md:text-base bg-white md:bg-transparent flex flex-row md:flex-col items-center shadow md:shadow-none">
-          <NavLink className="flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline" activeClassName="font-normal" to="/blog">Articles</NavLink>
+          <NavLink className="flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline" activeClassName="font-normal" to="/articles">Articles</NavLink>
           <NavLink className="flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline" activeClassName="font-normal" to="/bookmarks">Bookmarks</NavLink>
           <NavLink className="flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline" activeClassName="font-normal" to="/projects">Projects</NavLink>
           <NavLink className="flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline" activeClassName="font-normal" to="/snapshots">Snapshots</NavLink>

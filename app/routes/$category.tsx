@@ -1,4 +1,4 @@
-import type { HeadersFunction, LoaderFunction } from "remix";
+import type { HeadersFunction, MetaFunction, LoaderFunction } from "remix";
 import { json, useRouteData } from "remix";
 import Masonry from '../components/Masonry';
 import Card from '../components/Card';
@@ -7,6 +7,14 @@ import type { Entry } from '../types';
 export let headers: HeadersFunction = ({ loaderHeaders }) => {
   return {
     'Cache-Control': loaderHeaders.get('Cache-Control'),
+  };
+};
+
+export let meta: MetaFunction = ({ params }) => {
+  const { category } = params;
+
+  return {
+    title: `${category.slice(0, 1).toUpperCase()}${category.slice(1).toLowerCase()} - Edmund.dev`,
   };
 };
 

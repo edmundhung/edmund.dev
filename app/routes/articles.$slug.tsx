@@ -11,11 +11,12 @@ export let headers: HeadersFunction = ({ loaderHeaders }) => {
 export let meta: MetaFunction = ({ data }) => {
   return {
     title: `${data?.metadata?.title ?? 'Blog'} - Edmund.dev`,
+    description: `${data?.metadata?.description}`,
   };
 };
 
 export let loader: LoaderFunction = async ({ params, context }) => {
-  const [content, metadata] = await context.getContent('blog', params.slug);
+  const [content, metadata] = await context.getContent('articles', params.slug);
   const data = {
     content: content ? await parse(content) : null,
     metadata,
