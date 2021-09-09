@@ -1,13 +1,24 @@
-import type { LoaderFunction } from "remix";
+import type { HeadersFunction, LoaderFunction } from "remix";
 import { json, useRouteData } from "remix";
 import Masonry from '../components/Masonry';
 import Card from '../components/Card';
 import type { Entry } from '../types';
 
+export let headers: HeadersFunction = ({ loaderHeaders }) => {
+  return {
+    'Cache-Control': loaderHeaders.get('Cache-Control'),
+  };
+};
+
 export let loader: LoaderFunction = async ({ params, context }) => {
   const [entries] = await context.listContent();
 
-  return json({ entries }, entries.length > 0 ? 200 : 404);
+  return json({ entries },{
+    status: entries.length > 0 ? 200 : 404,
+    headers: {
+      'Cache-Control': 'max-age=3600',
+    },
+  });
 };
 
 export default function Index() {
