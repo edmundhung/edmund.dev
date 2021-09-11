@@ -1,0 +1,16 @@
+diff --git a/node_modules/cuid/lib/fingerprint.browser.js b/node_modules/cuid/lib/fingerprint.browser.js
+index b22dc06..83741d2 100644
+--- a/node_modules/cuid/lib/fingerprint.browser.js
++++ b/node_modules/cuid/lib/fingerprint.browser.js
+@@ -2,10 +2,7 @@ var pad = require('./pad.js');
+ 
+ var env = typeof window === 'object' ? window : self;
+ var globalCount = Object.keys(env).length;
+-var mimeTypesLength = navigator.mimeTypes ? navigator.mimeTypes.length : 0;
+-var clientId = pad((mimeTypesLength +
+-  navigator.userAgent.length).toString(36) +
+-  globalCount.toString(36), 4);
++var clientId = pad(globalCount.toString(36), 4);
+ 
+ module.exports = function fingerprint () {
+   return clientId;

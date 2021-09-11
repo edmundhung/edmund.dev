@@ -1,0 +1,139 @@
+diff --git a/node_modules/@metronome-sh/node/dist/exporter.js b/node_modules/@metronome-sh/node/dist/exporter.js
+index 5a01a05..85c8b27 100644
+--- a/node_modules/@metronome-sh/node/dist/exporter.js
++++ b/node_modules/@metronome-sh/node/dist/exporter.js
+@@ -2,17 +2,14 @@
+ 
+ Object.defineProperty(exports, '__esModule', { value: true });
+ 
+-var https = require('https');
+-var http = require('http');
+-var url = require('url');
+-
+ function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+ 
+-var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
+-var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
+-
+ let noTracerWarningLogged = false;
+-const sendSpan = span => {
++const sendSpan = (span, handleLog) => {
++  if (process.env.NODE_ENV !== 'production') {
++    return Promise.resolve();
++  }
++
+   const apiKey = process.env.METRONOME_API_KEY;
+   if (!apiKey && !noTracerWarningLogged || noTracerWarningLogged) {
+     console.log("Metronome: [Error] METRONOME_API_KEY environment variable is not set");
+@@ -20,33 +17,16 @@ const sendSpan = span => {
+     return Promise.resolve();
+   }
+   const url$1 = process.env.METRONOME_URL ? process.env.METRONOME_URL : 'https://metronome.sh';
+-  const {
+-    hostname,
+-    protocol,
+-    port
+-  } = new url.URL(url$1);
+-  const options = {
+-    hostname,
+-    port,
+-    path: "/insights",
++
++  return handleLog(url$1 + '/insights', {
+     method: "POST",
+     headers: {
+       "Content-Type": "application/json",
+       ApiKey: apiKey
+-    }
+-  };
+-  const request = protocol.startsWith('https') ? https__default['default'].request(options) : http__default['default'].request(options);
+-  const spans = JSON.stringify({
+-    spans: [span.prepared()]
+-  });
+-  request.write(spans, "utf-8");
+-  return new Promise(resolve => {
+-    request.on("error", error => {
+-      console.log(error);
+-      resolve();
+-    });
+-    setTimeout(resolve, 100);
+-    request.end(resolve);
++    },
++    body: JSON.stringify({
++      spans: [span.prepared()]
++    }),
+   });
+ };
+ 
+diff --git a/node_modules/@metronome-sh/node/dist/wrapper.js b/node_modules/@metronome-sh/node/dist/wrapper.js
+index a64c070..132feb4 100644
+--- a/node_modules/@metronome-sh/node/dist/wrapper.js
++++ b/node_modules/@metronome-sh/node/dist/wrapper.js
+@@ -3,21 +3,17 @@
+ Object.defineProperty(exports, '__esModule', { value: true });
+ 
+ var span = require('./span.js');
+-var exporter = require('./exporter.js');
+ 
+-const handleWebVitalRequest = async request => {
+-  await exporter.sendSpan(await span.createWebVitalSpan(request));
+-  return new Response("", {
+-    status: 204
+-  });
+-};
+ const wrapCreateRequestHandler = createRequestHandler => {
+   const createRequestHandlerWrapper = (...createRequestHandlerArgs) => {
+     const handleRequest = createRequestHandler(...createRequestHandlerArgs);
+     const handleRequestWrapper = async (...handleRequestArgs) => {
+       let [request, loadContext] = handleRequestArgs;
+       if (request.url.endsWith("__insights") && request.method.toLowerCase() === "post") {
+-        return handleWebVitalRequest(request);
++        await sendSpan(await span.createWebVitalSpan(request), loadContext.handleLog);
++        return new Response("", {
++          status: 204
++        });
+       }
+       const span$1 = span.createRequestSpan(request);
+       if (loadContext !== undefined) {
+@@ -29,10 +25,10 @@ const wrapCreateRequestHandler = createRequestHandler => {
+       }
+       try {
+         const response = await handleRequest(request, loadContext);
+-        await exporter.sendSpan(span.endSpan(span$1, response));
++        await sendSpan(span.endSpan(span$1, response), loadContext.handleLog);
+         return response;
+       } catch (error) {
+-        await exporter.sendSpan(span.endSpanWithError(span$1, error));
++        await sendSpan(span.endSpanWithError(span$1, error), loadContext.handleLog);
+         throw error;
+       }
+     };
+@@ -50,10 +46,10 @@ const wrapLoadRouteData = loadRouteData => {
+     });
+     try {
+       const response = await loadRouteData(...args);
+-      await exporter.sendSpan(span.endSpan(span$1, response));
++      await sendSpan(span.endSpan(span$1, response), context.handleLog);
+       return response;
+     } catch (error) {
+-      await exporter.sendSpan(span.endSpanWithError(span$1, error));
++      await sendSpan(span.endSpanWithError(span$1, error), context.handleLog);
+       throw error;
+     }
+   };
+@@ -68,13 +64,13 @@ const wrapCallRouteAction = callRouteAction => {
+     });
+     try {
+       const response = await callRouteAction(...args);
+-      await exporter.sendSpan(span.endSpan(span$1, response));
++      await sendSpan(span.endSpan(span$1, response), context.handleLog);
+       return response;
+     } catch (error) {
+       span$1.setAttribute("internal.error", true);
+       span$1.recordException(error);
+       span$1.end();
+-      await exporter.sendSpan(span.endSpanWithError(span$1, error));
++      await sendSpan(span.endSpanWithError(span$1, error), context.handleLog);
+       throw error;
+     }
+   };

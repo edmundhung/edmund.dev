@@ -12,7 +12,7 @@
     "build": "npm run build:css && npm run build:remix && npm run build:worker",
     "cleanup": "rimraf .mf .cache ./build ./public/build worker.js",
     "dev": "npm run build:remix && esbuild ./worker.ts --bundle --define:process.env.NODE_ENV=\"'development'\" --platform=browser --format=esm --outfile=worker.js",
-    "postinstall": "patch-package && remix setup",
+    "postinstall": "patch-package && remix setup && metronome setup",
     "prebuild": "npm run cleanup",
     "start": "MINIFLARE=1 npm run build:kv && concurrently \"npm:watch:*\"",
     "watch:app": "miniflare --build-command \"npm run dev\" --watch --kv-persist",
@@ -20,6 +20,8 @@
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.1.3",
+    "@metronome-sh/node": "^1.0.5",
+    "@metronome-sh/react": "^1.0.5",
     "@remix-run/dev": "^0.18.1",
     "@remix-run/node": "^0.18.1",
     "@remix-run/react": "^0.18.1",

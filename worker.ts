@@ -50,6 +50,9 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
 
           return [content.value, content.metadata];
         },
+        handleLog(url, init) {
+          event.waitUntil(fetch(url, init));
+        },
       };
     }
   });
