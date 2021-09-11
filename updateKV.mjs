@@ -68,6 +68,8 @@ async function main(root, binding) {
   if (process.env.MINIFLARE) {
     console.log('Persisting KV on Miniflare');
     const mf = new Miniflare({
+      script: `addEventListener("fetch", () => {});`,
+      buildCommand: '',
       kvPersist: true,
     });
     const Content = await mf.getKVNamespace(binding);
