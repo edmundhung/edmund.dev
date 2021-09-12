@@ -11,12 +11,14 @@
     "build:worker": "esbuild ./worker.ts --bundle --minify --define:process.env.NODE_ENV=\"'production'\" --platform=browser --format=esm --outfile=worker.js",
     "build": "npm run build:css && npm run build:remix && npm run build:worker",
     "cleanup": "rimraf .mf .cache ./build ./public/build worker.js",
-    "dev": "npm run build:remix && esbuild ./worker.ts --bundle --define:process.env.NODE_ENV=\"'development'\" --platform=browser --format=esm --outfile=worker.js",
+    "dev": "concurrently \"npm:watch:*\"",
     "postinstall": "patch-package && remix setup",
     "prebuild": "npm run cleanup",
-    "start": "MINIFLARE=1 npm run build:kv && concurrently \"npm:watch:*\"",
-    "watch:app": "miniflare --build-command \"npm run dev\" --watch --kv-persist",
-    "watch:style": "postcss styles --base styles --dir app/styles -w"
+    "start": "MINIFLARE=1 npm run build:kv && npm run dev",
+    "watch:miniflare": "miniflare --build-command \"\" --kv-persist --disable-cache --watch",
+    "watch:remix": "remix dev",
+    "watch:style": "postcss styles --base styles --dir app/styles -w",
+    "watch:worker": "esbuild ./worker.ts --bundle --watch --define:process.env.NODE_ENV=\"'development'\" --platform=browser --format=esm --outfile=worker.js"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.1.3",
