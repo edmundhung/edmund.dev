@@ -5,6 +5,7 @@
 @layer base {
   /* open-sans-300 - latin */
   @font-face {
+    font-display: fallback;
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 300;
@@ -14,6 +15,7 @@
   }
   /* open-sans-regular - latin */
   @font-face {
+    font-display: fallback;
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 400;
@@ -23,6 +25,7 @@
   }
   /* open-sans-700 - latin */
   @font-face {
+    font-display: fallback;
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 700;
