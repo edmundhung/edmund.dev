@@ -54,11 +54,16 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
     }
   });
 
-  const handleEvent = async (event: FetchEvent): Promise<Response> => {
+  const handleEvent = async (event: FetchEvent, cache: Cache): Promise<Response> => {
     let response = await handleAsset(event);
 
     if (response.status === 404) {
-      response = await handleRequest(event.request);
+      response = await cache.match(event.request, { ignoreSearch: true });
+
+      if (!response) {
+        response = handleRequest(event.request);
+        event.waitUntil(cache.put(event.request, response));
+      }
     }
 
     return response;
@@ -66,7 +71,7 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
 
   return (event: FetchEvent): void => {
     try {
-      event.respondWith(handleEvent(event));
+      event.respondWith(handleEvent(event, caches.default));
     } catch (e) {
       if (process.env.NODE_ENV === 'development') {
         event.respondWith(
