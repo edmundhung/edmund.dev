@@ -61,8 +61,8 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
       response = await cache.match(event.request);
 
       if (!response) {
-        response = handleRequest(event.request);
-        event.waitUntil(cache.put(event.request, response));
+        response = await handleRequest(event.request);
+        event.waitUntil(cache.put(event.request, response.clone()));
       }
     }
 
