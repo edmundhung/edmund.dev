@@ -1,6 +1,6 @@
 import type { MetaFunction, HeadersFunction, LinksFunction, LoaderFunction } from "remix";
 import { useRouteData, json } from "remix";
-import { parse } from '../markdown.server';
+import { parse } from '~/markdown.server';
 
 export let headers: HeadersFunction = ({ loaderHeaders }) => {
   return {

@@ -1,8 +1,8 @@
 import type { HeadersFunction, LoaderFunction } from "remix";
 import { json, useRouteData } from "remix";
-import Masonry from '../components/Masonry';
-import Card from '../components/Card';
-import type { Entry } from '../types';
+import Masonry from '~/components/Masonry';
+import Card from '~/components/Card';
+import type { Entry } from '~/types';
 
 export let headers: HeadersFunction = ({ loaderHeaders }) => {
   return {

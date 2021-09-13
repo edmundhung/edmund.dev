@@ -1,8 +1,7 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
 import type { LinksFunction } from "remix";
 import { Meta, Links, Scripts, useRouteData, LiveReload } from "remix";
-
-import stylesUrl from "./styles/global.css";
+import stylesUrl from "~/styles/global.css";
 
 export let meta: MetaFunction = () => {
   return {

@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import Hyperlink from '../components/Hyperlink';
+import Hyperlink from '~/components/Hyperlink';
 
 interface CardProps {
   name: string;
