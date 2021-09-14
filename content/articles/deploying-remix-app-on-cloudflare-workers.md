@@ -1,26 +1,55 @@
 ---
-title: Deploying remix app on Cloudflare Workers
-description: I was an early supporter of Remix and have been watching out for its development for a while. With its v1 Beta Launch, I think it is a good time to give it a try and spent a weekend building my first Remix app - a Blog
+title: Deploying Remix app on Cloudflare Workers
+description: Step by step guide on how to deploy your remix app to Cloudflare Workers using the `remix-worker-template`
 layout: col-span-2
 tags:
-- remix
-- cloudflare worker
+- Remix
+- Cloudflare Workers
 ---
-# Deploying remix app on Cloudflare Workers
+# Deploying Remix app on Cloudflare Workers
 
-I was an early supporter of Remix and have been watching out for its development for a while. With its [v1 Beta Launch](https://youtu.be/4dOAFJUOi-s), I think it is a good time to give it a try and spent a weekend building my first Remix app - a Blog.
+One of the core features about [Remix](https://remix.run/) is to allow deploying your app anywhere. The Remix team maintains several adapters for platforms such as Vercel, Architect, Netlify and also Cloudflare Workers.
 
-## Why Cloudflare Workers?
+The official adapter for Cloudflare Workers is not ready yet at the time this article is written. We will be showing you how to do it with minimal patches using [remix-worker-template](https://github.com/edmundhung/remix-worker-template) here.
 
-There are many options out there you can deploy your app to. But the idea of being able to run it in the Edge is pretty new to me.
+## Preparation
 
-Cloudflare Workers, as one of the providers, adopted the service worker model. The way Remix utilising the Request/Response from the [Web Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) makes them a perfect fit.
+If you are new to Cloudflare Workers, be sure to [signup](https://dash.cloudflare.com/sign-up) first. No custom domain nor credit card is required. A default `workers.dev` domain will be set with a [free plan](https://developers.cloudflare.com/workers/platform/limits#worker-limits) available.
 
-The Remix team has been working on some official adapters for different platforms. Even though Cloudflare Workers is on their roadmap, it is not yet ready as of the time I build this. Luckily, the Remix community is really helpful and shared [example](https://github.com/GregBrimble/remix) how you can do it.
+The environment should be set with node 14+. You should also set up the remix license following the instructions on the [dashboard](https://remix.run/dashboard).
 
-## Requirments
+## Set it up
 
-- Node 14+
-- Remix 0.17+
-- Wrangler 1.16+
-## Work in progress...
+To begin, create a new repository using the [remix-worker-template](https://github.com/edmundhung/remix-worker-template/generate) and clone it to your computer. Install all the packages required by running:
+
+```sh
+npm install
+```
+
+The next step is to setup the wrangler cli. [Wrangler](https://github.com/cloudflare/wrangler) is an official tool from Cloudflare for managing your workers. It should be installed together in the previous step. Authenticate the cli using:
+
+```sh
+npx wrangler login
+```
+
+This will open the Cloudflare account login page. Click `Authorize Wrangler` and it is set.
+
+## Before deploying...
+
+The workers environment is somehow tricky and is hard to verify locally. It is strongly suggest to test it first using the preview service before deploying:
+
+```sh
+npx wrangler preview
+```
+
+This will deploy your Remix app to a production-alike environment on Cloudflare. Be aware that usages on this environment counts towards your worker quota.
+
+## Take it live!
+
+If everything works fine on the preview environment, then you are good to go. Simply run
+
+```sh
+npx wrangler publish
+```
+
+And now your worker is released on production and should be accessible on the assigned `worker.dev` domain as stated on the cli result.
