@@ -2,8 +2,9 @@ export interface Metadata {
   url?: string;
   layout?: string;
   title: string;
-  description?: string;
+  description: string;
   image?: string;
+  author?: string;
   tags?: string[];
 }
 

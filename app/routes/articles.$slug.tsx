@@ -1,6 +1,7 @@
 import type { MetaFunction, HeadersFunction, LinksFunction, LoaderFunction } from "remix";
 import { useRouteData, json } from "remix";
 import { parse } from '~/markdown.server';
+import { deriveMetaFromMetadata, enhanceMeta } from '~/meta';
 
 export let headers: HeadersFunction = ({ loaderHeaders }) => {
   return {
@@ -8,11 +9,13 @@ export let headers: HeadersFunction = ({ loaderHeaders }) => {
   };
 };
 
-export let meta: MetaFunction = ({ data }) => {
-  return {
-    title: `${data?.metadata?.title ?? 'Blog'} - Edmund.dev`,
-    description: `${data?.metadata?.description}`,
-  };
+export let meta: MetaFunction = ({ data, location }) => {
+  const meta = deriveMetaFromMetadata(data?.metadata);
+
+  return enhanceMeta(meta, {
+    pathname: location.pathname,
+    type: 'article',
+  });
 };
 
 export let loader: LoaderFunction = async ({ params, context }) => {

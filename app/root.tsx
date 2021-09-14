@@ -3,15 +3,6 @@ import type { LinksFunction } from "remix";
 import { Meta, Links, Scripts, useRouteData, LiveReload } from "remix";
 import stylesUrl from "~/styles/global.css";
 
-export let meta: MetaFunction = () => {
-  return {
-    title: "Edmund.dev",
-    description: "I'm Edmund, a web engineer specialised in frontend development. Currently working as a frontend developer at @PPRO. Enjoy biking and photography in my leisure time.",
-    author: "Edmund Hung",
-    keywords: "web,engineer,react",
-  };
-};
-
 export let links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
