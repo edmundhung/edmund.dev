@@ -7,7 +7,7 @@
   "scripts": {
     "build:kv": "node ./updateKV.mjs",
     "build:css": "postcss styles --base styles --dir app/styles --env production",
-    "build:remix": "SERVER_PLATFORM=browser remix build",
+    "build:remix": "SERVER_PLATFORM=browser SERVER_FORMAT=esm remix build",
     "build:worker": "esbuild ./worker.ts --bundle --minify --define:process.env.NODE_ENV=\"'production'\" --platform=browser --format=esm --outfile=worker.js",
     "build": "npm run build:css && npm run build:remix && npm run build:worker",
     "cleanup": "rimraf .mf .cache ./build ./public/build worker.js",
@@ -17,7 +17,7 @@
     "prepare": "husky install",
     "start": "MINIFLARE=1 npm run build:kv && npm run dev",
     "watch:miniflare": "miniflare --build-command \"\" --kv-persist --disable-cache --watch",
-    "watch:remix": "remix dev",
+    "watch:remix": "SERVER_PLATFORM=browser SERVER_FORMAT=esm remix dev",
     "watch:style": "postcss styles --base styles --dir app/styles -w",
     "watch:worker": "esbuild ./worker.ts --bundle --watch --define:process.env.NODE_ENV=\"'development'\" --platform=browser --format=esm --outfile=worker.js"
   },
