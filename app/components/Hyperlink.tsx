@@ -8,11 +8,19 @@ interface HyperlinkProps {
 }
 
 function Hyperlink({ to, className, children }: HyperlinkProps): ReactElement {
-  const isAbsoluteURL = to.startsWith('https://') || to.startsWith('http://') || to.startsWith('//');
+  const isAbsoluteURL =
+    to.startsWith('https://') ||
+    to.startsWith('http://') ||
+    to.startsWith('//');
 
   if (isAbsoluteURL) {
     return (
-      <a className={className} href={to} target="_blank" rel="noopener noreferrer">
+      <a
+        className={className}
+        href={to}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         {children}
       </a>
     );
@@ -22,7 +30,7 @@ function Hyperlink({ to, className, children }: HyperlinkProps): ReactElement {
     <Link className={className} to={to}>
       {children}
     </Link>
-  )
+  );
 }
 
 export default Hyperlink;

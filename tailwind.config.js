@@ -2,10 +2,10 @@ module.exports = {
   // mode: 'jit',
   purge: {
     content: [
-      "./app/**/*.tsx",
-      "./app/**/*.jsx",
-      "./app/**/*.js",
-      "./app/**/*.ts"
+      './app/**/*.tsx',
+      './app/**/*.jsx',
+      './app/**/*.js',
+      './app/**/*.ts',
     ],
     safelist: [
       'col-span-1',
@@ -25,7 +25,7 @@ module.exports = {
     // Some useful comment
     extend: {
       fontFamily: {
-        'open-sans': ['Open Sans', 'sans-serif']
+        'open-sans': ['Open Sans', 'sans-serif'],
       },
       colors: {
         primary: '#383835',
@@ -39,13 +39,11 @@ module.exports = {
         secondary: '#d4d6c8',
       },
       gridTemplateColumns: {
-       'layout': '200px auto',
-       'masonry': 'repeat(auto-fill, minmax(180px, 1fr))',
-      }
+        layout: '200px auto',
+        masonry: 'repeat(auto-fill, minmax(180px, 1fr))',
+      },
     },
   },
   variants: {},
-  plugins: [
-    require('@tailwindcss/typography'),
-  ]
+  plugins: [require('@tailwindcss/typography')],
 };

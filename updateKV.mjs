@@ -51,7 +51,7 @@ async function parseDirectory(root, path = root) {
 
   for (const dirent of await fs.readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      list.push(...await parseDirectory(root, `${path}/${dirent.name}`));
+      list.push(...(await parseDirectory(root, `${path}/${dirent.name}`)));
     } else if (dirent.isFile()) {
       list.push(await parseFile(root, `${path}/${dirent.name}`));
     }
@@ -74,7 +74,11 @@ async function main(root, binding) {
     });
     const Content = await mf.getKVNamespace(binding);
 
-    await Promise.all(entries.map(entry => Content.put(entry.key, entry.value, { metadata: entry.metadata })));
+    await Promise.all(
+      entries.map(entry =>
+        Content.put(entry.key, entry.value, { metadata: entry.metadata }),
+      ),
+    );
     console.log('KV persisted on Miniflare');
     return;
   }
@@ -85,21 +89,29 @@ async function main(root, binding) {
   const accountId = config['account_id'];
   const kvNamespaces = config['kv_namespaces'] ?? [];
   const kv = kvNamespaces.find(namespace => namespace.binding === binding);
-  const namespaceId = process.env.NODE_ENV === 'production' ? kv?.id : kv?.preview_id;
+  const namespaceId =
+    process.env.NODE_ENV === 'production' ? kv?.id : kv?.preview_id;
 
-  console.log(`Updating KV with binding "${binding}" for account "${accountId}" and namespace "${namespaceId}"`);
+  console.log(
+    `Updating KV with binding "${binding}" for account "${accountId}" and namespace "${namespaceId}"`,
+  );
 
-  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/bulk`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.CF_API_TOKEN}`,
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/bulk`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.CF_API_TOKEN}`,
+      },
+      body: JSON.stringify(entries),
     },
-    body: JSON.stringify(entries),
-  });
+  );
   const result = await response.text();
 
-  console.log(`Update finish with status ${response.status} and result ${result}`);
+  console.log(
+    `Update finish with status ${response.status} and result ${result}`,
+  );
 }
 
 await main('content', 'Content');

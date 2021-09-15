@@ -2,14 +2,16 @@ import type { MetaFunction } from 'remix';
 import type { Metadata } from '~/types';
 
 function clearMeta(meta: Record<string, string>): Record<string, string> {
-  const entries = Object
-    .entries(meta)
-    .filter(([key, value]) => typeof value !== 'undefined' && value.trim() !== '');
+  const entries = Object.entries(meta).filter(
+    ([key, value]) => typeof value !== 'undefined' && value.trim() !== '',
+  );
 
   return Object.fromEntries(entries);
 }
 
-export function deriveMetaFromMetadata(metadata: Metadata): Record<string, string> {
+export function deriveMetaFromMetadata(
+  metadata: Metadata,
+): Record<string, string> {
   return clearMeta({
     title: metadata.title,
     description: metadata.description,
@@ -29,8 +31,13 @@ interface EnhanceMetaOptions {
   twitterSite: string;
 }
 
-export function createMetaEnhancer(defaultOptions: Omit<EnhanceMetaOptions, 'pathname'>) {
-  return (meta: Record<string, string>, options: Partial<EnhanceMetaOptions> = {}): Record<string, string> => {
+export function createMetaEnhancer(
+  defaultOptions: Omit<EnhanceMetaOptions, 'pathname'>,
+) {
+  return (
+    meta: Record<string, string>,
+    options: Partial<EnhanceMetaOptions> = {},
+  ): Record<string, string> => {
     const {
       siteName,
       baseURL,
@@ -46,7 +53,7 @@ export function createMetaEnhancer(defaultOptions: Omit<EnhanceMetaOptions, 'pat
 
     return clearMeta({
       ...meta,
-      author: meta.author ?? author,
+      'author': meta.author ?? author,
       'og:title': title,
       'og:description': meta.description,
       'og:image': meta.image,

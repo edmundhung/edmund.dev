@@ -1,5 +1,10 @@
-import type { MetaFunction, HeadersFunction, LinksFunction, LoaderFunction } from "remix";
-import { useRouteData, json } from "remix";
+import type {
+  MetaFunction,
+  HeadersFunction,
+  LinksFunction,
+  LoaderFunction,
+} from 'remix';
+import { useRouteData, json } from 'remix';
 import { parse } from '~/markdown.server';
 import { deriveMetaFromMetadata, enhanceMeta } from '~/meta';
 
@@ -37,6 +42,9 @@ export default function BlogSlug() {
   const { content } = useRouteData();
 
   return (
-    <div className="prose prose-sm" dangerouslySetInnerHTML={{ __html: content }} />
+    <div
+      className="prose prose-sm"
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
   );
 }

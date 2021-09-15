@@ -1,9 +1,9 @@
-import type { HeadersFunction, LoaderFunction, MetaFunction } from "remix";
-import { json, useRouteData } from "remix";
+import type { HeadersFunction, LoaderFunction, MetaFunction } from 'remix';
+import { json, useRouteData } from 'remix';
 import Masonry from '~/components/Masonry';
 import Card from '~/components/Card';
 import type { Entry } from '~/types';
-import { enhanceMeta } from "~/meta";
+import { enhanceMeta } from '~/meta';
 
 export let meta: MetaFunction = ({ location }) => {
   const baseMeta = {
@@ -25,12 +25,15 @@ export let headers: HeadersFunction = ({ loaderHeaders }) => {
 export let loader: LoaderFunction = async ({ params, context }) => {
   const [entries] = await context.listContent();
 
-  return json({ entries },{
-    status: entries.length > 0 ? 200 : 404,
-    headers: {
-      'Cache-Control': 'max-age=3600',
+  return json(
+    { entries },
+    {
+      status: entries.length > 0 ? 200 : 404,
+      headers: {
+        'Cache-Control': 'max-age=3600',
+      },
     },
-  });
+  );
 };
 
 export default function Index() {
@@ -38,7 +41,9 @@ export default function Index() {
 
   return (
     <Masonry>
-      {data.entries.map(({ name, metadata }) => <Card key={name} name={name} metadata={metadata} />)}
+      {data.entries.map(({ name, metadata }) => (
+        <Card key={name} name={name} metadata={metadata} />
+      ))}
     </Masonry>
   );
 }

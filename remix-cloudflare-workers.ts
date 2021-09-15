@@ -1,10 +1,10 @@
 import type {
   AppLoadContext,
   ServerBuild,
-  ServerPlatform
-} from "@remix-run/server-runtime";
-import { createRequestHandler as createRemixRequestHandler } from "@remix-run/server-runtime";
-import { installGlobals } from "@remix-run/node";
+  ServerPlatform,
+} from '@remix-run/server-runtime';
+import { createRequestHandler as createRemixRequestHandler } from '@remix-run/server-runtime';
+import { installGlobals } from '@remix-run/node';
 
 // Setup sign & unsign functions only
 installGlobals();
@@ -17,7 +17,7 @@ export interface GetLoadContextFunction {
 export function createRequestHandler({
   build,
   getLoadContext,
-  mode
+  mode,
 }: {
   build: ServerBuild;
   getLoadContext?: GetLoadContextFunction;
@@ -28,7 +28,9 @@ export function createRequestHandler({
 
   return (request: Request) => {
     let loadContext =
-      typeof getLoadContext === "function" ? getLoadContext(request) : undefined;
+      typeof getLoadContext === 'function'
+        ? getLoadContext(request)
+        : undefined;
 
     return handleRequest(request, loadContext);
   };

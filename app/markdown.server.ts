@@ -6,13 +6,13 @@ export async function parse(source: string): Promise<string> {
     remark()
       .use(html)
       .process(source, function (err, file) {
-          if (err) {
-            reject(err);
-            return;
-          }
+        if (err) {
+          reject(err);
+          return;
+        }
 
-          resolve(file);
-      })
+        resolve(file);
+      });
   });
 
   return result.contents;
