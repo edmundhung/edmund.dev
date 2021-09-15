@@ -7,6 +7,7 @@ import type {
   LoaderFunction,
 } from 'remix';
 import { useRouteData, json } from 'remix';
+import Hyperlink from '~/components/Hyperlink';
 import { deriveMetaFromMetadata, enhanceMeta } from '~/meta';
 
 export let headers: HeadersFunction = ({ loaderHeaders }) => {
@@ -42,5 +43,14 @@ export let loader: LoaderFunction = async ({ params, context }) => {
 export default function ArticleSlug() {
   const { content } = useRouteData();
 
-  return <ReactMarkdown className="prose prose-sm">{content}</ReactMarkdown>;
+  return (
+    <ReactMarkdown
+      className="prose prose-sm"
+      components={{
+        a: ({ node, href, ...props }) => <Hyperlink to={href} {...props} />,
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
 }
