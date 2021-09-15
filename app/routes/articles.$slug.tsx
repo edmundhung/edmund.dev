@@ -1,3 +1,5 @@
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import type {
   MetaFunction,
   HeadersFunction,
@@ -5,7 +7,6 @@ import type {
   LoaderFunction,
 } from 'remix';
 import { useRouteData, json } from 'remix';
-import { parse } from '~/markdown.server';
 import { deriveMetaFromMetadata, enhanceMeta } from '~/meta';
 
 export let headers: HeadersFunction = ({ loaderHeaders }) => {
@@ -26,7 +27,7 @@ export let meta: MetaFunction = ({ data, location }) => {
 export let loader: LoaderFunction = async ({ params, context }) => {
   const [content, metadata] = await context.getContent('articles', params.slug);
   const data = {
-    content: content ? await parse(content) : null,
+    content,
     metadata,
   };
 
@@ -38,13 +39,8 @@ export let loader: LoaderFunction = async ({ params, context }) => {
   });
 };
 
-export default function BlogSlug() {
+export default function ArticleSlug() {
   const { content } = useRouteData();
 
-  return (
-    <div
-      className="prose prose-sm"
-      dangerouslySetInnerHTML={{ __html: content }}
-    />
-  );
+  return <ReactMarkdown className="prose prose-sm">{content}</ReactMarkdown>;
 }
