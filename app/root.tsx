@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import type { LinksFunction } from 'remix';
 import { Meta, Links, Scripts, useRouteData, LiveReload } from 'remix';
+import Progress from '~/components/Progress';
 import stylesUrl from '~/styles/global.css';
 
 export let links: LinksFunction = () => {
@@ -57,6 +58,7 @@ export default function App() {
 
   return (
     <Document>
+      <Progress />
       <div className="min-h-screen grid md:grid-cols-layout auto-rows-min bg-primary font-open-sans text-primary py-4 md:py-0 md:pl-4 gap-4">
         <header className="px-4 md:px-0 flex flex-row md:flex-col items-center">
           <Link className="block no-underline" to="/">
