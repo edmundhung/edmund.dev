@@ -42,6 +42,15 @@ module.exports = {
         layout: '200px auto',
         masonry: 'repeat(auto-fill, minmax(180px, 1fr))',
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            pre: {
+              backgroundColor: '#f8f8f8',
+            },
+          },
+        },
+      },
     },
   },
   variants: {},

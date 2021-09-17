@@ -7,6 +7,8 @@ import type {
   LoaderFunction,
 } from 'remix';
 import { useRouteData, json } from 'remix';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { github } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import Hyperlink from '~/components/Hyperlink';
 import { deriveMetaFromMetadata, enhanceMeta } from '~/meta';
 
@@ -48,6 +50,32 @@ export default function ArticleSlug() {
       className="prose prose-sm"
       components={{
         a: ({ node, href, ...props }) => <Hyperlink to={href} {...props} />,
+        code({ node, inline, className, children, ...props }) {
+          const match = /language-(\w+)/.exec(className || '');
+
+          if (inline) {
+            return (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          }
+
+          const language = match ? match[1] : null;
+
+          return (
+            <SyntaxHighlighter
+              style={github}
+              showLineNumbers={language === 'tsx'}
+              language={language}
+              PreTag="div"
+              wrapLongLines
+              {...props}
+            >
+              {String(children).replace(/\n$/, '')}
+            </SyntaxHighlighter>
+          );
+        },
       }}
     >
       {content}
