@@ -7,8 +7,7 @@ import type {
   LoaderFunction,
 } from 'remix';
 import { useRouteData, json } from 'remix';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import { github } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
+import SyntaxHighlighter from '~/components/SyntaxHighlighter';
 import Hyperlink from '~/components/Hyperlink';
 import { deriveMetaFromMetadata, enhanceMeta } from '~/meta';
 
@@ -49,11 +48,13 @@ export default function ArticleSlug() {
     <ReactMarkdown
       className="prose prose-sm"
       components={{
-        a: ({ node, href, ...props }) => <Hyperlink to={href} {...props} />,
+        a({ node, href, ...props }) {
+          return <Hyperlink to={href} {...props} />;
+        },
         code({ node, inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || '');
 
-          if (inline) {
+          if (inline || !match) {
             return (
               <code className={className} {...props}>
                 {children}
@@ -61,17 +62,8 @@ export default function ArticleSlug() {
             );
           }
 
-          const language = match ? match[1] : null;
-
           return (
-            <SyntaxHighlighter
-              style={github}
-              showLineNumbers={language === 'tsx'}
-              language={language}
-              PreTag="div"
-              wrapLongLines
-              {...props}
-            >
+            <SyntaxHighlighter language={match[1]} {...props}>
               {String(children).replace(/\n$/, '')}
             </SyntaxHighlighter>
           );
