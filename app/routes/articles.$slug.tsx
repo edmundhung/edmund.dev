@@ -10,6 +10,11 @@ import { useRouteData, json } from 'remix';
 import SyntaxHighlighter from '~/components/SyntaxHighlighter';
 import Hyperlink from '~/components/Hyperlink';
 import { deriveMetaFromMetadata, enhanceMeta } from '~/meta';
+import stylesUrl from '~/styles/code.css';
+
+export let links: LinksFunction = () => {
+  return [{ rel: 'stylesheet', href: stylesUrl }];
+};
 
 export let headers: HeadersFunction = ({ loaderHeaders }) => {
   return {
@@ -50,6 +55,9 @@ export default function ArticleSlug() {
       components={{
         a({ node, href, ...props }) {
           return <Hyperlink to={href} {...props} />;
+        },
+        pre({ node, ...props }) {
+          return <figure {...props} />;
         },
         code({ node, inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || '');

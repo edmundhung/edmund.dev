@@ -1,14 +1,15 @@
 import type { ReactElement } from 'react';
 import type { Components } from 'react-markdown';
-import { Light as ReactSyntaxHighlighter } from 'react-syntax-highlighter';
-import ts from 'react-syntax-highlighter/dist/cjs/languages/hljs/typescript';
-import diff from 'react-syntax-highlighter/dist/cjs/languages/hljs/diff';
-import shell from 'react-syntax-highlighter/dist/cjs/languages/hljs/shell';
-import github from 'react-syntax-highlighter/dist/cjs/styles/hljs/github';
+import { PrismLight as ReactSyntaxHighlighter } from 'react-syntax-highlighter';
+import ts from 'react-syntax-highlighter/dist/cjs/languages/prism/typescript';
+import tsx from 'react-syntax-highlighter/dist/cjs/languages/prism/tsx';
+import diff from 'react-syntax-highlighter/dist/cjs/languages/prism/diff';
+import sh from 'react-syntax-highlighter/dist/cjs/languages/prism/bash';
 
-ReactSyntaxHighlighter.registerLanguage('typescript', ts);
+ReactSyntaxHighlighter.registerLanguage('ts', ts);
+ReactSyntaxHighlighter.registerLanguage('tsx', tsx);
 ReactSyntaxHighlighter.registerLanguage('diff', diff);
-ReactSyntaxHighlighter.registerLanguage('shell', shell);
+ReactSyntaxHighlighter.registerLanguage('sh', sh);
 
 interface SyntaxHighlighterProps extends Components {
   language: string;
@@ -20,11 +21,9 @@ function SyntaxHighlighter({
 }: SyntaxHighlighterProps): ReactElement {
   return (
     <ReactSyntaxHighlighter
-      style={github}
+      useInlineStyles={false}
       showLineNumbers={language === 'tsx'}
       language={language}
-      PreTag="div"
-      wrapLongLines
       {...props}
     />
   );
