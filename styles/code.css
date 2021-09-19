@@ -136,9 +136,10 @@ pre[class*='language-'] {
 
 .token.inserted {
   /* background: #a89984; */
-  background: #258e50; /* Customised */
+  background: #356d4c; /* Customised */
 }
 
 .token.deleted {
-  background: #fb4934;
+  /* background: #fb4934; */
+  background: #8c4242; /* Customised */
 }
