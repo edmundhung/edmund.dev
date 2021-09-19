@@ -1,14 +1,14 @@
 import type { ReactElement, MutableRefObject } from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePendingLocation } from 'remix';
 
 export function useProgress(): MutableRefObject<HTMLElement> {
-  const pendingLocation = usePendingLocation();
   const el = useRef<HTMLElement>();
   const timeout = useRef<NodeJS.Timeout>();
+  const pendingLocation = usePendingLocation();
 
   useEffect(() => {
-    if (!pendingLocation) {
+    if (!pendingLocation || !el.current) {
       return;
     }
 
@@ -17,21 +17,27 @@ export function useProgress(): MutableRefObject<HTMLElement> {
     }
 
     el.current.style.width = `0%`;
-    el.current.style.opacity = ``;
 
-    let interval = setInterval(() => {
-      if (!el.current) {
+    let updateWidth = (ms: number) => {
+      timeout.current = setTimeout(() => {
+        let width = parseFloat(el.current.style.width);
+        let percent = !isNaN(width) ? 10 + 0.9 * width : 0;
+
+        el.current.style.width = `${percent}%`;
+
+        updateWidth(100);
+      }, ms);
+    };
+
+    updateWidth(300);
+
+    return () => {
+      clearTimeout(timeout.current);
+
+      if (el.current.style.width === `0%`) {
         return;
       }
 
-      let width = parseFloat(el.current.style.width);
-      let percent = !isNaN(width) ? width : 0;
-
-      el.current.style.width = `${percent * 1.1}%`;
-    }, 200);
-
-    return () => {
-      clearInterval(interval);
       el.current.style.width = `100%`;
       timeout.current = setTimeout(() => {
         if (el.current?.style.width !== '100%') {
@@ -39,7 +45,6 @@ export function useProgress(): MutableRefObject<HTMLElement> {
         }
 
         el.current.style.width = ``;
-        el.current.style.opacity = `0%`;
       }, 200);
     };
   }, [pendingLocation]);
@@ -51,13 +56,11 @@ function Progress(): ReactElement {
   const progress = useProgress();
 
   return (
-    <div className="fixed top-0 left-0 right-0">
-      <div className="h-1 flex">
-        <div
-          ref={progress}
-          className="transition-all ease-out bg-gradient-to-r from-green-400 via-blue-500 to-pink-500"
-        />
-      </div>
+    <div className="fixed top-0 left-0 right-0 h-1 flex">
+      <div
+        ref={progress}
+        className="transition-all ease-out bg-gradient-to-r from-green-400 via-blue-500 to-pink-500"
+      />
     </div>
   );
 }
