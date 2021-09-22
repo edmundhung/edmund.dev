@@ -25,7 +25,7 @@ function Card({ name, metadata }: CardProps): ReactElement {
       >
         {!metadata.image ? null : (
           <figure>
-            <img src={metadata.image} alt="cover" />
+            <img src={metadata.image} width="100%" alt="cover" />
           </figure>
         )}
         <section className="p-4">
