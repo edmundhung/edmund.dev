@@ -35,6 +35,21 @@ async function handleAsset(event: FetchEvent): Promise<Response> {
   }
 }
 
+const orders = [
+  'articles/setting-up-a-global-loading-indicator-in-remix',
+  'bookmarks/swyx-client-server-battle',
+  'snapshots/the-bridge',
+  'snapshots/maple-tree',
+  'projects/remix-worker-template',
+  'articles/deploying-remix-app-on-cloudflare-workers',
+  'snapshots/childhood',
+  'bookmarks/kentcdodds-testing-implementation-details',
+  'projects/maildog',
+  'snapshots/quokka-at-rottnest-island',
+  'bookmarks/pomb-us-build-your-own-react',
+  'snapshots/bondi-beach',
+];
+
 function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
   const handleRequest = createRequestHandler({
     build,
@@ -46,7 +61,13 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
             cursor,
           });
 
-          return [result.keys, !result.list_complete ? result.cursor : null];
+          return [
+            result.keys.sort(
+              (prev, next) =>
+                orders.indexOf(prev.name) - orders.indexOf(next.name),
+            ),
+            !result.list_complete ? result.cursor : null,
+          ];
         },
         async getContent(category: string, slug: string) {
           const content = await Content.getWithMetadata(`${category}/${slug}`);
