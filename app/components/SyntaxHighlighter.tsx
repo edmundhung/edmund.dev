@@ -1,6 +1,5 @@
-import type { ReactElement } from 'react';
-import type { Components } from 'react-markdown';
-import { PrismLight as ReactSyntaxHighlighter } from 'react-syntax-highlighter';
+import type { ComponentPropsWithoutRef, ReactElement } from 'react';
+import ReactSyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/prism-light';
 import ts from 'react-syntax-highlighter/dist/cjs/languages/prism/typescript';
 import tsx from 'react-syntax-highlighter/dist/cjs/languages/prism/tsx';
 import diff from 'react-syntax-highlighter/dist/cjs/languages/prism/diff';
@@ -11,19 +10,21 @@ ReactSyntaxHighlighter.registerLanguage('tsx', tsx);
 ReactSyntaxHighlighter.registerLanguage('diff', diff);
 ReactSyntaxHighlighter.registerLanguage('sh', sh);
 
-interface SyntaxHighlighterProps extends Components {
-  language: string;
-}
+type SyntaxHighlighterProps = ComponentPropsWithoutRef<
+  typeof ReactSyntaxHighlighter
+>;
 
 function SyntaxHighlighter({
   language,
+  useInlineStyles = false,
+  showLineNumbers = language === 'tsx',
   ...props
 }: SyntaxHighlighterProps): ReactElement {
   return (
     <ReactSyntaxHighlighter
-      useInlineStyles={false}
-      showLineNumbers={language === 'tsx'}
       language={language}
+      useInlineStyles={useInlineStyles}
+      showLineNumbers={showLineNumbers}
       {...props}
     />
   );
