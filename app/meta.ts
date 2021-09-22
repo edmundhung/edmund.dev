@@ -53,6 +53,7 @@ export function createMetaEnhancer(
 
     return clearMeta({
       ...meta,
+      title,
       'author': meta.author ?? author,
       'og:title': title,
       'og:description': meta.description,
