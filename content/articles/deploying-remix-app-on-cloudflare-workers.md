@@ -1,7 +1,7 @@
 ---
 title: Deploying Remix app on Cloudflare Workers
 description: Step by step guide on how to deploy your remix app to Cloudflare Workers using the `remix-worker-template`
-layout: col-span-2
+layout: md:col-span-2
 tags:
 - Remix
 - Cloudflare Workers
