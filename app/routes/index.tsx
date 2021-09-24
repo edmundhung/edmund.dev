@@ -30,7 +30,7 @@ export let loader: LoaderFunction = async ({ params, context }) => {
     {
       status: entries.length > 0 ? 200 : 404,
       headers: {
-        'Cache-Control': 'max-age=3600',
+        'Cache-Control': 'public, max-age=3600',
       },
     },
   );
