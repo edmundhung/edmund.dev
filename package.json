@@ -5,7 +5,7 @@
   "description": "Blog built with Remix, deployed to Cloudflare workers",
   "license": "",
   "scripts": {
-    "build:kv": "node ./updateKV.mjs",
+    "build:kv": "ts-node ./namespace/update.ts",
     "build:style": "postcss styles --base styles --dir app/styles --env production",
     "build:remix": "SERVER_PLATFORM=browser SERVER_FORMAT=esm remix build",
     "build:worker": "NODE_ENV=production ts-node ./build.ts",
@@ -20,7 +20,7 @@
     "prebuild": "npm run cleanup",
     "prepare": "husky install",
     "prestart": "rimraf .mf",
-    "start": "MINIFLARE=1 npm run build:kv && npm run dev"
+    "start": "MINIFLARE=1 npm run build:kv && miniflare --kv-persist --disable-cache"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.1.3",

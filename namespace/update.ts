@@ -1,16 +1,15 @@
 import * as fs from 'fs/promises';
 import matter from 'gray-matter';
-import { Miniflare } from 'miniflare';
 import { getLinkPreview } from 'link-preview-js';
-import fetch from 'node-fetch';
 import TOML from '@iarna/toml';
+import { preview } from './preview';
 
-async function getPreviewMetadata(url) {
+async function getPreviewMetadata(url: string): Promise<any> {
   if (!url) {
     return {};
   }
 
-  const preview = await getLinkPreview(url);
+  const preview = (await getLinkPreview(url)) as any;
 
   switch (preview.siteName) {
     case 'Flickr':
@@ -31,7 +30,7 @@ async function getPreviewMetadata(url) {
   }
 }
 
-async function parseFile(root, path) {
+async function parseFile(root: string, path: string): Promise<any> {
   const content = await fs.readFile(path);
   const result = matter(content.toString('utf8'));
   const preview = await getPreviewMetadata(result.data?.url);
@@ -46,7 +45,7 @@ async function parseFile(root, path) {
   };
 }
 
-async function parseDirectory(root, path = root) {
+async function parseDirectory(root: string, path = root): Promise<any[]> {
   const list = [];
 
   for (const dirent of await fs.readdir(path, { withFileTypes: true })) {
@@ -60,26 +59,13 @@ async function parseDirectory(root, path = root) {
   return list;
 }
 
-async function main(root, binding) {
+async function main(root: string, binding: string): Promise<void> {
   console.log(`Start updating KV`);
   const entries = await parseDirectory(root);
   console.log(`KV Generated, total: ${entries.length}`);
 
   if (process.env.MINIFLARE) {
-    console.log('Persisting KV on Miniflare');
-    const mf = new Miniflare({
-      script: `addEventListener("fetch", () => {});`,
-      buildCommand: '',
-      kvPersist: true,
-    });
-    const Content = await mf.getKVNamespace(binding);
-
-    await Promise.all(
-      entries.map(entry =>
-        Content.put(entry.key, entry.value, { metadata: entry.metadata }),
-      ),
-    );
-    console.log('KV persisted on Miniflare');
+    await preview(binding, entries);
     return;
   }
 
@@ -87,7 +73,7 @@ async function main(root, binding) {
   const wranglerTOML = await fs.readFile('wrangler.toml');
   const config = TOML.parse(wranglerTOML.toString('utf8'));
   const accountId = config['account_id'];
-  const kvNamespaces = config['kv_namespaces'] ?? [];
+  const kvNamespaces = (config['kv_namespaces'] ?? []) as any[];
   const kv = kvNamespaces.find(namespace => namespace.binding === binding);
   const namespaceId =
     process.env.NODE_ENV === 'production' ? kv?.id : kv?.preview_id;
@@ -96,6 +82,8 @@ async function main(root, binding) {
     `Updating KV with binding "${binding}" for account "${accountId}" and namespace "${namespaceId}"`,
   );
 
+  const fetch = (url: string, init?: any) =>
+    import('node-fetch').then(({ default: fetch }) => fetch(url, init));
   const response = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/bulk`,
     {
@@ -114,4 +102,4 @@ async function main(root, binding) {
   );
 }
 
-await main('content', 'Content');
+main('content', 'Content');
