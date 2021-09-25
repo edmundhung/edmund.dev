@@ -1,6 +1,6 @@
 import { Miniflare } from 'miniflare';
 
-export async function preview(binding: string, entries: any[]): Promise<void> {
+async function preview(binding: string, entries: any[]): Promise<void> {
   console.log('Persisting KV on Miniflare');
   const mf = new Miniflare({
     script: `addEventListener("fetch", () => {});`,
@@ -16,3 +16,5 @@ export async function preview(binding: string, entries: any[]): Promise<void> {
   );
   console.log('KV persisted on Miniflare');
 }
+
+export default preview;

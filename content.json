@@ -1,0 +1,141 @@
+[
+  {
+    "key": "articles/deploying-remix-app-on-cloudflare-workers",
+    "value": "\n# Deploying Remix app on Cloudflare Workers\n\nOne of the core features about [Remix](https://remix.run/) is to allow deploying your app anywhere. The Remix team maintains several adapters for platforms such as Vercel, Architect, Netlify and also Cloudflare Workers.\n\nThe official adapter for Cloudflare Workers is not ready yet at the time this article is written. We will be showing you how to do it with minimal patches using [remix-worker-template](https://github.com/edmundhung/remix-worker-template) here.\n\n## Preparation\n\nIf you are new to Cloudflare Workers, be sure to [signup](https://dash.cloudflare.com/sign-up) first. No custom domain nor credit card is required. A default `workers.dev` domain will be set with a [free plan](https://developers.cloudflare.com/workers/platform/limits#worker-limits) available.\n\nThe environment should be set with node 14+. You should also set up the remix license following the instructions on the [dashboard](https://remix.run/dashboard).\n\n## Set it up\n\nTo begin, create a new repository using the [remix-worker-template](https://github.com/edmundhung/remix-worker-template/generate) and clone it to your computer. Install all the packages required by running:\n\n```sh\nnpm install\n```\n\nThe next step is to setup the wrangler cli. [Wrangler](https://github.com/cloudflare/wrangler) is an official tool from Cloudflare for managing your workers. It should be installed together in the previous step. Authenticate the cli using:\n\n```sh\nnpx wrangler login\n```\n\nThis will open the Cloudflare account login page. Click `Authorize Wrangler` and it is set.\n\n## Before deploying...\n\nThe workers environment is somehow tricky and is hard to verify locally. It is strongly suggest to test it first using the preview service before deploying:\n\n```sh\nnpx wrangler preview\n```\n\nThis will deploy your Remix app to a production-alike environment on Cloudflare. Be aware that usages on this environment counts towards your worker quota.\n\n## Take it live!\n\nIf everything works fine on the preview environment, then you are good to go. Simply run\n\n```sh\nnpx wrangler publish\n```\n\nAnd now your worker is released on production and should be accessible on the assigned `worker.dev` domain as stated on the cli result.\n",
+    "metadata": {
+      "title": "Deploying Remix app on Cloudflare Workers",
+      "description": "Step by step guide on how to deploy your remix app to Cloudflare Workers using the `remix-worker-template`",
+      "layout": "md:col-span-2",
+      "tags": ["Remix", "Cloudflare Workers"]
+    }
+  },
+  {
+    "key": "articles/setting-up-a-global-loading-indicator-in-remix",
+    "value": "\n# Setting up a global loading indicator in Remix\n\nGlobal loading indicator is a common UX pattern notifying your users something is still going on. It might not be the [best approach](https://www.lukew.com/ff/entry.asp?1797) these days but serves its purpose at a much lower cost.\n\nIn this tutorial, we will go through how to make a top loading progress bar using `tailwindcss`. Let's start by creating a dummy `<Progress />` component:\n\n```tsx Progress.tsx\nimport type { ReactElement } from 'react';\n\nfunction Progress(): ReactElement {\n  return (\n    <div className=\"fixed top-0 left-0 right-0 h-1 flex\">\n      <div\n        style={{ width: '30%' }}\n        className=\"bg-gradient-to-r from-green-400 via-blue-500 to-pink-500\"\n      />\n    </div>\n  );\n}\n\nexport default Progress;\n```\n\nIn this component, we have only two elements with one being the container which is fixed at the top and the inner div presenting the progress with a static 30% width. Next, we need to hook up some logic and make it move:\n\n```diff Progress.tsx\n@@ -1,10 +1,19 @@\n-import type { ReactElement } from 'react';\n+import type { ReactElement, MutableRefObject } from 'react';\n+import { useRef } from 'react';\n+\n+export function useProgress(): MutableRefObject<HTMLElement> {\n+  const el = useRef<HTMLElement>();\n+\n+  return el;\n+}\n\n function Progress(): ReactElement {\n+  const progress = useProgress();\n+\n   return (\n     <div className=\"fixed top-0 left-0 right-0 h-1 flex\">\n       <div\n-        style={{ width: '30%' }}\n+        ref={progress}\n         className=\"bg-gradient-to-r from-green-400 via-blue-500 to-pink-500\"\n       />\n     </div>\n```\n\nIt might be tempting to make the width a variable. But this is probably not an ideal solution as it adds unnecessary load to React which could block the other part of the UI. With this in mind, we will go with managing the element width by ourselves using `ref`.\n\n```diff Progress.tsx\n@@ -1,8 +1,22 @@\n import type { ReactElement, MutableRefObject } from 'react';\n-import { useRef } from 'react';\n+import { useEffect, useRef } from 'react';\n+import { usePendingLocation } from 'remix';\n\n export function useProgress(): MutableRefObject<HTMLElement> {\n   const el = useRef<HTMLElement>();\n+  const pendingLocation = usePendingLocation();\n+\n+  useEffect(() => {\n+    if (!pendingLocation || !el.current) {\n+      return;\n+    }\n+\n+    el.current.style.width = `0%`;\n+\n+    return () => {\n+      el.current.style.width = `100%`;\n+    };\n+  }, [pendingLocation]);\n\n   return el;\n }\n```\n\nUsually, you might need a query client which keeps track of all outgoing requests for you. However, this gets much simpler with Remix's route driven mechanism. It provides a built-in react hook named `usePendingLocation` which returns the next location whenever a transition is happening. This allows us simply subscribe to the `pendingLocation` value with useEffect and set the width accordingly.\n\n```diff Progress.tsx\n@@ -4,6 +4,7 @@\nimport { usePendingLocation } from 'remix';\n\n export function useProgress(): MutableRefObject<HTMLElement> {\n   const el = useRef<HTMLElement>();\n+  const timeout = useRef<NodeJS.Timeout>();\n   const pendingLocation = usePendingLocation();\n\n   useEffect(() => {\n@@ -11,10 +12,21 @@\nexport function useProgress(): MutableRefObject<HTMLElement> {\n       return;\n     }\n\n+    if (timeout.current) {\n+      clearTimeout(timeout.current);\n+    }\n+\n     el.current.style.width = `0%`;\n\n     return () => {\n       el.current.style.width = `100%`;\n+      timeout.current = setTimeout(() => {\n+        if (el.current?.style.width !== '100%') {\n+          return;\n+        }\n+\n+        el.current.style.width = ``;\n+      }, 200);\n     };\n   }, [pendingLocation]);\n```\n\nFor sure, the progress bar should be disappeared after a short time. Let's add a timeout to clear the width after 200ms.\n\n```diff Progress.tsx\n@@ -18,7 +18,26 @@\nexport function useProgress(): MutableRefObject<HTMLElement> {\n\n     el.current.style.width = `0%`;\n\n+    let updateWidth = (ms: number) => {\n+      timeout.current = setTimeout(() => {\n+        let width = parseFloat(el.current.style.width);\n+        let percent = !isNaN(width) ? 10 + 0.9 * width : 0;\n+\n+        el.current.style.width = `${percent}%`;\n+\n+        updateWidth(100);\n+      }, ms);\n+    };\n+\n+    updateWidth(300);\n+\n     return () => {\n+      clearTimeout(timeout.current);\n+\n+      if (el.current.style.width === `0%`) {\n+        return;\n+      }\n+\n       el.current.style.width = `100%`;\n       timeout.current = setTimeout(() => {\n         if (el.current?.style.width !== '100%') {\n```\n\nEven though we have no idea about the actual progress status, it is better to keep the progress moving as the page loads. To achieve this, we increase the progress slightly every 100ms with a smaller gap each time. There is also an initial delay of 300ms which avoid showing the progress in case the transition finish quickly.\n\n```diff Progress.tsx\n@@ -59,7 +59,7 @@\n  function Progress(): ReactElement {\n     <div className=\"fixed top-0 left-0 right-0 h-1 flex\">\n       <div\n         ref={progress}\n-        className=\"bg-gradient-to-r from-green-400 via-blue-500 to-pink-500\"\n+        className=\"transition-all ease-out bg-gradient-to-r from-green-400 via-blue-500 to-pink-500\"\n       />\n     </div>\n   );\n```\n\nOne final touch would be making use of the CSS transition property to make the animation smoother.\n\nReference: [Gist](https://gist.github.com/edmundhung/023e85cc731466bb5f4b350590ab30ea)\n",
+    "metadata": {
+      "title": "Setting up a global loading indicator in Remix",
+      "description": "Tutorial for making you own loading progress bar with tailwindcss",
+      "layout": "md:col-span-2",
+      "tags": ["React", "Remix"]
+    }
+  },
+  {
+    "key": "bookmarks/kentcdodds-testing-implementation-details",
+    "value": "",
+    "metadata": {
+      "title": "Testing Implementation Details",
+      "description": "Testing implementation details is a recipe for disaster. Why is that? And what does it even mean?\n",
+      "image": "https://res.cloudinary.com/kentcdodds-com/image/upload/v1625033409/kentcdodds.com/content/blog/testing-implementation-details/banner.jpg",
+      "url": "https://kentcdodds.com/blog/testing-implementation-details",
+      "tags": ["React", "Testing"]
+    }
+  },
+  {
+    "key": "bookmarks/pomb-us-build-your-own-react",
+    "value": "",
+    "metadata": {
+      "title": "Build your own React",
+      "description": "We are going to rewrite React from scratch. Step by step. Following the architecture from the real React code but without all the…",
+      "image": "https://pomb.us/static/b4694e6041953e3cb16f6a889f0cbc59/25036/card.png",
+      "url": "https://pomb.us/build-your-own-react/",
+      "tags": ["React"]
+    }
+  },
+  {
+    "key": "bookmarks/swyx-client-server-battle",
+    "value": "",
+    "metadata": {
+      "title": "Why do Webdevs keep trying to kill REST? : The epic client-server battle of our time ∊ swyx.io",
+      "description": "How I broke out of the tiresome REST vs GraphQL debate - by realizing that the real battle is between Smart Clients and Smart Servers!",
+      "image": "https://res.cloudinary.com/practicaldev/image/fetch/s--KTvRVE3w--/c_imagga_scale,f_auto,fl_progressive,h_420,q_auto,w_1000/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/uqbmd7yo8iwhmttuq0np.png",
+      "url": "https://www.swyx.io/client-server-battle/",
+      "layout": "md:col-span-2",
+      "tags": ["Architecture"]
+    }
+  },
+  {
+    "key": "projects/maildog",
+    "value": "",
+    "metadata": {
+      "image": "https://opengraph.githubassets.com/03258ec9fa25633105fc8d7109dddd0c22a5063b6a9bdf17e65e11c0d8b107c5/edmundhung/maildog",
+      "url": "https://github.com/edmundhung/maildog",
+      "layout": "md:col-span-2",
+      "tags": ["AWS", "CDK", "Email"]
+    }
+  },
+  {
+    "key": "projects/remix-sandbox",
+    "value": "",
+    "metadata": {
+      "image": "https://opengraph.githubassets.com/c55336a3e0a4daff4ca402c175add544713a31b56bccf27ce27f943f2e092b6a/edmundhung/remix-sandbox",
+      "url": "https://github.com/edmundhung/remix-sandbox",
+      "layout": "md:col-span-2",
+      "tags": ["Remix"]
+    }
+  },
+  {
+    "key": "projects/remix-worker-template",
+    "value": "",
+    "metadata": {
+      "image": "https://opengraph.githubassets.com/a360d8cbc26800008c2d624ec6d49e478d7291b181dea32d31f8d305d16387fa/edmundhung/remix-worker-template",
+      "url": "https://github.com/edmundhung/remix-worker-template",
+      "layout": "md:col-span-2",
+      "tags": ["Remix", "Cloudflare Workers"]
+    }
+  },
+  {
+    "key": "snapshots/bondi-beach",
+    "value": "",
+    "metadata": {
+      "title": "Bondi beach",
+      "image": "https://live.staticflickr.com/323/18602786413_b6cffec47c_b.jpg",
+      "url": "https://www.flickr.com/photos/eds-tudio/18602786413/",
+      "layout": "md:col-span-2",
+      "tags": ["Ricoh GR"]
+    }
+  },
+  {
+    "key": "snapshots/childhood",
+    "value": "",
+    "metadata": {
+      "title": "Childhood",
+      "image": "https://live.staticflickr.com/817/40632057564_445da4714e_b.jpg",
+      "url": "https://www.flickr.com/photos/eds-tudio/40632057564/",
+      "layout": "md:col-span-2",
+      "tags": ["Sony a7R3"]
+    }
+  },
+  {
+    "key": "snapshots/maple-tree",
+    "value": "",
+    "metadata": {
+      "title": "R0010215",
+      "image": "https://live.staticflickr.com/7462/15847757820_0caac81b6d_b.jpg",
+      "url": "https://www.flickr.com/photos/eds-tudio/15847757820/",
+      "layout": "md:col-span-2 md:row-span-2",
+      "tags": ["Ricoh GR"]
+    }
+  },
+  {
+    "key": "snapshots/quokka-at-rottnest-island",
+    "value": "",
+    "metadata": {
+      "title": "Quokka at Rottnest Island",
+      "image": "https://live.staticflickr.com/318/19197249056_00c930de23_b.jpg",
+      "url": "https://www.flickr.com/photos/eds-tudio/19197249056/",
+      "layout": "md:col-span-2",
+      "tags": ["Ricoh GR"]
+    }
+  },
+  {
+    "key": "snapshots/the-bridge",
+    "value": "",
+    "metadata": {
+      "title": "R0010065",
+      "image": "https://live.staticflickr.com/7570/15415381253_f44d5fd9f3_b.jpg",
+      "url": "https://www.flickr.com/photos/eds-tudio/15415381253/",
+      "layout": "md:col-span-2 md:row-span-2",
+      "tags": ["Ricoh GR"]
+    }
+  }
+]

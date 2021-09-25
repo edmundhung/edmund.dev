@@ -5,7 +5,6 @@
   "description": "Blog built with Remix, deployed to Cloudflare workers",
   "license": "",
   "scripts": {
-    "build:kv": "ts-node ./namespace/update.ts",
     "build:style": "postcss styles --base styles --dir app/styles --env production",
     "build:remix": "SERVER_PLATFORM=browser SERVER_FORMAT=esm remix build",
     "build:worker": "NODE_ENV=production ts-node ./build.ts",
@@ -15,12 +14,13 @@
     "dev:style": "postcss styles --base styles --dir app/styles -w",
     "dev:remix": "SERVER_PLATFORM=browser SERVER_FORMAT=esm remix dev",
     "dev:miniflare": "miniflare --build-command \"npx ts-node ./build.ts\" --kv-persist --disable-cache --watch",
-    "dev": "concurrently \"npm:dev:*\"",
+    "dev": "SOURCE=cypress/fixtures/content.json npm run kv:preview && concurrently \"npm:dev:*\"",
+    "kv:publish": "BINDING=Content MODE=publish ts-node ./namespace/index.ts",
+    "kv:preview": "rimraf .mf && BINDING=Content MODE=preview ts-node ./namespace/index.ts",
     "postinstall": "patch-package && remix setup",
     "prebuild": "npm run cleanup",
     "prepare": "husky install",
-    "prestart": "rimraf .mf",
-    "start": "MINIFLARE=1 npm run build:kv && miniflare --kv-persist --disable-cache"
+    "start": "SOURCE=content npm run kv:preview && miniflare --kv-persist --disable-cache"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.1.3",
