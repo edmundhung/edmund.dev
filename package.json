@@ -14,7 +14,7 @@
     "dev:style": "postcss styles --base styles --dir app/styles -w",
     "dev:remix": "SERVER_PLATFORM=browser SERVER_FORMAT=esm remix dev",
     "dev:miniflare": "miniflare --build-command \"npx ts-node ./build.ts\" --kv-persist --disable-cache --watch",
-    "dev": "concurrently \"npm:dev:*\"",
+    "dev": "SOURCE=cypress/fixtures/content.json npm run kv:preview && concurrently \"npm:dev:*\"",
     "test:miniflare": "npm run predev && miniflare --kv-persist --disable-cache",
     "test:cypress": "cypress run",
     "test": "start-server-and-test test:miniflare http-get://localhost:8787 test:cypress",
@@ -24,8 +24,7 @@
     "prebuild": "npm run cleanup",
     "predev": "SOURCE=cypress/fixtures/content.json npm run kv:preview",
     "prepare": "husky install",
-    "prestart": "SOURCE=content npm run kv:preview",
-    "start": "miniflare --kv-persist --disable-cache"
+    "start": "SOURCE=content npm run kv:preview && miniflare --kv-persist --disable-cache"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.1.3",
