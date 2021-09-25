@@ -9,7 +9,7 @@ import type {
 import { useRouteData, json } from 'remix';
 import SyntaxHighlighter from '~/components/SyntaxHighlighter';
 import Hyperlink from '~/components/Hyperlink';
-import { deriveMetaFromMetadata, enhanceMeta } from '~/meta';
+import { deriveMetaFromMetadata, enhanceMeta } from '~/utils/meta';
 import stylesUrl from '~/styles/code.css';
 
 export let links: LinksFunction = () => {

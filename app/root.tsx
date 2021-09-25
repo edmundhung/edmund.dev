@@ -3,6 +3,7 @@ import type { LinksFunction } from 'remix';
 import { Meta, Links, Scripts, useRouteData, LiveReload } from 'remix';
 import Progress from '~/components/Progress';
 import stylesUrl from '~/styles/global.css';
+import { useScrollRestoration } from '~/utils/scroll';
 
 export let links: LinksFunction = () => {
   return [{ rel: 'stylesheet', href: stylesUrl }];
@@ -55,6 +56,8 @@ function Document({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   let data = useRouteData();
+
+  useScrollRestoration();
 
   return (
     <Document>

@@ -3,7 +3,7 @@ import { json, useRouteData } from 'remix';
 import Masonry from '~/components/Masonry';
 import Card from '~/components/Card';
 import type { Entry } from '~/types';
-import { enhanceMeta } from '~/meta';
+import { enhanceMeta } from '~/utils/meta';
 
 export let headers: HeadersFunction = ({ loaderHeaders }) => {
   return {
