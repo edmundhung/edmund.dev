@@ -15,5 +15,8 @@ worker.js
 # miniflare
 /.mf
 
+# cypress
+/cypress/videos
+
 # Misc
 .DS_Store
