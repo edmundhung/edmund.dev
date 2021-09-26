@@ -1,7 +1,6 @@
 import * as fs from 'fs/promises';
 import matter from 'gray-matter';
 import { getLinkPreview } from 'link-preview-js';
-import { list } from 'postcss';
 
 async function getPreviewMetadata(url: string): Promise<any> {
   if (!url) {
@@ -58,16 +57,10 @@ async function parseDirectory(source: string, path: string): Promise<any[]> {
   return list;
 }
 
-async function generate(source: string, path = source): Promise<any[]> {
-  const stat = await fs.lstat(source);
+async function generate(source: string, path = source): Promise<void> {
+  const entries = await parseDirectory(source, path);
 
-  if (stat.isFile()) {
-    const content = await fs.readFile(source);
-
-    return JSON.parse(content.toString('utf8'));
-  }
-
-  return parseDirectory(source, path);
+  process.stdout.write(JSON.stringify(entries, null, 2));
 }
 
 export default generate;

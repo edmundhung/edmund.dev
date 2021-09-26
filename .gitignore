@@ -15,6 +15,9 @@ worker.js
 # miniflare
 /.mf
 
+# wkv
+/content.json
+
 # cypress
 /cypress/videos
 
