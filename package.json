@@ -55,6 +55,7 @@
     "@types/rimraf": "^3.0.2",
     "autoprefixer": "^10.3.6",
     "concurrently": "^6.2.1",
+    "cssnano": "^5.0.8",
     "cypress": "^8.5.0",
     "esbuild": "^0.13.2",
     "husky": "^7.0.2",
