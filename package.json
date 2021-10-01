@@ -14,7 +14,7 @@
     "dev:style": "postcss styles --base styles --dir app/styles -w",
     "dev:remix": "SERVER_FORMAT=esm remix dev",
     "dev:miniflare": "miniflare --build-command \"npx ts-node ./build.ts\" --kv-persist --disable-cache --watch",
-    "dev": "SOURCE=cypress/fixtures/content.json npm run kv:preview && concurrently \"npm:dev:*\"",
+    "dev": "concurrently \"npm:dev:*\"",
     "test:miniflare": "npm run predev && miniflare --kv-persist --disable-cache",
     "test:cypress": "cypress run",
     "test": "start-server-and-test test:miniflare http-get://localhost:8787 test:cypress",
