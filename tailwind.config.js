@@ -16,13 +16,8 @@ module.exports = {
       'md:row-span-3',
     ],
   },
-  darkMode: false, // or 'media' or 'class'
+  darkMode: false,
   theme: {
-    // listStyleType: {
-    //   disc: 'disclosure-open',
-    //   decimal: 'decimal-leading-zero',
-    // },
-    // Some useful comment
     extend: {
       fontFamily: {
         'open-sans': ['Open Sans', 'sans-serif'],
