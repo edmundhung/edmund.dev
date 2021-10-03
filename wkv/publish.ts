@@ -1,9 +1,10 @@
 import TOML from '@iarna/toml';
 import * as fs from 'fs/promises';
+import fetch from 'node-fetch';
 
 async function publish(source: string, binding: string): Promise<void> {
   console.log('[wkv] Reading wrangler.toml...');
-  const wranglerTOML = await fs.readFile('../wrangler.toml', 'utf-8');
+  const wranglerTOML = await fs.readFile('./wrangler.toml', 'utf-8');
   const config = TOML.parse(wranglerTOML);
   const accountId = config['account_id'];
   const kvNamespaces = (config['kv_namespaces'] ?? []) as any[];
@@ -16,8 +17,6 @@ async function publish(source: string, binding: string): Promise<void> {
   );
 
   const content = await fs.readFile(source, 'utf-8');
-  const fetch = (url: string, init?: any) =>
-    import('node-fetch').then(({ default: fetch }) => fetch(url, init));
   const response = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/bulk`,
     {
