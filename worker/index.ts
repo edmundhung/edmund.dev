@@ -36,6 +36,7 @@ async function handleAsset(event: FetchEvent): Promise<Response> {
 }
 
 const orders = [
+  'bookmarks/dan-abramov-goodbye-clean-code',
   'articles/setting-up-a-global-loading-indicator-in-remix',
   'bookmarks/swyx-client-server-battle',
   'snapshots/the-bridge',
