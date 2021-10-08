@@ -6,7 +6,7 @@ import type {
   LinksFunction,
   LoaderFunction,
 } from 'remix';
-import { useRouteData, json } from 'remix';
+import { useLoaderData, json } from 'remix';
 import SyntaxHighlighter from '~/components/SyntaxHighlighter';
 import Hyperlink from '~/components/Hyperlink';
 import { deriveMetaFromMetadata, enhanceMeta } from '~/utils/meta';
@@ -47,7 +47,7 @@ export let loader: LoaderFunction = async ({ params, context }) => {
 };
 
 export default function ArticleSlug() {
-  const { content } = useRouteData();
+  const { content } = useLoaderData();
 
   return (
     <ReactMarkdown

@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'remix';
 
 interface HyperlinkProps {
   to: string;
@@ -27,7 +27,7 @@ function Hyperlink({ to, className, children }: HyperlinkProps): ReactElement {
   }
 
   return (
-    <Link className={className} to={to}>
+    <Link className={className} to={to} prefetch="intent">
       {children}
     </Link>
   );

@@ -1,6 +1,15 @@
-import { Link, NavLink, Outlet } from 'react-router-dom';
 import type { LinksFunction } from 'remix';
-import { Meta, Links, Scripts, useRouteData, LiveReload } from 'remix';
+import {
+  Meta,
+  Links,
+  Scripts,
+  useCatch,
+  useLoaderData,
+  LiveReload,
+  Link,
+  NavLink,
+  Outlet,
+} from 'remix';
 import Progress from '~/components/Progress';
 import stylesUrl from '~/styles/global.css';
 import { useScrollRestoration } from '~/utils/scroll';
@@ -55,23 +64,23 @@ function Document({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  let data = useRouteData();
+  let data = useLoaderData();
 
-  useScrollRestoration();
+  // useScrollRestoration();
 
   return (
     <Document>
       <Progress />
       <div className="min-h-screen grid md:grid-cols-layout auto-rows-min bg-primary font-open-sans text-primary py-4 md:py-0 md:pl-4 gap-4">
         <header className="px-4 md:px-0 flex flex-row md:flex-col items-center">
-          <Link className="block no-underline" to="/">
+          <Link className="block no-underline" to="/" prefetch="intent">
             <img
               className="w-12 md:w-24 lg:w-32 md:py-4"
               src="/assets/logo.svg"
               alt="logo"
             />
           </Link>
-          <Link className="block no-underline" to="/">
+          <Link className="block no-underline" to="/" prefetch="intent">
             <h1 className="p-4 md:p-0 uppercase">Edmund.dev</h1>
           </Link>
         </header>
@@ -80,30 +89,46 @@ export default function App() {
         </main>
         <nav className="sticky bottom-0 md:static font-light text-center text-xs md:text-base bg-white md:bg-transparent flex flex-row md:flex-col items-center shadow md:shadow-none">
           <NavLink
-            className="flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline"
-            activeClassName="font-normal"
+            className={isActive =>
+              `flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline ${
+                isActive ? 'font-normal' : ''
+              }`.trim()
+            }
             to="/articles"
+            prefetch="intent"
           >
             Articles
           </NavLink>
           <NavLink
-            className="flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline"
-            activeClassName="font-normal"
+            className={isActive =>
+              `flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline ${
+                isActive ? 'font-normal' : ''
+              }`.trim()
+            }
             to="/bookmarks"
+            prefetch="intent"
           >
             Bookmarks
           </NavLink>
           <NavLink
-            className="flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline"
-            activeClassName="font-normal"
+            className={isActive =>
+              `flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline ${
+                isActive ? 'font-normal' : ''
+              }`.trim()
+            }
             to="/projects"
+            prefetch="intent"
           >
             Projects
           </NavLink>
           <NavLink
-            className="flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline"
-            activeClassName="font-normal"
+            className={isActive =>
+              `flex-1 md:flex-none block no-underline py-4 md:py-1 md:hover:underline ${
+                isActive ? 'font-normal' : ''
+              }`.trim()
+            }
             to="/snapshots"
+            prefetch="intent"
           >
             Snapshots
           </NavLink>
@@ -176,6 +201,27 @@ export default function App() {
       </div>
     </Document>
   );
+}
+
+export function CatchBoundary() {
+  let caught = useCatch();
+
+  switch (caught.status) {
+    case 404:
+      return (
+        <Document>
+          <div className="min-h-screen bg-primary font-open-sans text-primary py-4 flex flex-col justify-center items-center">
+            <img className="w-32 py-4" src="/assets/logo.svg" alt="logo" />
+            <p>Ooops!</p>
+            <h1 className="p-4">{`${caught.status} ${caught.statusText}`}</h1>
+          </div>
+        </Document>
+      );
+    default:
+      throw new Error(
+        `Unexpected caught response with status: ${caught.status}`,
+      );
+  }
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {

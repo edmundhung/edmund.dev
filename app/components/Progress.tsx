@@ -1,14 +1,14 @@
 import type { ReactElement, MutableRefObject } from 'react';
 import { useEffect, useRef } from 'react';
-import { usePendingLocation } from 'remix';
+import { useTransition } from 'remix';
 
 export function useProgress(): MutableRefObject<HTMLElement> {
   const el = useRef<HTMLElement>();
   const timeout = useRef<NodeJS.Timeout>();
-  const pendingLocation = usePendingLocation();
+  const { location } = useTransition();
 
   useEffect(() => {
-    if (!pendingLocation || !el.current) {
+    if (!location || !el.current) {
       return;
     }
 
@@ -47,7 +47,7 @@ export function useProgress(): MutableRefObject<HTMLElement> {
         el.current.style.width = ``;
       }, 200);
     };
-  }, [pendingLocation]);
+  }, [location]);
 
   return el;
 }

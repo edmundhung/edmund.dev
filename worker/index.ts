@@ -3,8 +3,7 @@ import {
   MethodNotAllowedError,
   NotFoundError,
 } from '@cloudflare/kv-asset-handler';
-import type { ServerBuild } from 'remix';
-import { createRequestHandler } from './remix-cloudflare-workers';
+import { createRequestHandler } from '@remix-run/cloudflare-workers';
 import * as build from '../build/index.js';
 
 async function handleAsset(event: FetchEvent): Promise<Response> {
@@ -90,7 +89,7 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
       response = await cache.match(event.request);
 
       if (!response) {
-        response = await handleRequest(event.request);
+        response = await handleRequest(event);
         event.waitUntil(cache.put(event.request, response.clone()));
       }
     }

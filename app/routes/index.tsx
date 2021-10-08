@@ -1,5 +1,5 @@
 import type { HeadersFunction, LoaderFunction, MetaFunction } from 'remix';
-import { json, useRouteData } from 'remix';
+import { json, useLoaderData } from 'remix';
 import Masonry from '~/components/Masonry';
 import Card from '~/components/Card';
 import type { Entry } from '~/types';
@@ -37,7 +37,7 @@ export let loader: LoaderFunction = async ({ params, context }) => {
 };
 
 export default function Index() {
-  const data = useRouteData<{ entries: Entry[] }>();
+  const data = useLoaderData<{ entries: Entry[] }>();
 
   return (
     <Masonry>
