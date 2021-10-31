@@ -1,3 +1,4 @@
+import type { Article, Query } from '@workaholic/core';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import type {
@@ -32,14 +33,11 @@ export let meta: MetaFunction = ({ data, location }) => {
 };
 
 export let loader: LoaderFunction = async ({ params, context }) => {
-  const [content, metadata] = await context.getContent('articles', params.slug);
-  const data = {
-    content,
-    metadata,
-  };
+  const { query } = context as { query: Query };
+  const article = await query('data', `articles/${params.slug}`);
 
-  return json(data, {
-    status: content !== null ? 200 : 404,
+  return json(article, {
+    status: article.content !== null ? 200 : 404,
     headers: {
       'Cache-Control': 'public, max-age=3600',
     },
@@ -47,7 +45,7 @@ export let loader: LoaderFunction = async ({ params, context }) => {
 };
 
 export default function ArticleSlug() {
-  const { content } = useLoaderData();
+  const { content } = useLoaderData<Article>();
 
   return (
     <ReactMarkdown

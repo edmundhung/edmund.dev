@@ -19,4 +19,18 @@ command = "npm run build"
 watch_dir = "app"
 
 [build.upload]
-format="service-worker"
+format = "service-worker"
+
+[workaholic]
+source = "content"
+binding = "Content"
+
+[[workaholic.plugins]]
+source = "@workaholic/core/src/plugins/plugin-frontmatter"
+
+[[workaholic.plugins]]
+source = "./workaholic/preview.ts"
+buildOptions = { key = "url" }
+
+[[workaholic.plugins]]
+source = "./workaholic/list.ts"

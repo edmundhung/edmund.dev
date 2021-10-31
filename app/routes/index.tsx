@@ -1,3 +1,4 @@
+import type { Query, Reference } from '@workaholic/core';
 import type { HeadersFunction, LoaderFunction, MetaFunction } from 'remix';
 import { json, useLoaderData } from 'remix';
 import Masonry from '~/components/Masonry';
@@ -23,26 +24,23 @@ export let headers: HeadersFunction = ({ loaderHeaders }) => {
 };
 
 export let loader: LoaderFunction = async ({ params, context }) => {
-  const [entries] = await context.listContent();
+  const { query } = context as { query: Query };
+  const references = await query('list', '', { includeSubfolders: true });
 
-  return json(
-    { entries },
-    {
-      status: entries.length > 0 ? 200 : 404,
-      headers: {
-        'Cache-Control': 'public, max-age=3600',
-      },
+  return json(references ?? [], {
+    headers: {
+      'Cache-Control': 'public, max-age=3600',
     },
-  );
+  });
 };
 
 export default function Index() {
-  const data = useLoaderData<{ entries: Entry[] }>();
+  const references = useLoaderData<Reference[]>();
 
   return (
     <Masonry>
-      {data.entries.map(({ name, metadata }) => (
-        <Card key={name} name={name} metadata={metadata} />
+      {references.map(({ slug, metadata }) => (
+        <Card key={slug} name={slug} metadata={metadata} />
       ))}
     </Masonry>
   );

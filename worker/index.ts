@@ -4,6 +4,7 @@ import {
   NotFoundError,
 } from '@cloudflare/kv-asset-handler';
 import { createRequestHandler } from '@remix-run/cloudflare-workers';
+import query from './query';
 import * as build from '../build/index.js';
 
 async function handleAsset(event: FetchEvent): Promise<Response> {
@@ -34,47 +35,12 @@ async function handleAsset(event: FetchEvent): Promise<Response> {
   }
 }
 
-const orders = [
-  'bookmarks/dan-abramov-goodbye-clean-code',
-  'articles/setting-up-a-global-loading-indicator-in-remix',
-  'bookmarks/swyx-client-server-battle',
-  'snapshots/the-bridge',
-  'projects/remix-sandbox',
-  'articles/deploying-remix-app-on-cloudflare-workers',
-  'snapshots/maple-tree',
-  'projects/remix-worker-template',
-  'snapshots/childhood',
-  'bookmarks/kentcdodds-testing-implementation-details',
-  'projects/maildog',
-  'snapshots/quokka-at-rottnest-island',
-  'bookmarks/pomb-us-build-your-own-react',
-  'snapshots/bondi-beach',
-];
-
 function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
   const handleRequest = createRequestHandler({
     build,
     getLoadContext() {
       return {
-        async listContent(category?: string, cursor?: string) {
-          const result = await Content.list({
-            prefix: category ? `${category}/` : '',
-            cursor,
-          });
-
-          return [
-            result.keys.sort(
-              (prev, next) =>
-                orders.indexOf(prev.name) - orders.indexOf(next.name),
-            ),
-            !result.list_complete ? result.cursor : null,
-          ];
-        },
-        async getContent(category: string, slug: string) {
-          const content = await Content.getWithMetadata(`${category}/${slug}`);
-
-          return [content.value, content.metadata];
-        },
+        query,
       };
     },
   });
