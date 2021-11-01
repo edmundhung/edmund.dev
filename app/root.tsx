@@ -66,7 +66,7 @@ function Document({ children }: { children: React.ReactNode }) {
 export default function App() {
   let data = useLoaderData();
 
-  // useScrollRestoration();
+  useScrollRestoration();
 
   return (
     <Document>
