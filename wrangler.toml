@@ -34,3 +34,6 @@ buildOptions = { key = "url" }
 
 [[workaholic.plugins]]
 source = "./workaholic/list.ts"
+
+[[workaholic.plugins]]
+source = "./workaholic/tags.ts"

@@ -1,5 +1,9 @@
 import type { Entry, Build, Query } from '@workaholic/core';
 
+function normalise(tag: string): string {
+  return tag.toLowerCase().replace(/\s/g, '-');
+}
+
 export async function setupBuild(options?: { key: string }): Build {
   return {
     namespace: 'tags',
@@ -18,7 +22,7 @@ export async function setupBuild(options?: { key: string }): Build {
           metadata: entry.metadata,
         };
 
-        for (const tag of [].concat(tags)) {
+        for (const tag of [].concat(tags).map(normalise)) {
           dictionary[tag] = [].concat(dictionary[tag] ?? [], reference);
         }
       }
@@ -38,7 +42,7 @@ export function setupQuery(): Query {
     namespace: 'tags',
     handlerFactory: kvNamespace => async (tag: string) => {
       const dictionary = await kvNamespace.get(`tags/`, 'json');
-      const references = dictionary[tag] ?? [];
+      const references = dictionary[normalise(tag)] ?? [];
 
       return references;
     },

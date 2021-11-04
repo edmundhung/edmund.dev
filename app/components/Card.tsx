@@ -1,4 +1,5 @@
 import { ReactElement } from 'react';
+import { Link } from 'remix';
 import Hyperlink from '~/components/Hyperlink';
 
 interface CardProps {
@@ -46,9 +47,14 @@ function Card({ name, metadata }: CardProps): ReactElement {
         <footer className="p-4 text-sm border-t">
           <div className="whitespace-nowrap overflow-hidden overflow-ellipsis divide-x -mx-2">
             {metadata.tags.map(tag => (
-              <span key={tag} className="px-2">
+              <Link
+                key={tag}
+                className="px-2 hover:underline"
+                to={`/search?tag=${encodeURIComponent(tag)}`}
+                prefetch="intent"
+              >
                 {tag}
-              </span>
+              </Link>
             ))}
           </div>
         </footer>
