@@ -12,6 +12,7 @@ import SyntaxHighlighter from '~/components/SyntaxHighlighter';
 import Hyperlink from '~/components/Hyperlink';
 import { deriveMetaFromMetadata, enhanceMeta } from '~/utils/meta';
 import stylesUrl from '~/styles/code.css';
+import type { Context, WithContext } from '~/types';
 
 export let links: LinksFunction = () => {
   return [{ rel: 'stylesheet', href: stylesUrl }];
@@ -32,9 +33,11 @@ export let meta: MetaFunction = ({ data, location }) => {
   });
 };
 
-export let loader: LoaderFunction = async ({ params, context }) => {
-  const { query } = context as { query: Query };
-  const article = await query('data', `articles/${params.slug}`);
+export let loader: WithContext<LoaderFunction, Context, 'slug'> = async ({
+  params,
+  context,
+}) => {
+  const article = await context.query('data', `articles/${params.slug}`);
 
   return json(article, {
     status: article.content !== null ? 200 : 404,

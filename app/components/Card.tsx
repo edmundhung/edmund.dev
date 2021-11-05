@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 import { Link } from 'remix';
 import Hyperlink from '~/components/Hyperlink';
+import type { Metadata } from '~/types';
 
 interface CardProps {
   name: string;

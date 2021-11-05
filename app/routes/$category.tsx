@@ -1,9 +1,8 @@
-import type { Query, Reference } from '@workaholic/core';
 import type { HeadersFunction, MetaFunction, LoaderFunction } from 'remix';
 import { json, useLoaderData } from 'remix';
 import Masonry from '~/components/Masonry';
 import Card from '~/components/Card';
-import type { Entry } from '~/types';
+import type { Context, Entry, WithContext } from '~/types';
 import { enhanceMeta } from '~/utils/meta';
 
 export let headers: HeadersFunction = ({ loaderHeaders }) => {
@@ -25,11 +24,16 @@ export let meta: MetaFunction = ({ params, location }) => {
   });
 };
 
-export let loader: LoaderFunction = async ({ params, context }) => {
-  const { query } = context as { query: Query };
-  const references = await query('list', params.category);
+export let loader: WithContext<LoaderFunction, Context, 'category'> = async ({
+  params,
+  context,
+}) => {
+  const references = await context.query('list', params.category);
+  const data = {
+    references: references ?? [],
+  };
 
-  return json(references ?? [], {
+  return json(data, {
     headers: {
       'Cache-Control': 'public, max-age=3600',
     },
@@ -37,7 +41,7 @@ export let loader: LoaderFunction = async ({ params, context }) => {
 };
 
 export default function Category() {
-  const references = useLoaderData<Reference[]>();
+  const { references } = useLoaderData();
 
   return (
     <Masonry>

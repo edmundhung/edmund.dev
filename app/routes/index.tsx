@@ -3,7 +3,7 @@ import type { HeadersFunction, LoaderFunction, MetaFunction } from 'remix';
 import { json, useLoaderData } from 'remix';
 import Masonry from '~/components/Masonry';
 import Card from '~/components/Card';
-import type { Entry } from '~/types';
+import type { Context, Entry, WithContext } from '~/types';
 import { enhanceMeta } from '~/utils/meta';
 
 export let meta: MetaFunction = ({ location }) => {
@@ -23,9 +23,12 @@ export let headers: HeadersFunction = ({ loaderHeaders }) => {
   };
 };
 
-export let loader: LoaderFunction = async ({ params, context }) => {
-  const { query } = context as { query: Query };
-  const references = await query('list', '', { includeSubfolders: true });
+export let loader: WithContext<LoaderFunction, Context> = async ({
+  context,
+}) => {
+  const references = await context.query('list', '', {
+    includeSubfolders: true,
+  });
 
   return json(references ?? [], {
     headers: {

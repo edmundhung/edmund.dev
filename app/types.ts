@@ -1,14 +1,25 @@
-export interface Metadata {
-  url?: string;
-  layout?: string;
-  title: string;
-  description: string;
-  image?: string;
-  author?: string;
-  tags?: string[];
+import type { LoaderFunction } from 'remix';
+import type { Params } from 'react-router-dom';
+import type { Query } from '@workaholic/core';
+
+export type { Entry, Metadata } from '@workaholic/core';
+
+export interface Context {
+  query: Query;
 }
 
-export interface Entry {
-  name: string;
-  metadata: Metadata;
+export type FirstParameter<T> = Parameters<T>[0];
+
+export interface LoaderArguments<Context, Key extends string = string>
+  extends FirstParameter<LoaderFunction> {
+  context: Context;
+  params: Params<Key>;
+}
+
+export interface WithContext<
+  T extends LoaderFunction,
+  Context extends any,
+  Key = string,
+> {
+  (args: LoaderArguments<Context, Key>): ReturnType<T>;
 }
