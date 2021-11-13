@@ -23,7 +23,7 @@ async function getPreviewMetadata(url: string): Promise<any> {
   }
 }
 
-export async function setupBuild(options?: { key: string }): Build {
+export function setupBuild(options?: { key: string }): Build {
   return {
     async transform(entry: Entry): Promise<Entry> {
       if (typeof entry.metadata?.[options?.key] === 'undefined') {

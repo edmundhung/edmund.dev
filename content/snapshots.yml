@@ -1,0 +1,20 @@
+bondi-beach:
+  url: https://www.flickr.com/photos/eds-tudio/18602786413/
+  layout: md:col-span-2
+  tags: [Ricoh GR]
+childhood:
+  url: https://www.flickr.com/photos/eds-tudio/40632057564/
+  layout: md:col-span-2
+  tags: [Sony a7R3]
+maple-tree:
+  url: https://www.flickr.com/photos/eds-tudio/15847757820/
+  layout: md:col-span-2 md:row-span-2
+  tags: [Ricoh GR]
+quokka-at-rottnest-island:
+  url: https://www.flickr.com/photos/eds-tudio/19197249056/
+  layout: md:col-span-2
+  tags: [Ricoh GR]
+the-bridge:
+  url: https://www.flickr.com/photos/eds-tudio/15415381253/
+  layout: md:col-span-2 md:row-span-2
+  tags: [Ricoh GR]

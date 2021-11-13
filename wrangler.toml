@@ -29,11 +29,16 @@ binding = "Content"
 source = "@workaholic/core/src/plugins/plugin-frontmatter"
 
 [[workaholic.plugins]]
+source = "@workaholic/core/src/plugins/plugin-yaml"
+
+[[workaholic.plugins]]
+source = "./workaholic/bookmarks.ts"
+
+[[workaholic.plugins]]
 source = "./workaholic/preview.ts"
-buildOptions = { key = "url" }
+options = { key = "url" }
 
-[[workaholic.plugins]]
-source = "./workaholic/list.ts"
-
-[[workaholic.plugins]]
-source = "./workaholic/tags.ts"
+[workaholic.output]
+data = { source = "./workaholic/data.ts" }
+list = { source = "./workaholic/list.ts" }
+tags = { source = "./workaholic/tags.ts" }

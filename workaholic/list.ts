@@ -24,7 +24,11 @@ export function setupBuild(): Build {
   return {
     ...build,
     async index(entries: Entry[]): Promise<Entry[]> {
-      const list = await build.index(entries);
+      const list = await build.index(
+        entries
+          .filter(entry => entry.key.endsWith('.md'))
+          .map(entry => ({ ...entry, key: entry.key.replace(/.md$/, '') })),
+      );
       const result = list.map(entry => {
         const references = JSON.parse(entry.value);
 

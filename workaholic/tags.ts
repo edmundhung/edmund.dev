@@ -1,12 +1,15 @@
-import type { Entry, Build, Query } from '@workaholic/core';
+import type {
+  Entry,
+  SetupBuildFunction,
+  SetupQueryFunction,
+} from '@workaholic/core';
 
 function normalise(tag: string): string {
   return tag.toLowerCase().replace(/\s/g, '-');
 }
 
-export async function setupBuild(options?: { key: string }): Build {
+export const setupBuild: SetupBuildFunction = (options?: { key: string }) => {
   return {
-    namespace: 'tags',
     async index(entries: Entry[]): Entry[] {
       const dictionary = {};
 
@@ -35,16 +38,13 @@ export async function setupBuild(options?: { key: string }): Build {
       ];
     },
   };
-}
+};
 
-export function setupQuery(): Query {
-  return {
-    namespace: 'tags',
-    handlerFactory: kvNamespace => async (tag: string) => {
-      const dictionary = await kvNamespace.get(`tags/`, 'json');
-      const references = dictionary[normalise(tag)] ?? [];
+export const setupQuery: SetupQueryFunction = () => {
+  return kvNamespace => async (namespace: string, tag: string) => {
+    const dictionary = await kvNamespace.get(`${namespace}/`, 'json');
+    const references = dictionary[normalise(tag)] ?? [];
 
-      return references;
-    },
+    return references;
   };
-}
+};
