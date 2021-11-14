@@ -45,6 +45,29 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
     },
   });
 
+  const handleImage = async (request: Request): Response => {
+    const url = new URL(request.url);
+
+    if (!url.pathname.startsWith('/images/')) {
+      return null;
+    }
+
+    const slug = url.pathname.replace(/^\/images\//, '');
+    const accept = request.headers.get('accept');
+    const image = await query('images', slug, { accept });
+
+    if (!image) {
+      return null;
+    }
+
+    return new Response(image.data, {
+      headers: {
+        'content-type': image.mimeType,
+        'cache-control': 'public, max-age=3600',
+      },
+    });
+  };
+
   const handleEvent = async (
     event: FetchEvent,
     cache: Cache,
@@ -55,7 +78,12 @@ function createEventHandler(build: ServerBuild): (event: FetchEvent) => void {
       response = await cache.match(event.request);
 
       if (!response) {
-        response = await handleRequest(event);
+        response = await handleImage(event.request);
+
+        if (!response) {
+          response = await handleRequest(event);
+        }
+
         event.waitUntil(cache.put(event.request, response.clone()));
       }
     }

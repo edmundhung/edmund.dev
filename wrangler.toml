@@ -38,7 +38,11 @@ source = "./workaholic/bookmarks.ts"
 source = "./workaholic/preview.ts"
 options = { key = "url" }
 
+[[workaholic.plugins]]
+source = "./workaholic/images.ts"
+
 [workaholic.output]
 data = { source = "./workaholic/data.ts" }
 list = { source = "./workaholic/list.ts" }
 tags = { source = "./workaholic/tags.ts" }
+images = { source = "./workaholic/images.ts" }
