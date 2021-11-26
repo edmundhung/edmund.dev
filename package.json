@@ -1,19 +1,19 @@
 {
   "private": true,
   "name": "@edmundhung/blog",
-  "main": "./worker.js",
+  "main": "./dist/worker.mjs",
   "description": "Blog built with Remix, deployed to Cloudflare workers",
   "license": "",
   "scripts": {
     "build:style": "postcss styles --base styles --dir app/styles --env production",
     "build:remix": "SERVER_FORMAT=esm remix build",
-    "build:worker": "NODE_ENV=production ts-node ./build.ts",
+    "build:worker": "NODE_ENV=production VERSION=$(git rev-parse HEAD) node ./scripts/build.mjs",
     "build": "npm run build:style && npm run build:remix && npm run build:worker",
-    "cleanup": "rimraf .cache ./build ./public/build worker.js",
+    "cleanup": "rimraf .cache ./build ./dist ./public/build",
     "dev:cypress": "cypress open",
     "dev:style": "postcss styles --base styles --dir app/styles -w",
     "dev:remix": "SERVER_FORMAT=esm remix watch",
-    "dev:miniflare": "miniflare --build-command \"npx ts-node ./build.ts\" --kv-persist --disable-cache --watch",
+    "dev:miniflare": "miniflare --build-command \"node ./scripts/build.mjs\" --kv-persist --disable-cache --watch",
     "dev": "concurrently \"npm:dev:*\"",
     "test:miniflare": "npm run predev && miniflare --kv-persist --disable-cache",
     "test:cypress": "cypress run",
@@ -67,7 +67,6 @@
     "prettier": "^2.4.1",
     "start-server-and-test": "^1.14.0",
     "tailwindcss": "^2.2.19",
-    "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   },
   "engines": {
