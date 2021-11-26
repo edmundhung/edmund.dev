@@ -8,11 +8,11 @@ import {
   LiveReload,
   Link,
   NavLink,
+  ScrollRestoration,
   Outlet,
 } from 'remix';
 import Progress from '~/components/Progress';
 import stylesUrl from '~/styles/global.css';
-import { useScrollRestoration } from '~/utils/scroll';
 
 export let links: LinksFunction = () => {
   return [{ rel: 'stylesheet', href: stylesUrl }];
@@ -55,7 +55,7 @@ function Document({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-
+        <ScrollRestoration />
         <Scripts />
         {process.env.NODE_ENV === 'development' && <LiveReload />}
       </body>
@@ -65,8 +65,6 @@ function Document({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   let data = useLoaderData();
-
-  useScrollRestoration();
 
   return (
     <Document>

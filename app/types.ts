@@ -1,5 +1,4 @@
-import type { LoaderFunction } from 'remix';
-import type { Params } from 'react-router-dom';
+import type { LoaderFunction, Params } from 'remix';
 import type { Query } from '@workaholic/core';
 
 export type { Entry, Metadata } from '@workaholic/core';
