@@ -22,16 +22,12 @@ jobs:
             ${{ runner.OS }}-
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Setup Remix auth token
-        run: npm config set //npm.remix.run/:_authToken $REMIX_TOKEN
-        env:
-          REMIX_TOKEN: ${{ secrets.REMIX_TOKEN }}
       - name: Install dependencies
         run: npm ci
       - name: Run tests
         uses: cypress-io/github-action@v2
         with:
-          start: npm run test:miniflare
+          start: npm start
       - name: Publish
         run: npx wrangler publish
         env:
