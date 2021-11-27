@@ -58,8 +58,8 @@ let setupQuery: SetupQueryFunction = () => {
           return references;
         }
         case 'tags': {
-          const dictionary = await kvNamespace.get(`${namespace}/`, 'json');
-          const references = dictionary[normalise(tag)] ?? [];
+          const dictionary = await query(namespace, 'data', { type: 'json' });
+          const references = dictionary[normalise(slug)] ?? [];
 
           return references;
         }

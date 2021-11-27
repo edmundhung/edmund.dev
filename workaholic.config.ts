@@ -156,7 +156,7 @@ export let setupBuild: SetupBuildFunction = () => {
 
     return [
       {
-        key: '',
+        key: 'data',
         value: JSON.stringify(dictionary),
       },
     ];
