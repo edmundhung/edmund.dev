@@ -1,40 +1,72 @@
 import { createQuery, SetupQueryFunction } from '@workaholic/core';
-import { setupQuery as setupListQuery } from '@workaholic/core/dist/plugins/plugin-list';
-import { setupQuery as setupTagQuery } from '../workaholic/tags';
-import { setupQuery as setupDataQuery } from '../workaholic/data';
 
-const setupImageQuery: SetupQueryFunction = () => {
+let setupQuery: SetupQueryFunction = () => {
   const extensionByMimeType = {
     'image/avif': 'avif',
     'image/webp': 'webp',
   };
 
-  return kvNamespace =>
-    async (namespace, slug, { accept }) => {
-      const [mimeType, extension] = Object.entries(extensionByMimeType).find(
-        ([mimeType]) => accept.includes(mimeType),
-      ) ?? ['image/jpeg', 'jpg'];
-      const data = await kvNamespace.get(
-        `${namespace}/${slug}.${extension}`,
-        'stream',
-      );
+  function normalise(tag: string): string {
+    return tag.toLowerCase().replace(/\s/g, '-');
+  }
 
-      if (!data) {
-        return null;
+  return query =>
+    async (namespace: string, slug: string, options?: Record<string, any>) => {
+      switch (namespace) {
+        case 'data': {
+          const { value, metadata } = await query(namespace, slug, {
+            type: 'text',
+            metadata: true,
+          });
+
+          if (value === null && metadata === null) {
+            return null;
+          }
+
+          return {
+            content: value,
+            metadata,
+          };
+        }
+        case 'images': {
+          const [mimeType, extension] = Object.entries(
+            extensionByMimeType,
+          ).find(([mimeType]) => accept.includes(mimeType)) ?? [
+            'image/jpeg',
+            'jpg',
+          ];
+          const data = await query(namespace, `${slug}.${extension}`, {
+            type: 'stream',
+          });
+
+          if (!data) {
+            return null;
+          }
+
+          return {
+            data,
+            mimeType,
+          };
+        }
+        case 'list': {
+          const references = await query(namespace, slug, { type: 'json' });
+
+          if (!references) {
+            return null;
+          }
+
+          return references;
+        }
+        case 'tags': {
+          const dictionary = await kvNamespace.get(`${namespace}/`, 'json');
+          const references = dictionary[normalise(tag)] ?? [];
+
+          return references;
+        }
+        default:
+          throw new Error(`Unknwon namespace found; Recevied: ${namespace}`);
       }
-
-      return {
-        data,
-        mimeType,
-      };
     };
 };
 
-const query = createQuery(Content, [
-  { namespace: 'data', handlerFactory: setupDataQuery() },
-  { namespace: 'list', handlerFactory: setupListQuery() },
-  { namespace: 'tags', handlerFactory: setupTagQuery() },
-  { namespace: 'images', handlerFactory: setupImageQuery() },
-]);
-
-export default query;
+export default createQuery(Content, setupQuery());

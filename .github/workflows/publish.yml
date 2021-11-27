@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Generate KV data
-        run: npx workaholic generate content.json
+        run: npx workaholic build content.json
       - name: Publish Content
         run: npx workaholic publish content.json
         env:
