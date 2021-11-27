@@ -20,22 +20,6 @@ export let setupBuild: SetupBuildFunction = () => {
     webp: 'auto',
     mozjpeg: 'auto',
   };
-  const orders = [
-    'bookmarks/dan-abramov-goodbye-clean-code',
-    'articles/setting-up-a-global-loading-indicator-in-remix',
-    'bookmarks/swyx-client-server-battle',
-    'snapshots/the-bridge',
-    'projects/remix-sandbox',
-    'articles/deploying-remix-app-on-cloudflare-workers',
-    'snapshots/maple-tree',
-    'projects/remix-worker-template',
-    'snapshots/childhood',
-    'bookmarks/kentcdodds-testing-implementation-details',
-    'projects/maildog',
-    'snapshots/quokka-at-rottnest-island',
-    'bookmarks/pomb-us-build-your-own-react',
-    'snapshots/bondi-beach',
-  ];
 
   async function getPreviewMetadata(url: string): Promise<any> {
     const preview = (await getLinkPreview(url)) as any;
@@ -46,15 +30,19 @@ export let setupBuild: SetupBuildFunction = () => {
           title: preview.title,
           image: preview.images[0],
         };
-      case 'GitHub':
+      case 'GitHub': {
+        const [repo, description] = preview.title
+          .replace('GitHub - ', '')
+          .split(':');
+
         return {
-          image: preview.images[0],
+          description,
         };
+      }
       default:
         return {
           title: preview.title,
           description: preview.description,
-          image: preview.images[0],
         };
     }
   }
@@ -141,7 +129,8 @@ export let setupBuild: SetupBuildFunction = () => {
       key,
       value: JSON.stringify(
         references.sort(
-          (prev, next) => orders.indexOf(prev.slug) - orders.indexOf(next.slug),
+          (prev, next) =>
+            (next.metadata?.date ?? 0) - (prev.metadata?.date ?? 0),
         ),
       ),
     }));

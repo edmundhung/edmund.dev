@@ -1,13 +1,17 @@
 kentcdodds-testing-implementation-details:
+  date: 2021-09-10
   url: https://kentcdodds.com/blog/testing-implementation-details
   tags: [React, Testing]
 pomb-us-build-your-own-react:
+  date: 2021-08-17
   url: https://pomb.us/build-your-own-react/
   tags: [React]
 swyx-client-server-battle:
   url: https://www.swyx.io/client-server-battle/
-  layout: md:col-span-2
+  highlight: true
+  date: 2021-09-22
   tags: [Architecture]
 dan-abramov-goodbye-clean-code:
   url: https://overreacted.io/goodbye-clean-code/
+  date: 2021-10-03
   tags: [Coding]

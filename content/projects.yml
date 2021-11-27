@@ -1,12 +1,23 @@
 maildog:
   url: https://github.com/edmundhung/maildog
-  layout: md:col-span-2
-  tags: [AWS, CDK, Email]
+  date: 2021-06-14
+  highlight: true
+  tags: [AWS, CDK]
 remix-sandbox:
   url: https://github.com/edmundhung/remix-sandbox
-  layout: md:col-span-2
+  date: 2021-09-19
   tags: [Remix]
 remix-worker-template:
   url: https://github.com/edmundhung/remix-worker-template
-  layout: md:col-span-2
+  date: 2021-08-22
+  tags: [Remix, Cloudflare Workers]
+workaholic:
+  url: https://github.com/edmundhung/workaholic
+  date: 2021-09-27
+  highlight: true
+  tags: [Cloudflare Workers]
+remix-guide:
+  url: https://github.com/edmundhung/remix-guide
+  date: 2021-11-17
+  highlight: true
   tags: [Remix, Cloudflare Workers]

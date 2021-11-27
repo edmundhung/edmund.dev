@@ -15,7 +15,7 @@ node_modules
 # miniflare
 /.mf
 
-# wkv
+# workaholic
 /content.json
 
 # cypress

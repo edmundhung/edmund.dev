@@ -1,20 +1,25 @@
 bondi-beach:
   url: https://www.flickr.com/photos/eds-tudio/18602786413/
-  layout: md:col-span-2
+  date: 2021-08-03
+  layout: landscape
   tags: [Ricoh GR]
 childhood:
   url: https://www.flickr.com/photos/eds-tudio/40632057564/
-  layout: md:col-span-2
+  date: 2021-09-23
+  layout: landscape
   tags: [Sony a7R3]
 maple-tree:
   url: https://www.flickr.com/photos/eds-tudio/15847757820/
-  layout: md:col-span-2 md:row-span-2
+  date: 2021-09-09
+  layout: portrait
   tags: [Ricoh GR]
 quokka-at-rottnest-island:
   url: https://www.flickr.com/photos/eds-tudio/19197249056/
-  layout: md:col-span-2
+  date: 2021-09-17
+  layout: landscape
   tags: [Ricoh GR]
 the-bridge:
   url: https://www.flickr.com/photos/eds-tudio/15415381253/
-  layout: md:col-span-2 md:row-span-2
+  date: 2021-10-03
+  layout: portrait
   tags: [Ricoh GR]

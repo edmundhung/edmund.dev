@@ -1,7 +1,8 @@
 ---
 title: Setting up a global loading indicator in Remix
 description: Tutorial for making you own loading progress bar with tailwindcss
-layout: md:col-span-2
+date: 2021-09-15
+highlight: true
 tags:
 - React
 - Remix

@@ -18,7 +18,9 @@ function Card({ name, metadata }: CardProps): ReactElement {
   return (
     <article
       className={`flex flex-col rounded overflow-hidden bg-white text-primary shadow-sm ${
-        metadata.layout ?? ''
+        metadata.layout === 'landscape' ? 'md:col-span-2' : ''
+      } ${
+        metadata.layout === 'portrait' ? 'md:col-span-2 md:row-span-2' : ''
       }`.trim()}
     >
       <Hyperlink
