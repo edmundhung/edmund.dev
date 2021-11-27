@@ -14,7 +14,11 @@ async function preview() {
 
   await Promise.all(
     entries.map(({ key, value, base64, ...options }) =>
-      kvNamespace.put(key, base64 ? Buffer.from(value).buffer : value, options),
+      kvNamespace.put(
+        key,
+        base64 ? Buffer.from(value, 'base64').buffer : value,
+        options,
+      ),
     ),
   );
 }

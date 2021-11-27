@@ -31,7 +31,7 @@ let setupQuery: SetupQueryFunction = () => {
         case 'images': {
           const [mimeType, extension] = Object.entries(
             extensionByMimeType,
-          ).find(([mimeType]) => accept.includes(mimeType)) ?? [
+          ).find(([mimeType]) => options?.accept.includes(mimeType)) ?? [
             'image/jpeg',
             'jpg',
           ];

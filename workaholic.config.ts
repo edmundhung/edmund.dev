@@ -85,7 +85,7 @@ export let setupBuild: SetupBuildFunction = () => {
     }
 
     return {
-      key: `${entry.key}${extension}`,
+      key: `${entry.key.replace(/\//g, '-')}${extension}`,
       value: Buffer.from(image).toString('base64'),
       base64: true,
     };
@@ -93,16 +93,22 @@ export let setupBuild: SetupBuildFunction = () => {
 
   async function createImagePreviews(entries: Entry[]) {
     const result = await Promise.all(
-      entries.map(async entry => ({
-        data: {
-          ...entry,
-          metadata: {
-            ...entry.metadata,
-            image: `/images/${entry.key}`,
-          },
-        },
-        image: await downloadImage(entry),
-      })),
+      entries.map(async entry => {
+        let image = await downloadImage(entry);
+
+        return {
+          data: !image
+            ? entry
+            : {
+                ...entry,
+                metadata: {
+                  ...entry.metadata,
+                  image: `/images/${entry.key.replace(/\//g, '-')}`,
+                },
+              },
+          image,
+        };
+      }),
     );
 
     return {
@@ -261,8 +267,8 @@ export let setupBuild: SetupBuildFunction = () => {
     return {
       data,
       images: await formatImages(images),
-      list: createListEntries(items),
-      tags: createTagEntries(items),
+      list: createListEntries(data),
+      tags: createTagEntries(data),
     };
   };
 };

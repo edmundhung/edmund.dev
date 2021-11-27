@@ -19,7 +19,7 @@
     "test": "start-server-and-test http-get://localhost:8787 test:cypress",
     "kv:publish": "workaholic publish content.json",
     "kv:build": "workaholic build content.json",
-    "kv:preview": "node ./scripts/preview.mjs",
+    "kv:preview": "rimraf .mf && node ./scripts/preview.mjs",
     "postinstall": "remix setup cloudflare-workers",
     "prebuild": "npm run cleanup",
     "predev": "npm run kv:preview",
