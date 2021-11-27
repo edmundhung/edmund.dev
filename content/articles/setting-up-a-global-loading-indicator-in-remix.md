@@ -64,14 +64,14 @@ It might be tempting to make the width a variable. But this is probably not an i
  import type { ReactElement, MutableRefObject } from 'react';
 -import { useRef } from 'react';
 +import { useEffect, useRef } from 'react';
-+import { usePendingLocation } from 'remix';
++import { useTransition } from 'remix';
 
  export function useProgress(): MutableRefObject<HTMLElement> {
    const el = useRef<HTMLElement>();
-+  const pendingLocation = usePendingLocation();
++  const { location } = useTransition();
 +
 +  useEffect(() => {
-+    if (!pendingLocation || !el.current) {
++    if (!location || !el.current) {
 +      return;
 +    }
 +
@@ -80,22 +80,22 @@ It might be tempting to make the width a variable. But this is probably not an i
 +    return () => {
 +      el.current.style.width = `100%`;
 +    };
-+  }, [pendingLocation]);
++  }, [location]);
 
    return el;
  }
 ```
 
-Usually, you might need a query client which keeps track of all outgoing requests for you. However, this gets much simpler with Remix's route driven mechanism. It provides a built-in react hook named `usePendingLocation` which returns the next location whenever a transition is happening. This allows us simply subscribe to the `pendingLocation` value with useEffect and set the width accordingly.
+Usually, you might need a query client which keeps track of all outgoing requests for you. However, this gets much simpler with Remix's route driven mechanism. It provides a built-in react hook named `useTransition` which returns the next location whenever a transition is happening. This allows us simply subscribe to the `location` value with useEffect and set the width accordingly.
 
 ```diff Progress.tsx
 @@ -4,6 +4,7 @@
-import { usePendingLocation } from 'remix';
+import { useTransition } from 'remix';
 
  export function useProgress(): MutableRefObject<HTMLElement> {
    const el = useRef<HTMLElement>();
 +  const timeout = useRef<NodeJS.Timeout>();
-   const pendingLocation = usePendingLocation();
+   const { location } = useTransition();
 
    useEffect(() => {
 @@ -11,10 +12,21 @@
@@ -119,7 +119,7 @@ export function useProgress(): MutableRefObject<HTMLElement> {
 +        el.current.style.width = ``;
 +      }, 200);
      };
-   }, [pendingLocation]);
+   }, [location]);
 ```
 
 For sure, the progress bar should be disappeared after a short time. Let's add a timeout to clear the width after 200ms.
