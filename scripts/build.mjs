@@ -4,9 +4,9 @@ async function build() {
   const mode = process.env.NODE_ENV?.toLowerCase() ?? 'development';
   const version = process.env.VERSION ?? new Date().toISOString();
 
-  console.log(`Building Worker in ${mode} mode (version: ${version})`);
+  console.log(`Building Worker in ${mode} mode for version ${version}`);
 
-  const outfile = './dist/worker.mjs';
+  const outfile = './public/_worker.js';
   const startTime = Date.now();
   const result = await esbuild.build({
     entryPoints: ['./worker/index.ts'],
@@ -19,6 +19,7 @@ async function build() {
       'process.env.NODE_ENV': `"${mode}"`,
       'process.env.VERSION': `"${version}"`,
     },
+    conditions: ['worker'], // Needed for react-markdown to be built correctly
     outfile,
   });
   const endTime = Date.now();

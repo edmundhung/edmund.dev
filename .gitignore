@@ -10,7 +10,8 @@ node_modules
 /app/styles
 
 # Worker build
-/dist
+/public/_worker.js
+/public/_worker.js.map
 
 # miniflare
 /.mf

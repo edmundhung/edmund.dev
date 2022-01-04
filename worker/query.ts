@@ -1,4 +1,7 @@
-import { createQuery, SetupQueryFunction } from '@workaholic/core';
+import {
+  createQuery as createBaseQuery,
+  SetupQueryFunction,
+} from '@workaholic/core';
 
 let setupQuery: SetupQueryFunction = () => {
   const extensionByMimeType = {
@@ -36,7 +39,7 @@ let setupQuery: SetupQueryFunction = () => {
             'jpg',
           ];
           const data = await query(namespace, `${slug}.${extension}`, {
-            type: 'stream',
+            type: 'arrayBuffer',
           });
 
           if (!data) {
@@ -69,4 +72,6 @@ let setupQuery: SetupQueryFunction = () => {
     };
 };
 
-export default createQuery(Content, setupQuery());
+export function createQuery<Env extends { Content: KVNamespace }>(env: Env) {
+  return createBaseQuery(env.Content, setupQuery());
+}

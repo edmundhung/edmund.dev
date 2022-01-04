@@ -223,6 +223,7 @@ export function CatchBoundary() {
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {
+  console.log('Error caught', error);
   return (
     <Document>
       <div className="min-h-screen bg-primary font-open-sans text-primary py-4 flex flex-col justify-center items-center">
