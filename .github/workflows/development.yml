@@ -1,7 +1,5 @@
 name: Check
-on:
-  push:
-    branches: dev
+on: push
 jobs:
   test:
     name: 🤖 Tests
