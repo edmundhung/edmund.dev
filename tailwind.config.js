@@ -27,7 +27,7 @@ module.exports = {
       },
       gridTemplateColumns: {
         layout: '200px auto',
-        masonry: 'repeat(auto-fill, minmax(220px, 1fr))',
+        masonry: 'repeat(auto-fill, minmax(360px, 1fr))',
       },
     },
   },
