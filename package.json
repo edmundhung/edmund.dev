@@ -29,8 +29,8 @@
   },
   "dependencies": {
     "@remix-run/cloudflare-pages": "^1.1.1",
-    "@remix-run/react": "^1.1.1",
-    "@remix-run/server-runtime": "^1.1.1",
+    "@remix-run/react": "^1.2.3",
+    "@remix-run/server-runtime": "^1.2.3",
     "@squoosh/lib": "^0.4.0",
     "@workaholic/core": "^0.4.0-alpha.4",
     "cross-fetch": "^3.1.4",
@@ -40,12 +40,12 @@
     "react-dom": "^17.0.1",
     "react-markdown": "^7.1.0",
     "react-syntax-highlighter": "^15.4.4",
-    "remix": "^1.1.1"
+    "remix": "^1.2.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^3.3.0",
+    "@cloudflare/workers-types": "^3.4.0",
     "@iarna/toml": "^2.2.5",
-    "@remix-run/dev": "^1.1.1",
+    "@remix-run/dev": "^1.2.3",
     "@tailwindcss/typography": "^0.4.1",
     "@testing-library/cypress": "^8.0.1",
     "@types/react": "^17.0.33",
@@ -65,7 +65,7 @@
     "start-server-and-test": "^1.14.0",
     "tailwindcss": "^2.2.19",
     "typescript": "^4.4.4",
-    "wrangler": "pages"
+    "wrangler": "beta"
   },
   "engines": {
     "node": ">=16.7"

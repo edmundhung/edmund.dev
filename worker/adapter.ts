@@ -9,6 +9,15 @@ import type {
 } from '@remix-run/server-runtime';
 import { createRequestHandler as createRemixRequestHandler } from '@remix-run/server-runtime';
 
+// Required only for Worker Site
+// import type { Options as KvAssetHandlerOptions } from '@cloudflare/kv-asset-handler';
+// import {
+//   getAssetFromKV,
+//   MethodNotAllowedError,
+//   NotFoundError,
+// } from '@cloudflare/kv-asset-handler';
+// import manifest from '__STATIC_CONTENT_MANIFEST';
+
 export interface GetLoadContextFunction<Env = unknown> {
   (request: Request, env: Env, ctx: ExecutionContext): AppLoadContext;
 }
@@ -39,19 +48,19 @@ export function createRequestHandler<Env>({
 
 export function createFetchHandler<Env>({
   build,
-  getCache,
   getLoadContext,
   handleAsset,
+  enableCache,
   mode,
 }: {
   build: ServerBuild;
-  getCache?: () => Promise<Cache>;
   getLoadContext?: GetLoadContextFunction<Env>;
   handleAsset: (
     request: Request,
     env: Env,
     ctx: ExecutionContext,
   ) => Promise<Response>;
+  enableCache?: boolean;
   mode?: string;
 }): ExportedHandlerFetchHandler<Env> {
   const handleRequest = createRequestHandler<Env>({
@@ -64,14 +73,14 @@ export function createFetchHandler<Env>({
     try {
       let isHeadOrGetRequest =
         request.method === 'HEAD' || request.method === 'GET';
-      let cache = await getCache?.();
+      let cache = enableCache ? await caches.open(build.assets.version) : null;
       let response: Response | undefined;
 
       if (isHeadOrGetRequest) {
         response = await handleAsset(request.clone(), env, ctx);
       }
 
-      if (response?.ok) {
+      if (response && response.status >= 200 && response.status < 400) {
         return response;
       }
 
@@ -80,11 +89,11 @@ export function createFetchHandler<Env>({
       }
 
       if (!response || !response.ok) {
-        response = await handleRequest(request, env, ctx);
-      }
+        response = await handleRequest(request.clone(), env, ctx);
 
-      if (cache && isHeadOrGetRequest && response.ok) {
-        ctx.waitUntil(cache?.put(request, response.clone()));
+        if (cache && isHeadOrGetRequest && response.ok) {
+          ctx.waitUntil(cache?.put(request, response.clone()));
+        }
       }
 
       return response;
@@ -97,10 +106,91 @@ export function createFetchHandler<Env>({
         });
       }
 
-      return new Response(`Error: ${e.toString()}`, { status: 200 });
+      return new Response('Internal Error', { status: 500 });
     }
   };
 }
+
+// export function createWorkerAssetHandler(build: ServerBuild) {
+//   async function handleAsset<Env>(
+//     request: Request,
+//     env: Env,
+//     ctx: ExecutionContext
+//   ): Promise<Response> {
+//     async function getAssetManifest(cache: Cache) {
+//       const nextAssetManifest = JSON.parse(manifest);
+
+//       try {
+//         const manifestCache = new Request('http://worker.localhost/');
+//         const response = await cache.match(manifestCache);
+//         const prevAssetManifest = await response?.json<Record<string, any>>();
+//         const assetManifest = {
+//           ...prevAssetManifest,
+//           ...nextAssetManifest,
+//         };
+
+//         ctx.waitUntil(
+//           cache.put(
+//             manifestCache,
+//             new Response(assetManifest, {
+//               headers: { 'cache-control': 'max-age=31536000' },
+//             })
+//           )
+//         );
+
+//         return assetManifest;
+//       } catch {
+//         return nextAssetManifest;
+//       }
+//     }
+
+//     try {
+//       const event = {
+//         request,
+//         waitUntil(promise: Promise<any>) {
+//           return ctx.waitUntil(promise);
+//         },
+//       };
+//       const options: Partial<KvAssetHandlerOptions> = {
+//         ASSET_NAMESPACE: (env as any).__STATIC_CONTENT,
+//         ASSET_MANIFEST: await getAssetManifest(caches.default),
+//       };
+
+//       const assetpath = build.assets.url.split('/').slice(0, -1).join('/');
+//       const requestpath = new URL(request.url).pathname
+//         .split('/')
+//         .slice(0, -1)
+//         .join('/');
+
+//       if (requestpath.startsWith(assetpath)) {
+//         options.cacheControl = {
+//           bypassCache: false,
+//           edgeTTL: 31536000,
+//           browserTTL: 31536000,
+//         };
+//       }
+
+//       if (process.env.NODE_ENV === 'development') {
+//         options.cacheControl = {
+//           bypassCache: true,
+//         };
+//       }
+
+//       return await getAssetFromKV(event, options);
+//     } catch (error) {
+//       if (
+//         error instanceof MethodNotAllowedError ||
+//         error instanceof NotFoundError
+//       ) {
+//         return new Response('Not Found', { status: 404 });
+//       }
+
+//       throw error;
+//     }
+//   }
+
+//   return handleAsset;
+// }
 
 export function createPageAssetHandler() {
   async function handleAsset<Env>(
