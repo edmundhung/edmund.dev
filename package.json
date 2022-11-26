@@ -1,87 +1,56 @@
 {
+  "name": "edmund.dev",
   "private": true,
-  "name": "@edmundhung/blog",
-  "main": "./dist/worker.mjs",
-  "description": "Blog built with Remix, deployed to Cloudflare workers",
-  "license": "MIT",
+  "module": "./dist/worker.mjs",
   "scripts": {
-    "build:style": "postcss styles --base styles --dir app/styles --env production",
-    "build:remix": "remix build",
-    "build:worker": "NODE_ENV=production VERSION=$(git rev-parse HEAD) node ./scripts/build.mjs",
-    "build": "npm run build:style && npm run build:remix && npm run build:worker",
-    "cleanup": "rimraf .cache ./app/styles ./build ./public/build ./public/_worker.js ./public/_worker.js.map",
-    "dev:style": "postcss styles --base styles --dir app/styles -w",
-    "dev:remix": "remix watch",
-    "dev:worker": "node ./scripts/build.mjs",
-    "dev:wrangler": "wrangler pages dev ./public --kv Content",
-    "dev": "run-p dev:*",
-    "test:cypress": "cypress run",
-    "test": "start-server-and-test http-get://localhost:8787 test:cypress",
-    "kv:publish": "workaholic publish content.json",
-    "kv:build": "workaholic build content.json",
-    "kv:preview": "rimraf .mf && node ./scripts/preview.mjs",
-    "postinstall": "remix setup cloudflare-pages",
     "prebuild": "npm run cleanup",
-    "predev": "npm run kv:preview",
+    "build": "npm run build:style && npm run build:remix && npm run build:worker",
+    "build:remix": "remix build",
+    "build:style": "cross-env NODE_ENV=production tailwindcss -o ./app/styles/global.css --minify",
+    "build:worker": "cross-env NODE_ENV=production node ./scripts/build.mjs",
+    "cleanup": "rimraf .cache ./dist ./build ./public/build ./app/styles/global.css",
+    "dev": "concurrently \"npm:dev:*\"",
+    "dev:miniflare": "miniflare --modules --build-command \"node ./scripts/build.mjs\" --build-watch-path ./worker --build-watch-path ./build/index.js --no-cache --watch --open",
+    "dev:remix": "remix watch",
+    "dev:style": "tailwindcss -o ./app/styles/global.css --watch",
     "prepare": "husky install",
-    "prestart": "npm run kv:preview",
-    "start": "miniflare --kv-persist --no-cache"
+    "start": "miniflare --modules",
+    "test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" playwright test"
+  },
+  "lint-staged": {
+    "*.{js,mjs,ts,tsx,css,md,yml}": "prettier --write"
   },
   "dependencies": {
-    "@remix-run/cloudflare-pages": "^1.1.1",
-    "@remix-run/react": "^1.2.3",
-    "@remix-run/server-runtime": "^1.2.3",
-    "@squoosh/lib": "^0.4.0",
-    "@workaholic/core": "^0.4.0-alpha.4",
-    "cross-fetch": "^3.1.4",
-    "gray-matter": "^4.0.3",
-    "link-preview-js": "^2.1.8",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-markdown": "^7.1.0",
-    "react-syntax-highlighter": "^15.4.4",
-    "remix": "^1.2.3"
+    "@cloudflare/kv-asset-handler": "^0.2.0",
+    "@remix-run/cloudflare": "^1.7.6",
+    "@remix-run/react": "^1.7.6",
+    "isbot": "^3.6.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^3.4.0",
-    "@iarna/toml": "^2.2.5",
-    "@remix-run/dev": "^1.2.3",
-    "@tailwindcss/typography": "^0.4.1",
-    "@testing-library/cypress": "^8.0.1",
-    "@types/react": "^17.0.33",
-    "@types/react-dom": "^17.0.10",
-    "@types/rimraf": "^3.0.2",
-    "autoprefixer": "^10.4.0",
-    "cssnano": "^5.0.8",
-    "cypress": "^8.7.0",
-    "esbuild": "^0.13.12",
-    "husky": "^7.0.4",
-    "lint-staged": "^11.2.6",
-    "miniflare": "^2.0.0-rc.4",
-    "npm-run-all": "^4.1.5",
-    "postcss": "^8.3.11",
-    "postcss-cli": "^9.0.1",
-    "prettier": "^2.4.1",
-    "start-server-and-test": "^1.14.0",
-    "tailwindcss": "^2.2.19",
-    "typescript": "^4.4.4",
-    "wrangler": "beta"
+    "@cloudflare/workers-types": "^3.18.0",
+    "@playwright/test": "^1.28.1",
+    "@remix-run/dev": "^1.7.6",
+    "@remix-run/eslint-config": "^1.7.6",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "concurrently": "^7.6.0",
+    "cross-env": "^7.0.3",
+    "esbuild": "^0.15.15",
+    "eslint": "^8.28.0",
+    "eslint-config-prettier": "^8.5.0",
+    "husky": "^8.0.2",
+    "lint-staged": "^13.0.4",
+    "miniflare": "^2.11.0",
+    "prettier": "^2.8.0",
+    "rimraf": "^3.0.2",
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4.9.3",
+    "wrangler": "^2.4.4"
   },
   "engines": {
     "node": ">=16.7"
-  },
-  "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
-  },
-  "browserslist": {
-    "production": [
-      "defaults"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   },
   "sideEffects": false
 }

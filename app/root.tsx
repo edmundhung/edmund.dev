@@ -1,16 +1,20 @@
-import type { LinksFunction } from 'remix';
+import type {
+  LinksFunction,
+  MetaFunction,
+  LoaderFunction,
+} from '@remix-run/cloudflare';
+import * as React from 'react';
 import {
-  Meta,
-  Links,
-  Scripts,
-  useCatch,
-  useLoaderData,
-  LiveReload,
   Link,
+  Links,
+  LiveReload,
+  Meta,
   NavLink,
-  ScrollRestoration,
   Outlet,
-} from 'remix';
+  Scripts,
+  ScrollRestoration,
+  useCatch,
+} from '@remix-run/react';
 import Progress from '~/components/Progress';
 import stylesUrl from '~/styles/global.css';
 
@@ -18,54 +22,17 @@ export let links: LinksFunction = () => {
   return [{ rel: 'stylesheet', href: stylesUrl }];
 };
 
-function Document({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="apple-mobile-web-app-title" content="Edmund.dev" />
-        <meta name="application-name" content="Edmund.dev" />
-        <meta name="msapplication-TileColor" content="#ebece5" />
-        <meta name="theme-color" content="#383835" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1"
-        ></meta>
-        <Meta />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/apple-touch-icon.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/favicon-16x16.png"
-        />
-        <link rel="manifest" href="/site.webmanifest" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#ebece5" />
-        <Links />
-      </head>
-      <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-        {process.env.NODE_ENV === 'development' && <LiveReload />}
-      </body>
-    </html>
-  );
-}
+export let meta: MetaFunction = () => {
+  return {
+    viewport: 'width=device-width, initial-scale=1',
+  };
+};
+
+export let loader: LoaderFunction = async () => {
+  return { date: new Date() };
+};
 
 export default function App() {
-  let data = useLoaderData();
-
   return (
     <Document>
       <Progress />
@@ -201,34 +168,83 @@ export default function App() {
   );
 }
 
+function Document({
+  children,
+  title,
+}: {
+  children: React.ReactNode;
+  title?: string;
+}) {
+  return (
+    <html lang="en">
+      <head>
+        {title ? <title>{title}</title> : null}
+        <meta charSet="utf-8" />
+        <meta name="apple-mobile-web-app-title" content="Edmund.dev" />
+        <meta name="application-name" content="Edmund.dev" />
+        <meta name="msapplication-TileColor" content="#ebece5" />
+        <meta name="theme-color" content="#383835" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#ebece5" />
+        <Links />
+      </head>
+      <body>
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+        {process.env.NODE_ENV === 'development' && <LiveReload />}
+      </body>
+    </html>
+  );
+}
+
 export function CatchBoundary() {
-  let caught = useCatch();
+  const caught = useCatch();
+  const message = `${caught.status} ${caught.statusText}`;
 
   switch (caught.status) {
     case 404:
       return (
-        <Document>
+        <Document title={caught.statusText}>
           <div className="min-h-screen bg-primary font-open-sans text-primary py-4 flex flex-col justify-center items-center">
             <img className="w-32 py-4" src="/assets/logo.svg" alt="logo" />
-            <p>Ooops!</p>
-            <h1 className="p-4">{`${caught.status} ${caught.statusText}`}</h1>
+            <p>Oops!</p>
+            <h1 className="p-4">{message}</h1>
           </div>
         </Document>
       );
     default:
-      throw new Error(
-        `Unexpected caught response with status: ${caught.status}`,
-      );
+      throw new Error(`${caught.status} ${caught.statusText}`);
   }
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {
-  console.log('Error caught', error);
+  console.error(error);
+
   return (
-    <Document>
+    <Document title="It happens">
       <div className="min-h-screen bg-primary font-open-sans text-primary py-4 flex flex-col justify-center items-center">
         <img className="w-32 py-4" src="/assets/logo.svg" alt="logo" />
-        <p>Ooops!</p>
+        <p>Well...it happens!</p>
         <h1 className="p-4">500 Internal server error</h1>
       </div>
     </Document>

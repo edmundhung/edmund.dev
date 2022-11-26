@@ -1,5 +1,5 @@
+import { Link } from '@remix-run/react';
 import type { ReactElement } from 'react';
-import { Link } from 'remix';
 
 interface HyperlinkProps {
   to: string;
@@ -15,12 +15,7 @@ function Hyperlink({ to, className, children }: HyperlinkProps): ReactElement {
 
   if (isAbsoluteURL) {
     return (
-      <a
-        className={className}
-        href={to}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <a className={className} href={to}>
         {children}
       </a>
     );

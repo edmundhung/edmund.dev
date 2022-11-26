@@ -1,42 +1,31 @@
 import * as build from '../build/index.js';
-import { createFetchHandler, createPageAssetHandler } from './adapter';
-import { createQuery } from './query';
+import { createRequestHandler, handleAsset } from './adapter';
 
-const handleFetch = createFetchHandler({
-  /**
-   * Required: Remix build files
-   */
+const handleRequest = createRequestHandler<Env>({
   build,
-
-  /**
-   * Optional: Context to be available on `loader` or `action`, default to `undefined` if not defined
-   * @param request Request
-   * @param env Variables defined for the environment
-   * @param ctx Exectuion context, i.e. ctx.waitUntil() or ctx.passThroughOnException();
-   * @returns Context
-   */
-  getLoadContext(_, env) {
-    return {
-      query: createQuery(env),
-    };
+  getLoadContext(request, env, ctx) {
+    return { env, ctx };
   },
-
-  /**
-   * Required: Setup how the assets are served
-   * 1) Call `createWorkerAssetHandler(build)` when using Worker Site
-   * 2) Call `createPageAssetHandler()` when using Pages
-   */
-  handleAsset: createPageAssetHandler(),
-
-  /**
-   * Optional: Enable cache for response from the Remix request handler, no cache by default
-   * Experimental feature - Let me know if you run into problems with cache enabled
-   */
-  enableCache: false,
 });
 
-const worker: ExportedHandler = {
-  fetch: handleFetch,
+const worker: ExportedHandler<Env> = {
+  async fetch(request, env, ctx): Promise<Response> {
+    try {
+      let response = await handleAsset(request, env, ctx);
+
+      if (response.status === 404) {
+        response = await handleRequest(request, env, ctx);
+      }
+
+      return response;
+    } catch (exception) {
+      if (process.env.NODE_ENV === 'development') {
+        return new Response(`${exception}`, { status: 500 });
+      }
+
+      return new Response('Internal Server Error', { status: 500 });
+    }
+  },
 };
 
 export default worker;

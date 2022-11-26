@@ -1,6 +1,6 @@
+import { useTransition } from '@remix-run/react';
 import type { ReactElement, MutableRefObject } from 'react';
 import { useEffect, useRef } from 'react';
-import { useTransition } from 'remix';
 
 export function useProgress(): MutableRefObject<HTMLElement> {
   const el = useRef<HTMLElement>();

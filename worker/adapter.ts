@@ -1,22 +1,14 @@
-// Required for installGlobals();
-import '@remix-run/cloudflare-pages';
+import type { AppLoadContext } from '@remix-run/cloudflare';
+import { createRequestHandler as createRemixRequestHandler } from '@remix-run/cloudflare';
+import {
+  getAssetFromKV,
+  MethodNotAllowedError,
+  NotFoundError,
+} from '@cloudflare/kv-asset-handler';
 
-// Required for custom adapters
-import type {
-  AppLoadContext,
-  ServerBuild,
-  ServerPlatform,
-} from '@remix-run/server-runtime';
-import { createRequestHandler as createRemixRequestHandler } from '@remix-run/server-runtime';
+import manifest from '__STATIC_CONTENT_MANIFEST';
 
-// Required only for Worker Site
-// import type { Options as KvAssetHandlerOptions } from '@cloudflare/kv-asset-handler';
-// import {
-//   getAssetFromKV,
-//   MethodNotAllowedError,
-//   NotFoundError,
-// } from '@cloudflare/kv-asset-handler';
-// import manifest from '__STATIC_CONTENT_MANIFEST';
+const assetManifest = JSON.parse(manifest);
 
 export interface GetLoadContextFunction<Env = unknown> {
   (request: Request, env: Env, ctx: ExecutionContext): AppLoadContext;
@@ -25,16 +17,24 @@ export interface GetLoadContextFunction<Env = unknown> {
 export type RequestHandler = ReturnType<typeof createRequestHandler>;
 
 export function createRequestHandler<Env>({
+  /**
+   * Remix build files
+   */
   build,
+
+  /**
+   * Optional: Context to be available on `loader` or `action`, default to `undefined` if not defined
+   * @param request Request
+   * @param env Variables defined for the environment
+   * @param ctx Exectuion context, i.e. ctx.waitUntil() or ctx.passThroughOnException();
+   * @returns Context
+   */
   getLoadContext,
-  mode,
 }: {
-  build: ServerBuild;
+  build: any; // ServerBuild
   getLoadContext?: GetLoadContextFunction<Env>;
-  mode?: string;
 }): ExportedHandlerFetchHandler<Env> {
-  let platform: ServerPlatform = {};
-  let handleRequest = createRemixRequestHandler(build, platform, mode);
+  let handleRequest = createRemixRequestHandler(build, process.env.NODE_ENV);
 
   return (request: Request, env: Env, ctx: ExecutionContext) => {
     let loadContext =
@@ -46,169 +46,47 @@ export function createRequestHandler<Env>({
   };
 }
 
-export function createFetchHandler<Env>({
-  build,
-  getLoadContext,
-  handleAsset,
-  enableCache,
-  mode,
-}: {
-  build: ServerBuild;
-  getLoadContext?: GetLoadContextFunction<Env>;
-  handleAsset: (
-    request: Request,
-    env: Env,
-    ctx: ExecutionContext,
-  ) => Promise<Response>;
-  enableCache?: boolean;
-  mode?: string;
-}): ExportedHandlerFetchHandler<Env> {
-  const handleRequest = createRequestHandler<Env>({
-    build,
-    getLoadContext,
-    mode,
-  });
+export async function handleAsset<Env extends { __STATIC_CONTENT: string }>(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
+  try {
+    return await getAssetFromKV(
+      {
+        request,
+        waitUntil(promise: Promise<any>) {
+          return ctx.waitUntil(promise);
+        },
+      },
+      {
+        cacheControl(request) {
+          const url = new URL(request.url);
 
-  return async (request: Request, env: Env, ctx: ExecutionContext) => {
-    try {
-      let isHeadOrGetRequest =
-        request.method === 'HEAD' || request.method === 'GET';
-      let cache = enableCache ? await caches.open(build.assets.version) : null;
-      let response: Response | undefined;
+          if (url.pathname.startsWith('/build')) {
+            return {
+              browserTTL: 60 * 60 * 24 * 365,
+              edgeTTL: 60 * 60 * 24 * 365,
+            };
+          }
 
-      if (isHeadOrGetRequest) {
-        response = await handleAsset(request.clone(), env, ctx);
-      }
-
-      if (response && response.status >= 200 && response.status < 400) {
-        return response;
-      }
-
-      if (cache && isHeadOrGetRequest) {
-        response = await cache?.match(request);
-      }
-
-      if (!response || !response.ok) {
-        response = await handleRequest(request.clone(), env, ctx);
-
-        if (cache && isHeadOrGetRequest && response.ok) {
-          ctx.waitUntil(cache?.put(request, response.clone()));
-        }
-      }
-
-      return response;
-    } catch (e: any) {
-      console.log('Error caught', e.message, e);
-
-      if (process.env.NODE_ENV === 'development' && e instanceof Error) {
-        return new Response(e.message || e.toString(), {
-          status: 500,
-        });
-      }
-
-      return new Response('Internal Error', { status: 500 });
-    }
-  };
-}
-
-// export function createWorkerAssetHandler(build: ServerBuild) {
-//   async function handleAsset<Env>(
-//     request: Request,
-//     env: Env,
-//     ctx: ExecutionContext
-//   ): Promise<Response> {
-//     async function getAssetManifest(cache: Cache) {
-//       const nextAssetManifest = JSON.parse(manifest);
-
-//       try {
-//         const manifestCache = new Request('http://worker.localhost/');
-//         const response = await cache.match(manifestCache);
-//         const prevAssetManifest = await response?.json<Record<string, any>>();
-//         const assetManifest = {
-//           ...prevAssetManifest,
-//           ...nextAssetManifest,
-//         };
-
-//         ctx.waitUntil(
-//           cache.put(
-//             manifestCache,
-//             new Response(assetManifest, {
-//               headers: { 'cache-control': 'max-age=31536000' },
-//             })
-//           )
-//         );
-
-//         return assetManifest;
-//       } catch {
-//         return nextAssetManifest;
-//       }
-//     }
-
-//     try {
-//       const event = {
-//         request,
-//         waitUntil(promise: Promise<any>) {
-//           return ctx.waitUntil(promise);
-//         },
-//       };
-//       const options: Partial<KvAssetHandlerOptions> = {
-//         ASSET_NAMESPACE: (env as any).__STATIC_CONTENT,
-//         ASSET_MANIFEST: await getAssetManifest(caches.default),
-//       };
-
-//       const assetpath = build.assets.url.split('/').slice(0, -1).join('/');
-//       const requestpath = new URL(request.url).pathname
-//         .split('/')
-//         .slice(0, -1)
-//         .join('/');
-
-//       if (requestpath.startsWith(assetpath)) {
-//         options.cacheControl = {
-//           bypassCache: false,
-//           edgeTTL: 31536000,
-//           browserTTL: 31536000,
-//         };
-//       }
-
-//       if (process.env.NODE_ENV === 'development') {
-//         options.cacheControl = {
-//           bypassCache: true,
-//         };
-//       }
-
-//       return await getAssetFromKV(event, options);
-//     } catch (error) {
-//       if (
-//         error instanceof MethodNotAllowedError ||
-//         error instanceof NotFoundError
-//       ) {
-//         return new Response('Not Found', { status: 404 });
-//       }
-
-//       throw error;
-//     }
-//   }
-
-//   return handleAsset;
-// }
-
-export function createPageAssetHandler() {
-  async function handleAsset<Env>(
-    request: Request,
-    env: Env,
-  ): Promise<Response> {
-    if (process.env.NODE_ENV === 'development') {
-      request.headers.delete('if-none-match');
+          return {
+            browserTTL: 60 * 10,
+            edgeTTL: 60 * 10,
+          };
+        },
+        ASSET_NAMESPACE: env.__STATIC_CONTENT,
+        ASSET_MANIFEST: assetManifest,
+      },
+    );
+  } catch (error) {
+    if (
+      error instanceof MethodNotAllowedError ||
+      error instanceof NotFoundError
+    ) {
+      return new Response('Not Found', { status: 404 });
     }
 
-    let response = await (env as any).ASSETS.fetch(request.url, request);
-
-    if (process.env.NODE_ENV === 'development') {
-      response = new Response(response.body, response);
-    }
-
-    return response;
+    throw error;
   }
-
-  return handleAsset;
 }
