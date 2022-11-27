@@ -100,9 +100,9 @@ export default function Blog() {
                       className="md:grid md:grid-cols-4 md:items-baseline gap-8"
                     >
                       <div className="md:col-span-3 group relative flex flex-col items-start">
-                        <h2 className="text-base font-semibold tracking-tight text-zinc-800">
-                          <div className="absolute -inset-y-6 -inset-x-4 z-0 scale-95 bg-zinc-50 opacity-0 transition group-hover:scale-100 group-hover:opacity-100 sm:-inset-x-6 sm:rounded-2xl"></div>
-                          <Link to={post.slug}>
+                        <h2 className="text-base font-semibold tracking-tight">
+                          <div className="absolute -inset-y-6 -inset-x-4 z-0 scale-95 bg-white opacity-0 transition group-hover:scale-100 group-hover:opacity-100 sm:-inset-x-6 sm:rounded-2xl"></div>
+                          <Link to={post.slug} title={post.title}>
                             <span className="absolute -inset-y-6 -inset-x-4 z-20 sm:-inset-x-6 sm:rounded-2xl"></span>
                             <span className="relative z-10">{post.title}</span>
                           </Link>

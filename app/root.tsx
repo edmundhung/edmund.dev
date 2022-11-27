@@ -38,7 +38,7 @@ export default function App() {
             className="w-12 h-12 rounded-full text-[#52524e] bg-white"
             symbol="logo"
           />
-          <h1 className="px-4 sr-only">Edmund Hung</h1>
+          <span className="px-4 sr-only">Edmund Hung</span>
         </Link>
         <nav className="flex flex-row items-center gap-4">
           <Hyperlink to="https://github.com/edmundhung">GitHub</Hyperlink>/

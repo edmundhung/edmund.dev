@@ -15,11 +15,5 @@ node_modules
 # miniflare
 /.mf
 
-# workaholic
-/content.json
-
-# cypress
-/cypress/videos
-
 # Misc
 .DS_Store

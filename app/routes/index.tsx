@@ -30,11 +30,10 @@ export default function Index() {
       </div>
       <div className="relative max-w-5xl mx-auto px-4 pb-12">
         <h1 className="text-4xl font-bold tracking-tight text-center sm:text-6xl">
-          Web developer, progressive enhancement advocate, and amateur
-          photographer.
+          Web developer, progressive enhancement advocate and traveler.
         </h1>
         <p className="mt-4 sm:mt-6 text-lg leading-8 text-gray-600 text-center">
-          I'm Edmund, a software developer from Hong Kong.
+          I'm Edmund, a senior software engineer currently based in Berlin.
           <br /> I maintain serveral open source projects, such as{' '}
           <Hyperlink to="https://github.com/edmundhung/conform" active>
             Conform
