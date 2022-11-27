@@ -2,6 +2,8 @@
 /// <reference types="@remix-run/cloudflare" />
 /// <reference types="@cloudflare/workers-types" />
 
+import '@remix-run/server-runtime';
+
 // Required by the worker adapter
 declare module '__STATIC_CONTENT_MANIFEST' {
   const value: string;
@@ -14,7 +16,7 @@ interface Env {
 }
 
 declare module '@remix-run/server-runtime' {
-  export interface AppLoadContext {
+  interface AppLoadContext {
     env: Env;
     ctx: ExecutionContext;
   }
