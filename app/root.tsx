@@ -12,6 +12,7 @@ import {
 } from '@remix-run/react';
 import * as React from 'react';
 import stylesUrl from '~/styles/global.css';
+import Hyperlink from './components/Hyperlink';
 import Icon from './components/Icon';
 
 export let links: LinksFunction = () => {
@@ -37,67 +38,33 @@ export default function App() {
             className="w-12 h-12 rounded-full text-[#52524e] bg-white"
             symbol="logo"
           />
-          <h1 className="px-4">Edmund Hung</h1>
+          <h1 className="px-4 sr-only">Edmund Hung</h1>
         </Link>
         <nav className="flex flex-row items-center gap-4">
-          <a
-            className="flex flex-row gap-2 items-center hover:underline"
-            href="https://github.com/edmundhung"
-          >
-            GitHub
-          </a>
-          /
-          <a
-            className="flex flex-row gap-2 items-center hover:underline"
-            href="https://twitter.com/_edmundhung"
-          >
-            Twitter
-          </a>
+          <Hyperlink to="https://github.com/edmundhung">GitHub</Hyperlink>/
+          <Hyperlink to="https://twitter.com/_edmundhung">Twitter</Hyperlink>/
+          <Hyperlink to="/rss.xml">RSS</Hyperlink>
         </nav>
       </header>
-      <main className="container mx-auto flex-1 px-4 overflow-y-scroll">
+      <main className="flex flex-col flex-1">
         <Outlet />
       </main>
-      <nav className="sticky bottom-0 font-light text-sm bg-white">
+      <nav className="sticky bottom-0 font-light text-sm bg-black text-white z-30 ">
         <div className="container mx-auto text-center flex flex-row justify-end gap-4 items-center shadow px-4">
-          <NavLink
-            className={isActive =>
-              `flex-1 lg:flex-none block no-underline lg:hover:underline py-4 ${
-                isActive ? 'font-normal' : ''
-              }`.trim()
-            }
-            to="/about"
-            prefetch="intent"
-          >
+          <Hyperlink className="flex-1 lg:flex-none block py-4" to="/about">
             About
-          </NavLink>
+          </Hyperlink>
           /
-          <NavLink
-            className={isActive =>
-              `flex-1 lg:flex-none block no-underline lg:hover:underline py-4 ${
-                isActive ? 'font-normal' : ''
-              }`.trim()
-            }
-            to="/blog"
-            prefetch="intent"
-          >
+          <Hyperlink className="flex-1 lg:flex-none block py-4" to="/blog">
             Blog
-          </NavLink>
+          </Hyperlink>
           /
-          <NavLink
-            className={isActive =>
-              `flex-1 lg:flex-none block no-underline lg:hover:underline py-4 ${
-                isActive ? 'font-normal' : ''
-              }`.trim()
-            }
-            to="/contact"
-            prefetch="intent"
-          >
+          <Hyperlink className="flex-1 lg:flex-none block py-4" to="/contact">
             Contact
-          </NavLink>
+          </Hyperlink>
         </div>
       </nav>
-      <footer className="bg-black text-white font-light text-sm">
+      <footer className="bg-white font-light text-sm">
         <div className="container mx-auto text-center lg:text-left p-4">
           All rights reserved &copy; Edmund Hung {new Date().getFullYear()}
         </div>
