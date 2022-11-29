@@ -1,10 +1,21 @@
+import type { Env } from 'worker.env';
 import * as build from '../build/index.js';
 import { createRequestHandler, handleAsset } from './adapter';
+import GitHubService from './github.js';
 
 const handleRequest = createRequestHandler<Env>({
   build,
   getLoadContext(request, env, ctx) {
-    return { env, ctx };
+    return {
+      github: new GitHubService({
+        owner: 'edmundhung',
+        repo: 'blog',
+        env,
+        ctx,
+      }),
+      env,
+      ctx,
+    };
   },
 });
 

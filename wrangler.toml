@@ -8,3 +8,7 @@ compatibility_flags = ["streams_enable_constructors"]
 
 [site]
 bucket = "./public"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = ""

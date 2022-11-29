@@ -18,12 +18,11 @@ interface Metadata {
 }
 
 interface PostMetadata extends Metadata {
-  post: {
-    title: string;
-    description: string;
-    date: string;
-    tags: string[];
-  };
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  tags: string[];
 }
 
 type Post = {
@@ -96,30 +95,29 @@ class GitHubService {
   }
 
   private async cachePost(slug: string, post: Post): Promise<void> {
-    await this.env.CACHE.put(`/blog/${slug}`, JSON.stringify(post.value), {
+    await this.env.CACHE.put(`blog/${slug}`, JSON.stringify(post.value), {
       expirationTtl: 60 * 60 * 24 * 7,
       metadata: post.metadata,
     });
   }
 
-  private formatFile(content: string, timestamp: string): Post {
+  private formatFile(slug: string, content: string, timestamp: string): Post {
     return {
       value: {
         content: atob(content),
       },
       metadata: {
         timestamp,
-        post: {
-          title: '',
-          description: '',
-          date: '',
-          tags: [],
-        },
+        slug,
+        title: '',
+        description: '',
+        date: '',
+        tags: [],
       },
     };
   }
 
-  public async getPosts() {
+  public async getPosts(): Promise<PostMetadata[]> {
     const timestamp = new Date().toISOString();
     const [cache, list] = await Promise.all([
       this.env.CACHE.getWithMetadata<string[], Metadata>('blog', {
@@ -141,17 +139,16 @@ class GitHubService {
       }, []);
     }
 
-    const files = await this.getDirectory('/content');
+    const files = await this.getDirectory('content/articles');
     const directory = files.reduce<Record<string, Post>>((result, file) => {
       if (
         file.type === 'file' &&
         typeof file.content !== 'undefined' &&
         file.name.endsWith('.md')
       ) {
-        result[file.name.slice(0, -3)] = this.formatFile(
-          file.content,
-          timestamp,
-        );
+        const slug = file.name.slice(0, -3);
+
+        result[slug] = this.formatFile(slug, file.content, timestamp);
       }
 
       return result;
@@ -173,13 +170,13 @@ class GitHubService {
       }),
     );
 
-    return Object.values(directory);
+    return Object.values(directory).map(post => post.metadata);
   }
 
   public async getPost(slug: string): Promise<Post> {
     const timestamp = new Date().toISOString();
     const cache = await this.env.CACHE.getWithMetadata<PostValue, PostMetadata>(
-      `/blog/${slug}`,
+      `blog/${slug}`,
       { type: 'json' },
     );
 
@@ -194,8 +191,8 @@ class GitHubService {
       };
     }
 
-    const file = await this.getFile(`/content/${slug}.md`);
-    const post = this.formatFile(file.content, timestamp);
+    const file = await this.getFile(`content/articles/${slug}.md`);
+    const post = this.formatFile(slug, file.content, timestamp);
 
     this.ctx.waitUntil(this.cachePost(slug, post));
 

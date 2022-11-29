@@ -3,6 +3,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import '@remix-run/server-runtime';
+import type GitHubService from 'worker/github';
 
 // Required by the worker adapter
 declare module '__STATIC_CONTENT_MANIFEST' {
@@ -13,10 +14,14 @@ declare module '__STATIC_CONTENT_MANIFEST' {
 interface Env {
   // Required by the worker adapter
   __STATIC_CONTENT: string;
+
+  // Custom env
+  CACHE: KVNamespace;
 }
 
 declare module '@remix-run/server-runtime' {
   interface AppLoadContext {
+    github: GitHubService;
     env: Env;
     ctx: ExecutionContext;
   }

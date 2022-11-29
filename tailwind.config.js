@@ -3,7 +3,6 @@
  */
 module.exports = {
   content: ['./app/**/*.tsx', './app/**/*.ts'],
-  darkMode: false,
   theme: {
     extend: {
       fontFamily: {
@@ -23,5 +22,5 @@ module.exports = {
     },
   },
   variants: {},
-  // plugins: [require('@tailwindcss/typography')],
+  plugins: [require('@tailwindcss/typography')],
 };

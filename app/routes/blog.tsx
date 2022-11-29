@@ -82,7 +82,7 @@ export default function Blog() {
       <div className="mx-auto container">
         <div className="relative">
           <div className="flex flex-col xl:flex-row gap-16">
-            <header className="max-w-4xl xl:max-w-xl px-4">
+            <header className="max-w-4xl xl:max-w-2xl px-4">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
                 Writing on web standard, progressive enhancement, and remix.
               </h1>
