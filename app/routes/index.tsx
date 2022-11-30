@@ -4,7 +4,7 @@ import {
   json,
 } from '@remix-run/cloudflare';
 import { Link, useLoaderData } from '@remix-run/react';
-import Hyperlink from '~/components/Hyperlink';
+import { Hyperlink } from '~/components';
 import { generateMetaDescriptor } from '~/utils/meta';
 
 export async function loader({ context }: LoaderArgs) {
@@ -51,11 +51,11 @@ export default function Index() {
         <p className="mt-4 sm:mt-6 text-lg leading-8 text-gray-600 text-center">
           I'm Edmund, a senior software engineer currently based in Berlin.
           <br /> I maintain serveral open source projects, such as{' '}
-          <Hyperlink to="https://github.com/edmundhung/conform" active>
+          <Hyperlink href="https://github.com/edmundhung/conform" active>
             Conform
           </Hyperlink>{' '}
           and{' '}
-          <Hyperlink to="https://github.com/edmundhung/remix-guide" active>
+          <Hyperlink href="https://github.com/edmundhung/remix-guide" active>
             Remix Guide
           </Hyperlink>
           .

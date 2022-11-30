@@ -4,7 +4,6 @@ import {
   Links,
   LiveReload,
   Meta,
-  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -12,8 +11,7 @@ import {
 } from '@remix-run/react';
 import * as React from 'react';
 import stylesUrl from '~/styles/global.css';
-import Hyperlink from './components/Hyperlink';
-import Icon from './components/Icon';
+import { Hyperlink, Icon } from '~/components';
 
 export let links: LinksFunction = () => {
   return [{ rel: 'stylesheet', href: stylesUrl }];
@@ -40,28 +38,42 @@ export default function App() {
           />
           <span className="px-4 sr-only">Edmund Hung</span>
         </Link>
-        <nav className="flex flex-row items-center gap-4">
-          <Hyperlink to="https://github.com/edmundhung">GitHub</Hyperlink>/
-          <Hyperlink to="https://twitter.com/_edmundhung">Twitter</Hyperlink>/
-          <Hyperlink to="/rss.xml">RSS</Hyperlink>
-        </nav>
       </header>
       <main className="flex flex-col flex-1">
         <Outlet />
       </main>
       <nav className="sticky bottom-0 font-light text-sm bg-black text-white z-30 ">
-        <div className="container mx-auto text-center flex flex-row justify-end gap-4 items-center shadow px-4">
-          <Hyperlink className="flex-1 lg:flex-none block py-4" to="/about">
-            About
-          </Hyperlink>
-          /
-          <Hyperlink className="flex-1 lg:flex-none block py-4" to="/blog">
-            Blog
-          </Hyperlink>
-          /
-          <Hyperlink className="flex-1 lg:flex-none block py-4" to="/contact">
-            Contact
-          </Hyperlink>
+        <div className="container mx-auto flex justify-between shadow px-4">
+          <div className="flex gap-6 items-center">
+            <Hyperlink href="https://github.com/edmundhung">
+              <Icon className="w-4 h-4" symbol="github" />
+              <span className="sr-only">GitHub</span>
+            </Hyperlink>
+            <Hyperlink href="https://twitter.com/_edmundhung">
+              <Icon className="w-4 h-4" symbol="twitter" />
+              <span className="sr-only">Twitter</span>
+            </Hyperlink>
+            <Hyperlink href="/rss.xml">
+              <Icon className="w-4 h-4" symbol="rss" />
+              <span className="sr-only">RSS</span>
+            </Hyperlink>
+          </div>
+          <div className="text-center flex gap-6 items-center">
+            <Hyperlink className="flex-1 lg:flex-none block py-4" href="/about">
+              About
+            </Hyperlink>
+            /
+            <Hyperlink className="flex-1 lg:flex-none block py-4" href="/blog">
+              Blog
+            </Hyperlink>
+            /
+            <Hyperlink
+              className="flex-1 lg:flex-none block py-4"
+              href="/contact"
+            >
+              Contact
+            </Hyperlink>
+          </div>
         </div>
       </nav>
       <footer className="bg-white font-light text-sm">

@@ -1,4 +1,4 @@
-import Hyperlink from '~/components/Hyperlink';
+import { Hyperlink } from '~/components';
 
 export default function About() {
   return (
@@ -25,7 +25,7 @@ export default function About() {
             <p></p>
             <p className="my-4">
               Today, I am a senior software engineer in{' '}
-              <Hyperlink to="https://deliveryhero.com" active>
+              <Hyperlink href="https://deliveryhero.com" active>
                 Delivery Hero
               </Hyperlink>
               , where we build the next generation fraud detection system for

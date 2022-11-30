@@ -1,79 +1,27 @@
 import type { RenderableTreeNodes } from '@markdoc/markdoc';
 import { renderers } from '@markdoc/markdoc';
-import { Link as RouterLink, useMatches } from '@remix-run/react';
+import { Link, useMatches, useLocation } from '@remix-run/react';
 import * as React from 'react';
 import ReactSyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/prism-light';
+import ts from 'react-syntax-highlighter/dist/cjs/languages/prism/typescript';
 import tsx from 'react-syntax-highlighter/dist/cjs/languages/prism/tsx';
+import diff from 'react-syntax-highlighter/dist/cjs/languages/prism/diff';
 import css from 'react-syntax-highlighter/dist/cjs/languages/prism/css';
-import darcula from 'react-syntax-highlighter/dist/cjs/styles/prism/darcula';
-import { getChildren, isTag } from './markdoc';
+import sh from 'react-syntax-highlighter/dist/cjs/languages/prism/bash';
+import style from 'react-syntax-highlighter/dist/cjs/styles/prism/night-owl';
+import iconURL from '~/icons.svg';
+import { getChildren, isTag } from '~/markdoc';
 
-const style = {
-  ...darcula,
-  'pre[class*="language-"]': {
-    ...darcula['pre[class*="language-"]'],
-    background: '#111',
-  },
-};
-
+ReactSyntaxHighlighter.registerLanguage('ts', ts);
 ReactSyntaxHighlighter.registerLanguage('tsx', tsx);
 ReactSyntaxHighlighter.registerLanguage('css', css);
+ReactSyntaxHighlighter.registerLanguage('diff', diff);
+ReactSyntaxHighlighter.registerLanguage('sh', sh);
 
 export function useRootLoaderData() {
   const [root] = useMatches();
 
   return root.data;
-}
-
-export function Sandbox({
-  title,
-  src,
-  children,
-}: {
-  title: string;
-  src: string;
-  children: React.ReactNode;
-}) {
-  const { repository, branch } = useRootLoaderData();
-  const [hydated, setHydrated] = React.useState(false);
-
-  React.useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  if (!hydated) {
-    return children;
-  }
-
-  const url = new URL(
-    `https://codesandbox.io/embed/github/${repository}/tree/${branch}${src}`,
-  );
-
-  url.searchParams.set('editorsize', '60');
-
-  return (
-    <iframe
-      title={title}
-      src={url.toString()}
-      className="min-h-[70vh] my-6 w-full aspect-[16/9] outline outline-1 outline-zinc-800 outline-offset-4 rounded"
-      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-    />
-  );
-}
-
-export function Aside({ children }: { children: React.ReactNode }) {
-  return (
-    <aside
-      className={`
-				-ml-4 xl:ml-0 mb-8 xl:float-right xl:sticky xl:top-16 xl:w-72 xl:-mr-72 xl:pl-4 xl:py-8 xl:-mt-48 xl:max-h-[calc(100vh-4rem)] overflow-y-auto
-				prose-ul:list-none prose-ul:m-0 prose-ul:pl-4 prose-li:m-0 prose-li:pl-0 prose-headings:pl-4
-				prose-a:block prose-a:py-2 prose-a:no-underline prose-a:font-normal prose-a:text-zinc-400 
-				hover:prose-a:text-white  
-			`}
-    >
-      {children}
-    </aside>
-  );
 }
 
 export function Fence({
@@ -84,28 +32,15 @@ export function Fence({
   children: string;
 }): React.ReactElement {
   return (
-    <ReactSyntaxHighlighter
-      language={language}
-      style={style}
-      showLineNumbers={language === 'tsx' || language === 'css'}
-    >
-      {children}
-    </ReactSyntaxHighlighter>
-  );
-}
-
-export function Details({
-  summary,
-  children,
-}: {
-  summary: string;
-  children: React.ReactElement;
-}) {
-  return (
-    <details className="border border-zinc-700 rounded p-4 my-6">
-      <summary>{summary}</summary>
-      {children}
-    </details>
+    <div className="-mx-16">
+      <ReactSyntaxHighlighter
+        language={language}
+        style={style}
+        showLineNumbers={language === 'tsx' || language === 'css'}
+      >
+        {children}
+      </ReactSyntaxHighlighter>
+    </div>
   );
 }
 
@@ -123,50 +58,52 @@ export function Heading({
       : '';
 
   return (
-    <HeadingTag
-      id={id}
-      className="-mt-20 pt-20 lg:-mt-24 lg:pt-24 prose-a:inline-block prose-img:m-0"
-    >
+    <HeadingTag id={id} className="-mt-20 pt-20 prose-a:inline-block">
       {children}
     </HeadingTag>
   );
 }
 
-export function Link({
-  href,
-  title,
-  children,
-}: {
+interface HyperlinkProps {
   href: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  if (
+  className?: string;
+  active?: boolean;
+  children: React.ReactElement | React.ReactNode;
+}
+
+const linkStyle = {
+  default: 'hover:underline underline-offset-4 decoration-dotted decoration-2',
+  active: 'underline',
+  inactive: 'no-underline',
+};
+
+export function Hyperlink({
+  href,
+  className,
+  active,
+  children,
+}: HyperlinkProps): React.ReactElement {
+  const location = useLocation();
+  const linkClass = `${className ?? ''} ${linkStyle.default} ${
+    active || location.pathname === href ? linkStyle.active : linkStyle.inactive
+  }`.trim();
+  const isAbsoluteURL =
     href.startsWith('https://') ||
     href.startsWith('http://') ||
-    href.startsWith('//')
-  ) {
+    href.startsWith('//');
+
+  if (isAbsoluteURL) {
     return (
-      <a href={href} title={title}>
+      <a className={linkClass} href={href}>
         {children}
       </a>
     );
   }
 
-  let to = href;
-
-  if (to.startsWith('/packages/')) {
-    to = to.replace('/packages/conform-', '/api/').replace('/README.md', '');
-  } else if (to.startsWith('/docs/')) {
-    to = to.replace('/docs', '').replace('.md', '');
-  } else {
-    to = to.replace('.md', '');
-  }
-
   return (
-    <RouterLink to={to} title={title} prefetch="intent">
+    <Link className={linkClass} to={href} prefetch="intent">
       {children}
-    </RouterLink>
+    </Link>
   );
 }
 
@@ -182,14 +119,23 @@ export function Markdown({ content }: { content: RenderableTreeNodes }) {
     >
       {renderers.react(content, React, {
         components: {
-          Aside,
-          Sandbox,
-          Details,
           Fence,
           Heading,
-          Link,
+          Hyperlink,
         },
       })}
     </section>
+  );
+}
+
+interface IconProps extends React.SVGAttributes<SVGElement> {
+  symbol: 'logo' | 'email' | 'github' | 'linkedin' | 'twitter' | 'rss';
+}
+
+export function Icon({ symbol, ...rest }: IconProps): React.ReactElement {
+  return (
+    <svg {...rest}>
+      <use href={`${iconURL}#${symbol}`} />
+    </svg>
   );
 }
