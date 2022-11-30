@@ -1,5 +1,8 @@
 import { Octokit } from '@octokit/core';
+import markdoc from '@markdoc/markdoc';
+import invariant from 'tiny-invariant';
 import type { Env } from 'worker.env';
+import yaml from 'yaml';
 
 interface GitHubConfig {
   auth?: string;
@@ -7,10 +10,6 @@ interface GitHubConfig {
   repo: string;
   env: Env;
   ctx: ExecutionContext;
-}
-
-interface PostValue {
-  content: string;
 }
 
 interface Metadata {
@@ -22,11 +21,10 @@ interface PostMetadata extends Metadata {
   title: string;
   description: string;
   date: string;
-  tags: string[];
 }
 
 type Post = {
-  value: PostValue;
+  value: string;
   metadata: PostMetadata;
 };
 
@@ -95,24 +93,31 @@ class GitHubService {
   }
 
   private async cachePost(slug: string, post: Post): Promise<void> {
-    await this.env.CACHE.put(`blog/${slug}`, JSON.stringify(post.value), {
+    await this.env.CACHE.put(`blog/${slug}`, post.value, {
       expirationTtl: 60 * 60 * 24 * 7,
       metadata: post.metadata,
     });
   }
 
   private formatFile(slug: string, content: string, timestamp: string): Post {
+    const value = atob(content);
+    const ast = markdoc.parse(value);
+    const frontmatter: { [key in string]?: any } = ast.attributes.frontmatter
+      ? yaml.parse(ast.attributes.frontmatter)
+      : {};
+
+    invariant(typeof frontmatter.title === 'string');
+    invariant(typeof frontmatter.description === 'string');
+    invariant(typeof frontmatter.date === 'string');
+
     return {
-      value: {
-        content: atob(content),
-      },
+      value,
       metadata: {
         timestamp,
         slug,
-        title: '',
-        description: '',
-        date: '',
-        tags: [],
+        title: frontmatter.title,
+        description: frontmatter.description,
+        date: frontmatter.date,
       },
     };
   }
@@ -140,29 +145,20 @@ class GitHubService {
     }
 
     const files = await this.getDirectory('content/articles');
-    const directory = files.reduce<Record<string, Post>>((result, file) => {
-      if (
-        file.type === 'file' &&
-        typeof file.content !== 'undefined' &&
-        file.name.endsWith('.md')
-      ) {
-        const slug = file.name.slice(0, -3);
+    const posts = await Promise.all(
+      files.reduce<Array<Promise<PostMetadata>>>((result, file) => {
+        if (file.type === 'file' && file.name.endsWith('.md')) {
+          const slug = file.name.slice(0, -3);
 
-        result[slug] = this.formatFile(slug, file.content, timestamp);
-      }
+          result.push(this.getPost(slug).then(post => post.metadata));
+        }
 
-      return result;
-    }, {});
-
-    this.ctx.waitUntil(
-      Promise.all(
-        Object.entries(directory).map(([slug, post]) =>
-          this.cachePost(slug, post),
-        ),
-      ),
+        return result;
+      }, []),
     );
+
     this.ctx.waitUntil(
-      this.env.CACHE.put('blog', JSON.stringify(Object.keys(directory)), {
+      this.env.CACHE.put('blog', JSON.stringify(posts.map(post => post.slug)), {
         expirationTtl: 60 * 60 * 24 * 7,
         metadata: {
           timestamp,
@@ -170,14 +166,14 @@ class GitHubService {
       }),
     );
 
-    return Object.values(directory).map(post => post.metadata);
+    return posts;
   }
 
   public async getPost(slug: string): Promise<Post> {
     const timestamp = new Date().toISOString();
-    const cache = await this.env.CACHE.getWithMetadata<PostValue, PostMetadata>(
+    const cache = await this.env.CACHE.getWithMetadata<PostMetadata>(
       `blog/${slug}`,
-      { type: 'json' },
+      { type: 'text' },
     );
 
     if (

@@ -13,7 +13,7 @@ export async function loader({ context, params }: LoaderArgs) {
 
   return json({
     ...post.metadata,
-    content: parse(post.value.content),
+    content: parse(post.value),
   });
 }
 

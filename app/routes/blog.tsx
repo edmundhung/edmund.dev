@@ -1,68 +1,17 @@
-import { type HtmlMetaDescriptor, json } from '@remix-run/cloudflare';
+import {
+  type HtmlMetaDescriptor,
+  type LoaderArgs,
+  json,
+} from '@remix-run/cloudflare';
 import { Link, useLoaderData } from '@remix-run/react';
 import { generateMetaDescriptor } from '~/utils/meta';
 
-interface Post {
-  slug: string;
-  title: string;
-  description: string;
-  date: string;
-}
+export async function loader({ context }: LoaderArgs) {
+  const posts = await context.github.getPosts();
 
-export function loader() {
-  const posts: Post[] = [
-    {
-      slug: 'deploying-remix-app-on-cloudflare-workers',
-      title: 'Deploying Remix app on Cloudflare Workers',
-      description:
-        'Step by step guide on how to deploy your remix app to Cloudflare Workers using the `remix-worker-template`',
-      date: '2021-11-27',
-    },
-    {
-      slug: 'setting-up-a-global-loading-indicator-in-remix',
-      title: 'Setting up a global loading indicator in Remix',
-      description:
-        'Tutorial for making you own loading progress bar with tailwindcss',
-      date: '2021-09-15',
-    },
-    // {
-    //   slug: 'setting-up-a-global-loading-indicator-in-remix1',
-    //   title: 'Setting up a global loading indicator in Remix',
-    //   description:
-    //     'Tutorial for making you own loading progress bar with tailwindcss',
-    //   date: '2021-09-15',
-    // },
-    // {
-    //   slug: 'setting-up-a-global-loading-indicator-in-remix2',
-    //   title: 'Setting up a global loading indicator in Remix',
-    //   description:
-    //     'Tutorial for making you own loading progress bar with tailwindcss',
-    //   date: '2021-09-15',
-    // },
-    // {
-    //   slug: 'setting-up-a-global-loading-indicator-in-remix3',
-    //   title: 'Setting up a global loading indicator in Remix',
-    //   description:
-    //     'Tutorial for making you own loading progress bar with tailwindcss',
-    //   date: '2021-09-15',
-    // },
-    // {
-    //   slug: 'setting-up-a-global-loading-indicator-in-remix4',
-    //   title: 'Setting up a global loading indicator in Remix',
-    //   description:
-    //     'Tutorial for making you own loading progress bar with tailwindcss',
-    //   date: '2021-09-15',
-    // },
-    // {
-    //   slug: 'setting-up-a-global-loading-indicator-in-remix5',
-    //   title: 'Setting up a global loading indicator in Remix',
-    //   description:
-    //     'Tutorial for making you own loading progress bar with tailwindcss',
-    //   date: '2021-09-15',
-    // },
-  ];
-
-  return json(posts);
+  return json({
+    posts,
+  });
 }
 
 export function meta(): HtmlMetaDescriptor {
@@ -75,7 +24,7 @@ export function meta(): HtmlMetaDescriptor {
 }
 
 export default function Blog() {
-  const posts = useLoaderData<typeof loader>();
+  const { posts } = useLoaderData<typeof loader>();
 
   return (
     <section className="mt-16 mb-16 sm:mt-32">
