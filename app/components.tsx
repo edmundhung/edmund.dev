@@ -84,7 +84,8 @@ export function Hyperlink({
     href.startsWith('https://') ||
     href.startsWith('http://') ||
     href.startsWith('mailto:') ||
-    href.startsWith('//');
+    href.startsWith('//') ||
+    href.endsWith('/rss.xml');
 
   if (isAbsoluteURL) {
     return (

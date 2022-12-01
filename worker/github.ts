@@ -122,6 +122,10 @@ class GitHubService {
     };
   }
 
+  private latestPostFirst(prev: PostMetadata, next: PostMetadata) {
+    return new Date(next.date).valueOf() - new Date(prev.date).valueOf();
+  }
+
   public async getPosts(): Promise<PostMetadata[]> {
     const timestamp = new Date().toISOString();
     const [cache, list] = await Promise.all([
@@ -135,13 +139,15 @@ class GitHubService {
       list.keys.length > 0 &&
       !this.isStale(cache.metadata?.timestamp, timestamp, 300)
     ) {
-      return list.keys.reduce<PostMetadata[]>((result, key) => {
-        if (key.metadata) {
-          result.push(key.metadata);
-        }
+      return list.keys
+        .reduce<PostMetadata[]>((result, key) => {
+          if (key.metadata) {
+            result.push(key.metadata);
+          }
 
-        return result;
-      }, []);
+          return result;
+        }, [])
+        .sort(this.latestPostFirst);
     }
 
     const files = await this.getDirectory('content/articles');
@@ -166,7 +172,7 @@ class GitHubService {
       }),
     );
 
-    return posts;
+    return posts.sort(this.latestPostFirst);
   }
 
   public async getPost(slug: string): Promise<Post> {
