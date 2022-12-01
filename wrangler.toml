@@ -1,4 +1,4 @@
-name = "template"
+name = "edmund-dev"
 main = "./dist/worker.mjs"
 account_id = "c63d756a160ad09cd9a82553c77e9174"
 workers_dev = false
