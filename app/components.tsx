@@ -8,7 +8,7 @@ import tsx from 'react-syntax-highlighter/dist/cjs/languages/prism/tsx';
 import diff from 'react-syntax-highlighter/dist/cjs/languages/prism/diff';
 import css from 'react-syntax-highlighter/dist/cjs/languages/prism/css';
 import sh from 'react-syntax-highlighter/dist/cjs/languages/prism/bash';
-import style from 'react-syntax-highlighter/dist/cjs/styles/prism/night-owl';
+import style from 'react-syntax-highlighter/dist/cjs/styles/prism/gruvbox-dark';
 import iconURL from '~/icons.svg';
 import { getChildren, isTag } from '~/markdoc';
 
@@ -64,8 +64,9 @@ interface HyperlinkProps {
 }
 
 const linkStyle = {
-  default: 'underline-offset-4 decoration-dotted decoration-current',
-  active: 'underline hover:decoration-2',
+  default:
+    'underline-offset-4 decoration-dotted decoration-current hover:decoration-2',
+  active: 'underline',
   inactive: 'no-underline hover:underline',
 };
 
@@ -82,6 +83,7 @@ export function Hyperlink({
   const isAbsoluteURL =
     href.startsWith('https://') ||
     href.startsWith('http://') ||
+    href.startsWith('mailto:') ||
     href.startsWith('//');
 
   if (isAbsoluteURL) {
