@@ -17,6 +17,7 @@ interface Env {
 
   // Custom env
   CACHE: KVNamespace;
+  GITHUB_TOKEN: string | undefined;
 }
 
 declare module '@remix-run/server-runtime' {

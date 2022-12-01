@@ -8,6 +8,7 @@ const handleRequest = createRequestHandler<Env>({
   getLoadContext(request, env, ctx) {
     return {
       github: new GitHubService({
+        auth: env.GITHUB_TOKEN,
         owner: 'edmundhung',
         repo: 'blog',
         env,
