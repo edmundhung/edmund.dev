@@ -25,13 +25,18 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export default function Post() {
-  const { title, date, content } = useLoaderData<typeof loader>();
+  const { date, content } = useLoaderData<typeof loader>();
 
   return (
     <div className="mt-16 mb-16 sm:mt-32">
       <div className="mx-auto xl:max-w-4xl container px-4">
-        <h1>{title}</h1>
-        <time>{date}</time>
+        <time className="block mb-4" dateTime={date}>
+          {new Date(date).toLocaleDateString('en', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </time>
         <Markdown content={content} />
       </div>
     </div>

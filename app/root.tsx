@@ -4,6 +4,7 @@ import {
   Links,
   LiveReload,
   Meta,
+  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -26,7 +27,7 @@ export let meta: MetaFunction = () => {
 export default function App() {
   return (
     <Document>
-      <header className="container mx-auto flex flex-row justify-between gap-4 p-4">
+      <header className="container mx-auto flex flex-row justify-between gap-8 p-4">
         <Link
           className="flex flex-row items-center no-underline"
           to="/"
@@ -42,37 +43,55 @@ export default function App() {
       <main className="flex flex-col flex-1">
         <Outlet />
       </main>
-      <nav className="sticky bottom-0 font-light text-sm bg-black text-white z-30 ">
+      <nav className="sticky bottom-0 font-light text-sm bg-black text-white/70 z-30 ">
         <div className="container mx-auto flex justify-between shadow px-4">
-          <div className="flex gap-6 items-center">
+          <div className="hidden md:flex gap-6 items-center">
             <Hyperlink href="https://github.com/edmundhung">
-              <Icon className="w-4 h-4" symbol="github" />
+              <Icon className="w-4 h-4 hover:text-white" symbol="github" />
               <span className="sr-only">GitHub</span>
             </Hyperlink>
             <Hyperlink href="https://twitter.com/_edmundhung">
-              <Icon className="w-4 h-4" symbol="twitter" />
+              <Icon className="w-4 h-4 hover:text-white" symbol="twitter" />
               <span className="sr-only">Twitter</span>
             </Hyperlink>
             <Hyperlink href="/rss.xml">
-              <Icon className="w-4 h-4" symbol="rss" />
+              <Icon className="w-4 h-4 hover:text-white" symbol="rss" />
               <span className="sr-only">RSS</span>
             </Hyperlink>
           </div>
-          <div className="text-center flex gap-6 items-center">
-            <Hyperlink className="flex-1 lg:flex-none block py-4" href="/about">
-              About
-            </Hyperlink>
-            /
-            <Hyperlink className="flex-1 lg:flex-none block py-4" href="/blog">
-              Blog
-            </Hyperlink>
-            /
-            <Hyperlink
-              className="flex-1 lg:flex-none block py-4"
-              href="/contact"
+          <div className="text-center flex flex-1 gap-6 justify-end items-center">
+            <NavLink
+              className={({ isActive }) =>
+                `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
+                  isActive ? 'text-white' : 'hover:underline'
+                }`
+              }
+              to="/"
             >
-              Contact
-            </Hyperlink>
+              Home
+            </NavLink>
+            /
+            <NavLink
+              className={({ isActive }) =>
+                `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
+                  isActive ? 'text-white' : 'hover:underline'
+                }`
+              }
+              to="/about"
+            >
+              About
+            </NavLink>
+            /
+            <NavLink
+              className={({ isActive }) =>
+                `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
+                  isActive ? 'text-white' : 'hover:underline'
+                }`
+              }
+              to="/blog"
+            >
+              Blog
+            </NavLink>
           </div>
         </div>
       </nav>

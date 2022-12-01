@@ -4,7 +4,7 @@ import {
   json,
 } from '@remix-run/cloudflare';
 import { Link, useLoaderData } from '@remix-run/react';
-import { Hyperlink } from '~/components';
+import { Hyperlink, Icon } from '~/components';
 import { generateMetaDescriptor } from '~/utils/meta';
 
 export async function loader({ context }: LoaderArgs) {
@@ -27,29 +27,35 @@ export default function Index() {
   const { latestPost } = useLoaderData<typeof loader>();
 
   return (
-    <div className="flex-1 flex flex-col items-start justify-center">
-      <div className="mx-auto mb-6 sm:mb-8 p-4 flex justify-center">
+    <div className="flex-1 flex flex-col-reverse md:flex-col justify-center">
+      <div className="max-w-full mx-auto my-4 p-4">
         {latestPost ? (
-          <div className="relative overflow-hidden rounded-full py-1.5 px-4 text-sm leading-6 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-            <span className="text-gray-600">
-              {`${latestPost.title} `}
-              <Link
-                to={`/blog/${latestPost.slug}`}
-                className="inline-block font-semibold text-red-600"
-              >
-                <span className="absolute inset-0" aria-hidden="true" />
-                Learn more <span aria-hidden="true">&rarr;</span>
-              </Link>
+          <Link
+            to={`/blog/${latestPost.slug}`}
+            className="flex items-center rounded-full bg-[#d4d6c8] p-1 pr-2 hover:text-black text-base"
+          >
+            <span className="rounded-full bg-[#52524e] px-3 py-0.5 text-sm font-semibold leading-5 text-white">
+              New
             </span>
-          </div>
+            <span className="mx-2 text-sm text-ellipsis overflow-hidden whitespace-nowrap">
+              {latestPost.title}
+            </span>
+            {/* <Icon symbol="arrow" className="h-5 w-5 stroke-current" aria-hidden="true" /> */}
+            <Icon
+              symbol="chevron-right"
+              className="h-5 w-5"
+              aria-hidden="true"
+            />
+          </Link>
         ) : null}
       </div>
-      <div className="relative max-w-5xl mx-auto px-4 pb-12">
+      <div className="relative max-w-5xl mx-auto px-4 py-6 flex-1 md:flex-none flex flex-col items-center justify-center">
         <h1 className="text-4xl font-bold tracking-tight text-center sm:text-6xl">
-          Web developer, amateur photographer and traveler.
+          Welcome to my <span className="inline-block">little corner</span>.{' '}
+          <span className="inline-block">I'm Edmund Hung.</span>
         </h1>
         <p className="mt-4 sm:mt-6 text-lg leading-8 text-gray-600 text-center">
-          I'm Edmund, a senior software engineer currently based in Berlin.
+          I'm a web developer currently based in Berlin.
           <br /> I maintain serveral open source projects, such as{' '}
           <Hyperlink href="https://github.com/edmundhung/conform" active>
             Conform

@@ -1,6 +1,6 @@
 import type { RenderableTreeNodes } from '@markdoc/markdoc';
 import { renderers } from '@markdoc/markdoc';
-import { Link, useMatches, useLocation } from '@remix-run/react';
+import { Link, useLocation } from '@remix-run/react';
 import * as React from 'react';
 import ReactSyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/prism-light';
 import ts from 'react-syntax-highlighter/dist/cjs/languages/prism/typescript';
@@ -18,12 +18,6 @@ ReactSyntaxHighlighter.registerLanguage('css', css);
 ReactSyntaxHighlighter.registerLanguage('diff', diff);
 ReactSyntaxHighlighter.registerLanguage('sh', sh);
 
-export function useRootLoaderData() {
-  const [root] = useMatches();
-
-  return root.data;
-}
-
 export function Fence({
   language,
   children,
@@ -32,15 +26,13 @@ export function Fence({
   children: string;
 }): React.ReactElement {
   return (
-    <div className="-mx-16">
-      <ReactSyntaxHighlighter
-        language={language}
-        style={style}
-        showLineNumbers={language === 'tsx' || language === 'css'}
-      >
-        {children}
-      </ReactSyntaxHighlighter>
-    </div>
+    <ReactSyntaxHighlighter
+      language={language}
+      style={style}
+      showLineNumbers={language === 'tsx' || language === 'css'}
+    >
+      {children}
+    </ReactSyntaxHighlighter>
   );
 }
 
@@ -72,9 +64,9 @@ interface HyperlinkProps {
 }
 
 const linkStyle = {
-  default: 'hover:underline underline-offset-4 decoration-dotted decoration-2',
-  active: 'underline',
-  inactive: 'no-underline',
+  default: 'underline-offset-4 decoration-dotted decoration-current',
+  active: 'underline hover:decoration-2',
+  inactive: 'no-underline hover:underline',
 };
 
 export function Hyperlink({
@@ -115,7 +107,9 @@ export function Markdown({ content }: { content: RenderableTreeNodes }) {
 
   return (
     <section
-      className={`prose max-w-none ${hasSidebar ? 'xl:pr-72' : ''}`.trim()}
+      className={`prose prose-headings:text-primary prose-p:text-primary prose-a:text-primary max-w-none ${
+        hasSidebar ? 'xl:pr-72' : ''
+      }`.trim()}
     >
       {renderers.react(content, React, {
         components: {
@@ -129,7 +123,15 @@ export function Markdown({ content }: { content: RenderableTreeNodes }) {
 }
 
 interface IconProps extends React.SVGAttributes<SVGElement> {
-  symbol: 'logo' | 'email' | 'github' | 'linkedin' | 'twitter' | 'rss';
+  symbol:
+    | 'logo'
+    | 'email'
+    | 'github'
+    | 'linkedin'
+    | 'twitter'
+    | 'rss'
+    | 'arrow'
+    | 'chevron-right';
 }
 
 export function Icon({ symbol, ...rest }: IconProps): React.ReactElement {
