@@ -14,7 +14,7 @@ interface WorkerFixtures {
 
 export { expect };
 
-export const test = base.extend<TestFixtures, WorkerFixtures>({
+export const it = base.extend<TestFixtures, WorkerFixtures>({
   // Assign a unique "port" for each worker process
   port: [
     // eslint-disable-next-line no-empty-pattern
