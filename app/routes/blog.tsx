@@ -42,7 +42,7 @@ export default function Blog() {
               </p>
             </header>
             <div className="px-4">
-              <div className="md:border-l-2 md:border-[#d4d6c8] md:pl-6">
+              <div className="md:pl-6">
                 <div className="flex max-w-3xl flex-col space-y-16">
                   {posts.map(post => (
                     <article
