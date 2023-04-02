@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "mdx-deck deck.mdx",
+    "build": "mdx-deck build deck.mdx",
+    "test": "echo \"there are no tests\""
+  },
+  "devDependencies": {
+    "code-surfer": "3.1.0",
+    "mdx-deck": "3.0.13"
+  },
+  "name": "talks"
+}
