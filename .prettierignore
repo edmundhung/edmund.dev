@@ -6,6 +6,9 @@
 # Postcss build
 /app/styles
 
+# Talks
+/talks
+
 # Worker build
 /dist
 

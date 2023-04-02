@@ -1,0 +1,127 @@
+import {
+  CodeSurfer,
+  CodeSurferColumns,
+  Step,
+} from "code-surfer";
+import { github, vsDark } from "@code-surfer/themes";
+import {
+  BaseExample,
+  CapturingInvalidMessages,
+  EnhancingValidation,
+  CustomizeMessages,
+} from './demo';
+
+export const theme = github;
+
+# Remixing Constraint Validation
+
+Edmund Hung
+
+Remix Conf 2023
+
+---
+
+<CodeSurfer>
+
+```html
+<input name="email" />
+```
+
+```html 1[21:42]
+<input name="email" type="email" required />
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurferColumns sizes={[2,3]}>
+
+<Step>
+
+<BaseExample />
+
+```jsx file=./src/01.BaseExample.jsx
+```
+
+</Step>
+
+<Step>
+
+<BaseExample />
+
+```jsx file=./src/02.Preparation.jsx
+```
+
+</Step>
+
+<Step>
+
+<CapturingInvalidMessages />
+
+```jsx file=./src/03.ReportingErrors.jsx
+```
+
+</Step>
+
+<Step>
+
+<EnhancingValidation />
+
+```jsx file=./src/04.EnhancingValidation.jsx
+```
+
+</Step>
+
+<Step>
+
+<CustomizeMessages />
+
+```jsx file=./src/05.CustomizeMessages.jsx
+```
+
+</Step>
+
+<Step>
+
+<CustomizeMessages />
+
+```jsx file=./src/06.Action.jsx
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+# Never trust the client
+
+---
+
+<CodeSurfer>
+
+
+```jsx 49:69 file=./src/06.Action.jsx
+```
+
+```jsx 66,74 file=./src/07.ExtractSchema.jsx
+```
+
+```diff 5:15
+```
+
+```jsx 1 file=./src/08.SecretSauce.jsx
+```
+
+```diff 31:43
+```
+
+```jsx file=./src/09.SyncState.jsx
+```
+
+</CodeSurfer>
+
+---
+
+Demo
