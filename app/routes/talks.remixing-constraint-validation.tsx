@@ -1,9 +1,9 @@
 import { type LinksFunction, type MetaFunction } from '@remix-run/cloudflare';
 import resetCSS from 'reveal.js/dist/reset.css';
 import baseCSS from 'reveal.js/dist/reveal.css';
-import themeCSS from 'reveal.js/dist/theme/serif.css';
-import monokaiCSS from 'reveal.js/plugin/highlight/monokai.css';
 import { useEffect } from 'react';
+import codeCSS from '~/styles/code.css';
+import themeCSS from '~/styles/reveal-theme.css';
 import { TalkLayout } from '~/components';
 import { initialize } from '~/reveal.client';
 import { generateMetaDescriptor } from '~/utils/meta';
@@ -13,7 +13,7 @@ export let links: LinksFunction = () => {
     { rel: 'stylesheet', href: resetCSS },
     { rel: 'stylesheet', href: baseCSS },
     { rel: 'stylesheet', href: themeCSS },
-    { rel: 'stylesheet', href: monokaiCSS },
+    { rel: 'stylesheet', href: codeCSS },
   ];
 };
 
@@ -31,7 +31,7 @@ export const meta: MetaFunction = () => {
 
 export default function Talk() {
   useEffect(() => {
-    initialize();
+    return initialize();
   }, []);
 
   return (
@@ -40,8 +40,98 @@ export default function Talk() {
       description="Remix Conf 2023"
     >
       <div className="slides">
-        <section>Slide 1</section>
-        <section>Slide 2</section>
+        <section>
+          <h3>Remixing Constraint Validation</h3>
+        </section>
+        <section>
+          <section data-auto-animate>
+            <pre style={{ width: 'max-content' }}>
+              <code data-trim>{`<input type="email" required />`}</code>
+            </pre>
+          </section>
+        </section>
+        <section>
+          <section data-auto-animate>
+            <pre data-id="code-animation">
+              <code data-trim data-line-numbers>
+                {`
+import { Form } from "@remix-run/react";
+
+export default function LoginForm() {
+  return (
+    <Form
+      method="post"
+    >
+      <div>
+        <label>Email</label>
+        <input
+          name="email"
+          type="email"
+          required
+          pattern="[^@]+@[A-Za-z0-9]+.[A-Za-z0-9]+"
+        />
+      </div>
+      <div>
+        <label>Password</label>
+        <input
+          name="password"
+          type="password"
+          required
+        />
+      </div>
+      <button>Login</button>
+    </Form>
+  );
+}
+                `}
+              </code>
+            </pre>
+          </section>
+          <section data-auto-animate>
+            <pre data-id="code-animation">
+              <code data-trim data-line-numbers="7-14">
+                {`
+import { Form } from "@remix-run/react";
+
+export default function LoginForm() {
+  return (
+    <Form
+      method="post"
+      onSubmit={(event) => {
+        // Check validity of each field
+        if (!event.currentTarget.reportValidity()) {
+          // Prevent default form submission
+          event.preventDefault();
+        }
+      }}
+      noValidate
+    >
+      <div>
+        <label>Email</label>
+        <input
+          name="email"
+          type="email"
+          required
+          pattern="[^@]+@[A-Za-z0-9]+.[A-Za-z0-9]+"
+        />
+      </div>
+      <div>
+        <label>Password</label>
+        <input
+          name="password"
+          type="password"
+          required
+        />
+      </div>
+      <button>Login</button>
+    </Form>
+  );
+}
+                `}
+              </code>
+            </pre>
+          </section>
+        </section>
       </div>
     </TalkLayout>
   );

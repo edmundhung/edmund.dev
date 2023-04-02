@@ -201,7 +201,6 @@ export function Layout({ children }: LayoutProps) {
                 }`
               }
               to="/"
-              reloadDocument={hardTransition}
             >
               Home
             </NavLink>
