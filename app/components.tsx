@@ -1,6 +1,6 @@
 import type { RenderableTreeNodes } from '@markdoc/markdoc';
 import { renderers } from '@markdoc/markdoc';
-import { Link, useLocation } from '@remix-run/react';
+import { Link, NavLink, useLocation } from '@remix-run/react';
 import * as React from 'react';
 import ReactSyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/prism-light';
 import ts from 'react-syntax-highlighter/dist/cjs/languages/prism/typescript';
@@ -142,5 +142,122 @@ export function Icon({ symbol, ...rest }: IconProps): React.ReactElement {
     <svg {...rest}>
       <use href={`${iconURL}#${symbol}`} />
     </svg>
+  );
+}
+
+interface HeaderProps {
+  reloadDocument?: boolean;
+}
+
+export function Header({ reloadDocument }: HeaderProps) {
+  return (
+    <header className="container mx-auto flex flex-row justify-between gap-8 p-4">
+      <Link
+        className="flex flex-row items-center no-underline"
+        to="/"
+        prefetch="intent"
+        reloadDocument={reloadDocument}
+      >
+        <Icon
+          className="w-12 h-12 rounded-full text-[#52524e] bg-white"
+          symbol="logo"
+        />
+        <span className="px-4 sr-only">Edmund Hung</span>
+      </Link>
+    </header>
+  );
+}
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export function Layout({ children }: LayoutProps) {
+  return (
+    <>
+      <Header />
+      <main className="flex flex-col flex-1">{children}</main>
+      <nav className="sticky bottom-0 font-light text-sm bg-black text-white/70 z-30 ">
+        <div className="container mx-auto flex justify-between shadow px-4">
+          <div className="hidden md:flex gap-6 items-center">
+            <Hyperlink href="https://github.com/edmundhung">
+              <Icon className="w-4 h-4 hover:text-white" symbol="github" />
+              <span className="sr-only">GitHub</span>
+            </Hyperlink>
+            <Hyperlink href="https://twitter.com/_edmundhung">
+              <Icon className="w-4 h-4 hover:text-white" symbol="twitter" />
+              <span className="sr-only">Twitter</span>
+            </Hyperlink>
+            <Hyperlink href="/rss.xml">
+              <Icon className="w-4 h-4 hover:text-white" symbol="rss" />
+              <span className="sr-only">RSS</span>
+            </Hyperlink>
+          </div>
+          <div className="text-center flex flex-1 gap-6 justify-end items-center">
+            <NavLink
+              className={({ isActive }) =>
+                `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
+                  isActive ? 'text-white' : 'hover:underline'
+                }`
+              }
+              to="/"
+              reloadDocument={hardTransition}
+            >
+              Home
+            </NavLink>
+            /
+            <NavLink
+              className={({ isActive }) =>
+                `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
+                  isActive ? 'text-white' : 'hover:underline'
+                }`
+              }
+              to="/about"
+            >
+              About
+            </NavLink>
+            /
+            <NavLink
+              className={({ isActive }) =>
+                `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
+                  isActive ? 'text-white' : 'hover:underline'
+                }`
+              }
+              to="/blog"
+            >
+              Blog
+            </NavLink>
+          </div>
+        </div>
+      </nav>
+      <footer className="bg-white font-light text-sm">
+        <div className="container mx-auto text-center lg:text-left p-4">
+          All rights reserved &copy; Edmund Hung {new Date().getFullYear()}
+        </div>
+      </footer>
+    </>
+  );
+}
+
+interface TalkLayoutProps {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}
+
+export function TalkLayout({ title, description, children }: TalkLayoutProps) {
+  return (
+    <>
+      <Header reloadDocument />
+      <main className="flex flex-col flex-1 reveal">{children}</main>
+      <footer className="bg-white font-light text-sm">
+        <div className="container mx-auto text-center lg:text-left p-4">
+          <div className="flex justify-between">
+            <div>{title}</div>
+            <div>{description}</div>
+          </div>
+        </div>
+      </footer>
+    </>
   );
 }

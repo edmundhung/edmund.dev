@@ -4,7 +4,7 @@ import {
   json,
 } from '@remix-run/cloudflare';
 import { useLoaderData } from '@remix-run/react';
-import { Markdown } from '~/components';
+import { Layout, Markdown } from '~/components';
 import { parse } from '~/markdoc';
 import { generateMetaDescriptor } from '~/utils/meta';
 
@@ -28,17 +28,19 @@ export default function Post() {
   const { date, content } = useLoaderData<typeof loader>();
 
   return (
-    <div className="mt-16 mb-16 sm:mt-32">
-      <div className="mx-auto xl:max-w-4xl container px-4">
-        <time className="block mb-4" dateTime={date}>
-          {new Date(date).toLocaleDateString('en', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </time>
-        <Markdown content={content} />
+    <Layout>
+      <div className="mt-16 mb-16 sm:mt-32">
+        <div className="mx-auto xl:max-w-4xl container px-4">
+          <time className="block mb-4" dateTime={date}>
+            {new Date(date).toLocaleDateString('en', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+          <Markdown content={content} />
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }

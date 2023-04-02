@@ -4,7 +4,6 @@ import {
   Links,
   LiveReload,
   Meta,
-  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -12,7 +11,7 @@ import {
 } from '@remix-run/react';
 import * as React from 'react';
 import stylesUrl from '~/styles/global.css';
-import { Hyperlink, Icon } from '~/components';
+import { Icon } from '~/components';
 
 export let links: LinksFunction = () => {
   return [{ rel: 'stylesheet', href: stylesUrl }];
@@ -27,79 +26,7 @@ export let meta: MetaFunction = () => {
 export default function App() {
   return (
     <Document>
-      <header className="container mx-auto flex flex-row justify-between gap-8 p-4">
-        <Link
-          className="flex flex-row items-center no-underline"
-          to="/"
-          prefetch="intent"
-        >
-          <Icon
-            className="w-12 h-12 rounded-full text-[#52524e] bg-white"
-            symbol="logo"
-          />
-          <span className="px-4 sr-only">Edmund Hung</span>
-        </Link>
-      </header>
-      <main className="flex flex-col flex-1">
-        <Outlet />
-      </main>
-      <nav className="sticky bottom-0 font-light text-sm bg-black text-white/70 z-30 ">
-        <div className="container mx-auto flex justify-between shadow px-4">
-          <div className="hidden md:flex gap-6 items-center">
-            <Hyperlink href="https://github.com/edmundhung">
-              <Icon className="w-4 h-4 hover:text-white" symbol="github" />
-              <span className="sr-only">GitHub</span>
-            </Hyperlink>
-            <Hyperlink href="https://twitter.com/_edmundhung">
-              <Icon className="w-4 h-4 hover:text-white" symbol="twitter" />
-              <span className="sr-only">Twitter</span>
-            </Hyperlink>
-            <Hyperlink href="/rss.xml">
-              <Icon className="w-4 h-4 hover:text-white" symbol="rss" />
-              <span className="sr-only">RSS</span>
-            </Hyperlink>
-          </div>
-          <div className="text-center flex flex-1 gap-6 justify-end items-center">
-            <NavLink
-              className={({ isActive }) =>
-                `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
-                  isActive ? 'text-white' : 'hover:underline'
-                }`
-              }
-              to="/"
-            >
-              Home
-            </NavLink>
-            /
-            <NavLink
-              className={({ isActive }) =>
-                `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
-                  isActive ? 'text-white' : 'hover:underline'
-                }`
-              }
-              to="/about"
-            >
-              About
-            </NavLink>
-            /
-            <NavLink
-              className={({ isActive }) =>
-                `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
-                  isActive ? 'text-white' : 'hover:underline'
-                }`
-              }
-              to="/blog"
-            >
-              Blog
-            </NavLink>
-          </div>
-        </div>
-      </nav>
-      <footer className="bg-white font-light text-sm">
-        <div className="container mx-auto text-center lg:text-left p-4">
-          All rights reserved &copy; Edmund Hung {new Date().getFullYear()}
-        </div>
-      </footer>
+      <Outlet />
     </Document>
   );
 }
