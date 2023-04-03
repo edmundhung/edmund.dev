@@ -3,15 +3,18 @@ import {
   CodeSurferColumns,
   Step,
 } from "code-surfer";
-import { github, vsDark } from "@code-surfer/themes";
 import {
   BaseExample,
   CapturingInvalidMessages,
   EnhancingValidation,
   CustomizeMessages,
 } from './demo';
+import { demo, code, deck } from "./theme";
+import { Layout, Centered } from './layout';
 
-export const theme = github;
+export const theme = deck;
+
+<Layout>
 
 # Remixing Constraint Validation
 
@@ -19,23 +22,24 @@ Edmund Hung
 
 Remix Conf 2023
 
+</Layout>
+
 ---
 
-<CodeSurfer>
+<CodeSurfer theme={code}>
 
 ```html
-<input name="email" />
+<input name="email" required />
 ```
 
-```html 1[21:42]
-<input name="email" type="email" required />
+```diff 1[21:29]
 ```
 
 </CodeSurfer>
 
 ---
 
-<CodeSurferColumns sizes={[2,3]}>
+<CodeSurferColumns themes={[demo, code]} sizes={[2,3]}>
 
 <Step>
 
@@ -91,21 +95,36 @@ Remix Conf 2023
 
 </Step>
 
+
+
+<Step>
+
+<CustomizeMessages />
+
+```diff 17:22
+```
+
+</Step>
+
 </CodeSurferColumns>
 
 ---
 
+<Centered>
+
 # Never trust the client
+
+</Centered>
 
 ---
 
-<CodeSurfer>
+<CodeSurfer theme={code}>
 
 
 ```jsx 49:69 file=./src/06.Action.jsx
 ```
 
-```jsx 66,74 file=./src/07.ExtractSchema.jsx
+```jsx 66,75 file=./src/07.ExtractSchema.jsx
 ```
 
 ```diff 5:15
