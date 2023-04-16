@@ -11,35 +11,41 @@ tags:
 
 # Remixing Constraint Validation
 
-Building form is hard. The Remix Form and Action have already made server validation simplier than ever, but client validation is still a challenge for many of us. In this article, I will show you how to use the browser to validate the form data by utilizing the Constraint Validation APIs.
+Building form is hard. There are different states you need to maintain and also events to react as user interacting with your form. It is always tempting for us to just go with a form validation solution which, however, might brings a lot more than what we needed. What if we could use the platform to implement simple form validation without adding another dependency on the client?
 
-The Constraint Validation is a specification that spread across HTML, CSS and the DOM. For example, you can validate the value of an input tag with the required attribute:
+## What is Constraint Validation?
+
+The [Constraint Validation](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#constraint-validation) is a specification that spread across HTML, CSS and the DOM. For example, you can validate the value on an input field with the `required` attribute:
 
 ```tsx
 <input required />
 ```
 
-You can also create a number input with min, max and step attributes that describe the different criteria needed for the number:
+You can also configure a number input with `min`, `max` and `step` attributes that describes different criterias needed for the number:
 
 ```tsx
 <input type="number" min={0} max={5} step={0.5} />
 ```
 
-There is also email input that you can restirct to a certain pattern:
+There is also email input which you can restirct to a certain `pattern`:
 
 ```tsx
 <input type="email" pattern="[^@]+@example.com" />
 ```
 
-This is not limited to the input tag, but also other form control elements. For example, you can setup a textarea with a specific length requriement using the `minLength` and `maxLength` attributes.
+This is not limited to the input element, but also other form controls. For example, you can setup a textarea with a specific length requriement using the `minLength` and `maxLength` attributes.
 
 ```tsx
 <textarea minLength={10} maxLength={100} />
 ```
 
-By specifiying the validation attributes, the browser will start reporting errors through the error bubbles when the users submit the form.
+After specifiying the validation attributes, the browser will validate form controls as user types and report errors in the form of error bubbles, which come with a generic message (**Why**), populate only on the first invalid control (**Where**) and are shown only on form submission (**When**). This is where people stop and turn to its own form validation solution.
 
-However this is just the superficial part of the Constraint Validation API. The DOMs also provides a way to access the validity of each form controls called the `ValidityState`. The Validity State is an interface that contains a list of boolean values that describe the validity of the element. For example, if the input is required and the value is empty, the `valueMissing` property will be marked as `true`:
+However, this is just the superficial part of the Constraint Validation. The DOM APIs is where its true power lies.
+
+### Why: ValidityState
+
+The [ValidityState](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState) is an interface that contains a list of boolean values which describe the validity of the element and can be accessed from the `validity` property of the form element. For example, if an input is required and its value is empty, the `valueMissing` property will be marked as `true`:
 
 ```json
 {
@@ -57,18 +63,20 @@ However this is just the superficial part of the Constraint Validation API. The 
 }
 ```
 
-When the form is submitted, the browser will also fire an `invalid` event on form element that were invalid, and you can check the `validity` property of the form elements to customize its behavior:
+### Where: Invalid event
+
+When user submits a form, the browser will check the validity of each form controls and fire an `invalid` event on the corresponding element if it is considered invalid. This gives us the opportunity to react to the invalid state and display the error message to the user.
 
 ```tsx
 <input
   onInvalid={event => {
-    const input = event.currentTarget;
+    const { name, validity } = event.currentTarget;
 
-    if (input.validity.valueMissing) {
+    if (validity.valueMissing) {
         // input is required but the value is empty
     }
 
-    if (input.validity.typeMismatch) {
+    if (validity.typeMismatch) {
         // input is not a valid email / url etc.
     }
 
@@ -78,7 +86,9 @@ When the form is submitted, the browser will also fire an `invalid` event on for
 />
 ```
 
-By default, the browser will report any errors through the error bubbles and prevent the form submit event from firing if there are any errors. However, this makes it hard to know if the form has been submitted or not. To solve this problem, you can use the `noValidate` attribute on the form element to disable the default behavior and reimplement it yourself using the `reportValidity` method from the form element:
+### When: reportValidity
+
+By default, the browser will report form error on submission and prevent the form submit event from firing if there are any errors. But this is completely customizable. All you need is to disable the browser checks with the `noValidte` attribute and reimplement it yourself using the `reportValidity` API:
 
 ```tsx
 <form
@@ -131,9 +141,13 @@ export default function LoginForm() {
 }
 ```
 
-By utilizing the validation attributes, the login form is already checking if the email provided is valid and if the password is not empty. However, we can do better than this. Let's prepare the form to display the error messages when the user submits the form:
+By utilizing the validation attributes, the login form is already checking if the email provided is valid and if the password is not empty. Now, it's time to improve it using the Constraint Validation APIs.
 
-```tsx
+### Prepartion
+
+First, it is common to have the error message displayed next to the input field. Let's setup an error state that will be used to keep track of the error message for each form control:
+
+```tsx +[2,5,12,18,23,28]
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 
@@ -169,9 +183,13 @@ export default function LoginForm() {
 }
 ```
 
-We can then capture the error messages with an `onInvalid` event handler:
+### Capturing error messages
 
-```tsx
+Then, we can capture the error messages with an `onInvalid` event handler. You can set it up on each form control or on the form element itself. In this example, we will use the form element to capture the error messages:
+
+> It is technically better to use `onInvalidCapture` as native invalid event does not bubble. This works fine only because React bubbles the event regardsless.
+
+```tsx +[10-21]
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 
@@ -181,7 +199,7 @@ export default function LoginForm() {
   return (
     <Form
       method="post"
-      onInvalidCapture={(event) => {
+      onInvalid={(event) => {
         const input = event.target;
 
         // Update message based on the input name
@@ -221,9 +239,11 @@ export default function LoginForm() {
 }
 ```
 
-Our form is now able to display the error messages when the user submits the form. However, the error messages will still be displayed even if the user fixes the error. To fix this, we can customize the `onSubmit` event handler to clear the error messages when the form is submitted:
+### Clearing error messages on valid
 
-```tsx
+Our form is now able to display the error messages when the user submits the form. But there is a problem. The error messages persists even if the user fixes the error as the message is updated only on invalid. To fix this, we can customize the `onSubmit` event handler to clear the error messages before reporting errors:
+
+```tsx +[20-31]
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 
@@ -284,13 +304,15 @@ export default function LoginForm() {
 }
 ```
 
-For sure, we can also customize the error messages by accessing the ValidityState of the input:
+### Customizing messages
 
-```tsx
+By far we are only displaying the default error messages provided by the browser. Let's customize the error messages by accessing the ValidityState of the input:
+
+```tsx +[4-14,27]
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 
-function formatValidity(input) {
+function formatError(input) {
   if (input.validity.valueMissing) {
     return "The field is required";
   }
@@ -308,12 +330,12 @@ export default function LoginForm() {
   return (
     <Form
       method="post"
-      onInvalidCapture={(event) => {
+      onInvalid={(event) => {
         const input = event.target;
 
         setError((error) => ({
           ...error,
-          [input.name]: formatValidity(input),
+          [input.name]: formatError(input),
         }));
 
         event.preventDefault();
@@ -356,14 +378,16 @@ export default function LoginForm() {
 }
 ```
 
-At this point, we have a form that is able to validate the user input and display the error messages. Let's wrap it up by adding the action.
+### Finishing up
+
+Now, it's time to wrap it up with an action. We will parse the form data and login with the credentials. We are done, aren't we? No. We should never trust the client.
 
 ```tsx
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 import { login } from "~/auth.server";
 
-function formatValidity(input) {
+function formatError(input) {
   if (input.validity.valueMissing) {
     return "The field is required";
   }
@@ -393,7 +417,7 @@ export default function LoginForm() {
 
         setError((error) => ({
           ...error,
-          [input.name]: formatValidity(input),
+          [input.name]: formatError(input),
         }));
 
         event.preventDefault();
@@ -436,21 +460,17 @@ export default function LoginForm() {
 }
 ```
 
-We are done, aren't we?
-
 ### Never trust the client
 
-So far we have talked about how to validate the user input on the client side. However, server validation is still needed. We should never trust the client.
+Trusting the client is a bad idea. But there is no Constraint Validation API on the server side and we have no access to the ValidityState. Are we going to rewrite the validation logic again?
 
-But how? There is no Constraint Validation API on the server side. There is no ValidityState object. Are we going to write the validation logic again?
+This is where our secret sauce comes in: [@conform-to/validitystate](https://www.npmjs.com/package/@conform-to/validitystate).
 
-This is where our secret sauce comes in: [@conform-to/validitystate](#).
-
-This is a simple validation library that is able to validate the user input on the server side by polyfilling the ValidityState object. It can validate the form data based on the constraints that we have set on the client side and return the error messages.
+This is a simple validation library that let you Validate on the server using the same rules as the browser: it takes a schema that represent the constraint of each form control and allows customizing the validation message by polyfilling the ValidityState.
 
 Let's start by extracting the schema from the LoginForm component:
 
-```tsx
+```tsx +[5-15,68,77]
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 import { login } from "~/auth.server";
@@ -467,7 +487,7 @@ const schema = {
     },
 };
 
-function formatValidity(input) {
+function formatError(input) {
   if (input.validity.valueMissing) {
     return "The field is required";
   }
@@ -497,7 +517,7 @@ export default function LoginForm() {
 
         setError((error) => ({
           ...error,
-          [input.name]: formatValidity(input),
+          [input.name]: formatError(input),
         }));
 
         event.preventDefault();
@@ -537,7 +557,7 @@ export default function LoginForm() {
 }
 ```
 
-We will then use the `validate` function from the `@conform-to/validitystate` library to validate the formData on the server and format the error messages using our `formatValidity` function:
+We will then replace `Object.fromEntries` with the `validate` together with the schema and the `formatError` helper:
 
 ```tsx
 import { parse } from "@conform-to/validitystate"
@@ -558,7 +578,7 @@ const schema = {
     },
 };
 
-function formatValidity(input) {
+function formatError(input) {
   if (input.validity.valueMissing) {
     return "The field is required";
   }
@@ -574,7 +594,7 @@ export async function action({ request }) {
   const formData = await request.formData();
   const submission = parse(formData, {
     schema,
-    formatValidity,
+    formatError,
   });
 
   if (submission.error) {
@@ -595,7 +615,7 @@ export default function LoginForm() {
 
         setError((error) => ({
           ...error,
-          [input.name]: formatValidity(input.validity),
+          [input.name]: formatError(input.validity),
         }));
 
         event.preventDefault();
@@ -656,7 +676,7 @@ const schema = {
     },
 };
 
-function formatValidity(input) {
+function formatError(input) {
   if (input.validity.valueMissing) {
     return "The field is required";
   }
@@ -672,7 +692,7 @@ export async function action({ request }) {
   const formData = await request.formData();
   const submission = parse(formData, {
     schema,
-    formatValidity,
+    formatError,
   });
 
   if (submission.error) {
@@ -700,7 +720,7 @@ export default function LoginForm() {
 
         setError((error) => ({
           ...error,
-          [input.name]: formatValidity(input.validity),
+          [input.name]: formatError(input.validity),
         }));
 
         event.preventDefault();
