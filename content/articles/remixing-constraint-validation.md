@@ -11,13 +11,11 @@ tags:
 
 # Remixing Constraint Validation
 
-Building form is hard. There are different states you need to maintain and also events to react as user interacting with your form. It is always tempting for us to just go with a form validation solution which, however, might brings a lot more than what we needed. What if we could use the platform to implement simple form validation without adding another dependency on the client?
+Building form is hard. You need to maintain different states and react to all kinds of events as user interacting with your forms. It is always tempting for us to just go with a form validation library. However, this might also brings a lot more than what we needed. What if we could use the platform to implement simple form validation without adding another dependency on the client?
 
 ## What is Constraint Validation?
 
-> emphasize constraint validation provides basic client validation experience, in such case no additional dependenicies are needed; the following HTML validation attributes are relatively common/familiar
-
-The [Constraint Validation](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#constraint-validation) is a browser built-in mechanism for client validation. It introudced a set of HTML validation attributes to enforce common constraint which could be checked without JavaScript. For example, you can enforce an input to be filled with the `required` attribute:
+The [Constraint Validation](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#constraint-validation) is a browser mechanism for client validation. It introudced a set of HTML validation attributes to enforce common constraint which could be checked without JavaScript. For example, you can enforce an input to be filled with the `required` attribute:
 
 ```tsx
 <input required />
@@ -43,7 +41,7 @@ This is not limited to the input element, but also other form controls. For exam
 
 With all these attributes, the browser will validate form controls as you types and report any errors found on submission, like this: [Example](#https://remix-conf-2023.edmund.dev/examples/basic).
 
-This looks cool, but it feels a bit limited: The error bubbles are not customizable. It happens only on form submit. The error messages are also generic and not informative. I think this is how most of the developers feel about this browser mechanism. It sounds good, but it's far from what a modrern form experience should be. But, that's just the HTML part of the specification. There are also DOM APIs to customize the validation experience. Let's take a look at them.
+I think this is how most of the developers feel about this browser mechanism. It sounds good, but it's far from what a modrern form experience should be. The styles of the error bubbles are not customizable. It happens only on form submit. The error messages are also generic. Indeed, what we missed here is that's just the HTML part of the specification. There are also DOM APIs to customize the validation experience. Let's take a look together.
 
 ## DOM APIs
 
@@ -51,7 +49,7 @@ The DOM APIs can be split into two parts: What is the error and when to report i
 
 ### What is the error
 
-The [ValidityState](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState) is an interface that contains a list of boolean values which describe the validity of the element and can be accessed from the `validity` property of the form element. For example, if an required input is empty, the `valueMissing` property will be marked as `true`:
+The [ValidityState](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState) is an interface that contains a list of boolean values which describe the validity of the element and can be accessed from the `validity` property of the form element. For example, if a required input is empty, the `valueMissing` property will be marked as `true`:
 
 ```json
 {
@@ -94,11 +92,9 @@ The ValidityState gives us an idea of what the error is and enables us to furthe
 
 ### When to report it
 
-> through ValidityState we can know the reason of invalid, and then we can show the corresponding error message to user. it also provides a way to customize the error message, (e.g. by using `setCustomValidity` API)
-
 Now we know how to customize the error message, but when should we show it? This is where the `invalid` event comes in.
 
-By default, when you submit a form, the browser will report the validity of each form controls and fire an `invalid` event on the corresponding invalid form elements. This gives us the opportunity to react to the invalid state and display the error message to the user. You can also cancel the error bubble by calling `event.preventDefault()`.
+By default, when you submit a form, the browser will report the validity of each form controls and fire an `invalid` event on the corresponding invalid form elements. This gives us the opportunity to react to the invalid state and display the error message to the user. If you called `event.preventDefault()`, the error bubble will be cancelled as well.
 
 ```tsx
 <input
@@ -115,7 +111,7 @@ By default, when you submit a form, the browser will report the validity of each
 />
 ```
 
-You can also customize the time when it should fire the invalid event. For example, you can disable the browser checks with the `noValidte` attribute and reimplement the check yourself using the `reportValidity` API. It will fire the `invalid` event on all invalid form elements and return a boolean value indicating whether the form is valid or not.
+Besides, you can customize the time when it should fire the invalid event. For example, you can disable the browser checks with the `noValidte` attribute and reimplement the check yourself using the `reportValidity` API. It will fire the `invalid` event on all invalid form elements and return a boolean value indicating whether the form is valid or not.
 
 ```tsx
 <form
@@ -133,9 +129,9 @@ You can also customize the time when it should fire the invalid event. For examp
 />
 ```
 
-Now that we have a basic understanding of the Constraint Validation API, let's see how we can use it to build a simple form validation experience in Remix.
+Now that we have a better understanding of the Constraint Validation APIs, let's see how we can use it to build a moden form validation experience with Remix.
 
-## The recipe
+## Login Form Example
 
 To begin, let's create a simple login form utilizing the validation attributes which sets the basic validation experience:
 
@@ -170,7 +166,7 @@ export default function LoginForm() {
 
 Now, it's time to improve it using the DOM APIs.
 
-### Customizing the error message
+### Customizing message
 
 The first thing we can do is to customize the error message by listening to the `change` event on the form element and use the `setCustomValidity` API to set the error message. Now, the error bubble will displayed the custom message instead of the generic one.
 
@@ -224,9 +220,9 @@ export default function LoginForm() {
 
 ### Displaying error messages manually
 
-The error bubble is a nice feature, but it's more common to have the error message displayed next to the input field. Let's capture the error message by listening to the `invalid` event and display it by ourselves.
+The error bubble is a nice feature, but sometimes you might prefer have the error message displayed next to the input field instead. Let's capture the error message by listening to the `invalid` event and display it ourselves.
 
-```tsx +[2,5,12,18,23,28]
+```tsx
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 
@@ -295,7 +291,7 @@ export default function LoginForm() {
 
 ### Clearing error messages on valid
 
-Our form is now able to display the error messages when the user submits the form. But there is a problem. The error messages persists even if the user fixes the error as the message is updated only on invalid. To fix this, we can customize the `onSubmit` event handler to clear the error messages before reporting errors:
+Our form is now populating the error messages when the user submits the form. But there is a problem. The error messages is not cleared even when the user fixes the issues. Why? We are updating the message only on invalid, but that's not called when it becomes valid. To fix this, we can customize the `onSubmit` event handler to clear the error messages before reporting errors:
 
 ```tsx +[20-31]
 import { Form } from '@remix-run/react';
@@ -363,17 +359,15 @@ export default function LoginForm() {
 }
 ```
 
-Now it is working. We started with a basic validation experience and progressively enhanced it with the Constraint Validation API. The form is still usable without JavaScript. A progressively enhanced form validation!
+It's done! We started with a basic validation experience and progressively enhanced it with the Constraint Validation API. The form is still usable without JavaScript. Now its time to move on to the server.
 
 ## How about the server?
-
-> Never trust the client. Always validate on the server too. Constraint Validation API does do a great work in client-side validation, but it is not enough. You will always have to validate on the server too.
 
 It's great that we have a good client validation experience. But this doesn't mean we can trust the client. We still need to validate on the server. But there is no Constraint Validation APIs on the server side and we have no access to the ValidityState. Are we going to rewrite the validation logic again?
 
 This is where our secret sauce comes in: [@conform-to/validitystate](https://www.npmjs.com/package/@conform-to/validitystate).
 
-This is a simple validation library that let you validate on the server using the same rules as the browser. It takes a schema that represent the constraint of each form control and allows customizing the validation message by polyfilling the ValidityState.
+This is a 2.5kb validation library that let you validate on the server using the same rules as the browser. It takes a schema that represent the constraint of each form control and allows customizing the validation message by polyfilling the ValidityState.
 
 Let's start by extracting the form validation attributes as a schema of our login form:
 
