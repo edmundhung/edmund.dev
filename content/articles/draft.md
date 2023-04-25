@@ -50,66 +50,60 @@ ALWAYS VALIDATE YOUR FORM SERVER SIDE / NEVER TRUST YOUR CLIENT
 
 ## Scripts
 
-### [0:00-0:15] Introduction (Who am I, what I do, why I am here)
+### [0:00-0:10] Introduction (Who am I, what I do, why I am here)
 
 Hi everyone, my name is Edmund Hung. I am a senior software engineer at DeliveryHero. I maintain Remix Guide and a form validation library called Conform. Today, I will be talking about Constraint Validation. [10s]
 
-### [0:15-1:15] What is Constraint Validation? (Use the platform)
+### [0:10-0:25] What is Constraint Validation? (Use the platform)
 
-Before we start, what is Constraint Validation? It's a browser mechanism for form validation. It introudced a set of HTML validation attributes to enforce some common constraint which will be checked by the browser.
+First of all, what is Constraint Validation? It's a built-in browser mechanism for form validation. It was introduced in HTML5 and is now supported by all modern browsers. You might not be familiar with the name, but you have probably used it before. [15s]
 
-For example, you can enforce an input to be filled with the `required` attribute:
+### [0:25-1:25] Validation Attributes
 
-You can also restrict its format as a number or email with some extra criterias. Or applying to other form elements, such as textarea.
+Let's say we are building a simple signup form and this is how the markup looks like. Pretty basic, right? Now, can you tell what would happen if we submit the form with the email input filled with an invalid email address? Like this:
+[Type "edmund" on the email input and click submit]
 
-When you submit the form, the browser checks the validity of each input and prevent the submission if anything looks wrong, which sounds great. But there are some limitations. [35s]
+What happened? The browser is validating the email and report the problem with us through the error bubble. There are more validation attributes we can use too. For example, we can enforce all the fields to be filled by adding the required attribute. We can also restrict the password to be at least 8 characters long using the minlength attribute and make sure there are at least 1 lowercase, 1 uppercase and 1 digit with a regular expression on the pattern attribute.
 
-First, the error bubbles looks different on each browsers. The styles cannot be changed. It also have limited support for message customization, such as the messages.
+Now, the browser is already validating many things for us and it works without a single line of JavaScript. It's awesome. It might not be the exact experience you wanted. But you should think of it as the basic validation experience you offered to your users and we are gonna progresively enhanced it using the DOM APIs. There are a few concepts you need to learn but it's not that hard.
 
-What we missed is the DOM APIs.
+### [1:25-1:55] Enhancing validation
 
-### [1:15-1:45] validationMessage / ValidityState
+The first thing we should learn is to disable the browser validation with the noValidate attribute. Without it, the submit event will not be triggered until all issues are resolved and this gives us full control on what's happened on the form. If I click on the submit button now, the form will be actually submitted.
 
-First of all, you can capture the message on the error bubbles with JavaScript. It's available on the form element through the `validationMessage` property. But you are probably more interested in the `validity` property, which represent the `ValidityState` of the input.
+Don't worry, we can reimplement it easily with the reportValidty API on the form element. It triggers the error bubbles and returns whether the form is valid or not, which help us deciding if the submission should be blocked. [30s]
 
-The `ValidityState` is a set of booleans that describes the result of each validation attributes. For example, if a required input is empty, the `valueMissing` property will be marked as `true`. [25s]
+### [1:55-2:40] Customizing messages
 
-### [1:45-2:30] Invalid event / reportValidity
+After this, how about customzing the messages? We will call the `setCustomValidity` API on each input element before any error is reported. We will also setup a formatError function to derive the message we want.
 
-Now we know about the errors, but when should we show it? This is where the `invalid` event comes to play. By default, when you submit a form, the browser will report the error and fire an `invalid` event on each invalid elements. This gives us a chance to react to the invalid state and display the error message to the user. If you called `event.preventDefault()`, the error bubble will be cancelled as well.
+In this function, we are accessing the ValidityState of the input element through the `validity` property, which is a set of booleans that describes the result of each validation attributes. For example, if a required input is empty, the `valueMissing` property will be marked as `true`.
 
-You can also customize the time when it should fire the invalid event. For example, you can disable the browser checks with the `noValidte` attribute and reimplement the check yourself using the `reportValidity` API. It will fire the `invalid` event on all invalid form elements and return a boolean value indicating whether the form is valid or not. [45s]
+We haven't check if the passwords are matching yet. Unfortunately, there is no built-in validation attribute for this. We will have to validate it ourselves. To achieve that, we will pass the formData to our formatError function and compare their values. [40s]
 
-### [2:30-2:45] Transition to the demo
+### [2:40-3:30] Capturing errors
 
-[Insert humor] and here is a remix recipe. [15s]
+I know not everyone likes the error bubble. Let's capture the errors and display them next to the input instead. When the `reportValidity` API is called, the browser will fire an invalid event on each invalid input. We will use it to capture the latest validation message in an error state. Note that our form does not show any error bubble now because it is cancelled with the `preventDefault` method on the event object.
 
-### [2:45-4:00] Demo
+Once we have the error ready, we can render it next to the input. We are almost done. But there is one problem as you can see here: We just typed a password. But the message is still showing even after I re-submit the form. Why? It's because we are updating the message only on `invalid`, but the event handler will not be triggered when it becomes valid. To fix this, all we need is to reset it before reporting new errors.
 
-To begin, let's create a simple login form with the validation attributes to give a basic validation experience. It checks the email and password and report errors through the bubbles. Now, let's improve it using the DOM APIs.
+Complete Demo [50s]
 
-The error bubble is nice, but sometimes you might prefer having the errors displayed next to the inputs.
-The first thing we can do is to capture them with an error state by listening to the `invalid` event, and then display them ourselves.
+### [3:30-3:45] How about the server
 
-But there is a problem here. As you can see here: We just typed a password. But the message is still there even after I submit the form. Why? We are updating the message only on `invalid`, but the event handler will not be triggered when it becomes valid. To fix this, we can customize the `onSubmit` event handler to clear the error messages before reporting errors, like this.
+Well, it's great to have client validation in place even without JavaScript. But it doesn't mean we can skip the server validation, right? How should we validate it on the server side? You cannot access the DOM on the server. Are we going to rewrite the validation logic again? This is where my secret sauce comes in [15s]
 
-We can also customize the messages with the ValidityState.
+### [3:45-4:30] The secret sauce
 
-It's done! We started with a basic validation experience and progressively enhanced it with the Constraint Validation APIs. The form is still usable without JavaScript.
-
-[70s]
-
-### [4:00-4:15] How about the server
-
-Well, it's great to have client validation in place even without JavaScript. But it doesn't mean we can skip the server validation, right? How should we validate it on the server side? You cannot access the DOM on the server. Are we going to rewrite the validation logic again? This is where our secret sauce comes in [15s]
-
-### [4:15-5:00] The secret sauce
-
-This is a package for you to validate on the server based on the ValidityState, with type inference support. Most importantly, it's 0kb on the client as you need it only on the server.
+This is a package for you to validate on the server based on the ValidityState with type inference support. Most importantly, it's 0kb on the client as you need it only on the server.
 
 Let's get back to our example and see how it works. Here we are gonna extract the constraint of each form control and put it together as the schema.
 
-Then, we will import the parse helper and pass the formData to it together with the schema and the formatError helper. The result includes the errors which we can send back to the client, or the parsed data if no error. Once the action returns the error, we can sync it with the client state.
+Then, we will import the parse helper and parse the formData based on the schema and the formatError helper. If there is any error, we just send it back to the client and sync it with the client error state.
+
+What's great about this approach is that we can reuse the same validation logic on the client and the server. It is now fully enhanced from the server and being able to show the same message even without JavaScript. [45s]
+
+### [4:30-5:00] Progressive Enhancement / Comparing both validation experience and tradeoffs
 
 ### [5:00-5:15] Closing
 
