@@ -60,16 +60,15 @@ First of all, what is Constraint Validation? It's a built-in browser mechanism f
 
 ### [0:25-1:25] Validation Attributes
 
-Let's say we are building a simple signup form and this is how the markup looks like. Pretty basic, right? Now, can you tell what would happen if we submit the form with the email input filled with an invalid email address? Like this:
-[Type "edmund" on the email input and click submit]
+Let's say we are building a simple signup form and this is how the markup looks like. Pretty basic, right? Now, if I type an invalid email address here and submit it, can you tell what would happen and why? [Type "edmund" on the email input and click submit]
 
-What happened? The browser is validating the email and report the problem with us through the error bubble. There are more validation attributes we can use too. For example, we can enforce all the fields to be filled by adding the required attribute. We can also restrict the password to be at least 8 characters long using the minlength attribute and make sure there are at least 1 lowercase, 1 uppercase and 1 digit with a regular expression on the pattern attribute.
+Well, the browser is reporting the problem on the email field because the email type attribute is actually one of the validation attributes. When the browser finds any of the validation attributes, the constraint validation mechanism got kicks-in. There are more validation attributes we can use too. For example, we can enforce all the fields to be filled by adding the required attribute. We can also restrict the password to be at least 8 characters long using the minlength attribute and make sure there are at least 1 lowercase, 1 uppercase and 1 digit with a regular expression on the pattern attribute.
 
-Now, the browser is already validating many things for us and it works without a single line of JavaScript. It's awesome. It might not be the exact experience you wanted. But you should think of it as the basic validation experience you offered to your users and we are gonna progresively enhanced it using the DOM APIs. There are a few concepts you need to learn but it's not that hard.
+It might be far from what the acttual experience we want to offer to our user. But you should think of it as the basic validation experience you offered to your users and we are gonna progresively enhanced it using the DOM APIs. There are a few concepts you need to learn but it's not that hard.
 
 ### [1:25-1:55] Enhancing validation
 
-The first thing we should learn is to disable the browser validation with the noValidate attribute. Without it, the submit event will not be triggered until all issues are resolved and this gives us full control on what's happened on the form. If I click on the submit button now, the form will be actually submitted.
+The first thing is to disable the browser validation with the noValidate attribute. This is quite important because it gives us full control on when a submission is happened. Without it, the submit event will not be triggered until all issues are resolved. That's why if I click on the submit button now, the form will be actually submitted.
 
 Don't worry, we can reimplement it easily with the reportValidty API on the form element. It triggers the error bubbles and returns whether the form is valid or not, which help us deciding if the submission should be blocked. [30s]
 
