@@ -62,9 +62,9 @@ First of all, what is Constraint Validation? It's a built-in browser mechanism f
 
 Let's say we are building a simple signup form and this is how the markup looks like. Pretty basic, right? Now, if I type an invalid email address here and submit it, what will happen? [Type "edmund" on the email input and click submit]
 
-Well, the browser prevents us from submitting the form and tells us the email is invalid. But why? It's because of the email type attribute here. If your form have these validation attributes set, the browser will make sure all values are valid. For example, we can enforce all inputs to be filled by adding the required attribute. We can also restrict the password to be at least 8 characters long using the minlength attribute and make sure it follows a certain pattern with a regular expression on the pattern attribute.
+Well, the browser prevents us from submitting the form and tells us the email is invalid because of the email type attribute here. If our form have these validation attributes set, the browser will make sure all values are valid. For example, we can enforce all inputs to be filled by adding the required attribute. We can also restrict the password to be at least 8 characters long using the minlength attribute and make sure it follows a certain pattern with a regular expression on the pattern attribute.
 
-This might be far from the actual experience we want. But this is just the basic validation experience. I am gonna show you how we can progressively enhanced it using the DOM APIs. [50s]
+This might be far from the actual experience we want. But we should think of it as just the basic validation experience. I am gonna show you how we can progressively enhanced it using the DOM APIs. [50s]
 
 ### [1:15-1:45] Enhancing validation
 
