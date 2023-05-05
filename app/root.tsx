@@ -142,7 +142,11 @@ function Document({
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#ebece5" />
         <Links />
-        <script defer data-domain="edmund.dev" src="https://plausible.io/js/script.js"></script>
+        <script
+          defer
+          data-domain="edmund.dev"
+          src="https://plausible.io/js/script.js"
+        />
       </head>
       <body className="min-h-screen bg-primary font-open-sans text-primary flex flex-col">
         {children}
