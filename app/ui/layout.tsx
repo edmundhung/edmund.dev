@@ -13,7 +13,7 @@ export interface LayoutProps {
 }
 
 function navLinkClass(active: boolean) {
-  return `flex-1 md:flex-none block py-4 decoration-dotted underline-offset-4 ${
+  return `flex-1 md:flex-none block py-3 decoration underline-offset-6 ${
     active ? 'text-white' : 'hover:underline'
   }`;
 }
@@ -36,8 +36,8 @@ export function Layout() {
           </a>
         </header>
         <main className="flex flex-1 flex-col">{children}</main>
-        <nav className="sticky bottom-0 z-30 bg-black text-sm font-light text-white/70">
-          <div className="container mx-auto flex justify-between px-4 shadow">
+        <nav className="sticky bottom-0 z-30 text-sm font-light bg-black text-white/70 border-white border-y-2 py-1">
+          <div className="container mx-auto flex justify-between px-4">
             <div className="hidden items-center gap-6 md:flex">
               <a
                 className="underline-offset-4 decoration-dotted decoration-current hover:decoration-2"

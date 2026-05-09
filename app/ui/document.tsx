@@ -65,7 +65,7 @@ export function Document() {
         <link rel="mask-icon" href="/safari-pinned-tab.svg" />
         <link rel="stylesheet" href={GLOBAL_STYLES_HREF} />
       </head>
-      <body className="min-h-screen bg-primary font-open-sans text-primary">
+      <body>
         {children}
         <script type="module" src={CLIENT_ENTRY_SRC}></script>
       </body>
