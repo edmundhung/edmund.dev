@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "edmund-dev",
+  "compatibility_date": "2026-05-05",
+  "main": "./server.ts",
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "3e46a589dc17470a97cadf3fd8fcf07e"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

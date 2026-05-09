@@ -11,13 +11,9 @@ jobs:
       - name: ⎔ Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 24
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
-      - name: 🎭 Install Playwright
-        run: npx playwright install --with-deps
-      - name: 📦 Build the worker
-        run: npm run build
       - name: 💣 Run some tests
         run: npm run test
 
@@ -30,13 +26,13 @@ jobs:
       - name: ⎔ Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 24
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
       - name: ✨ Code format check
         run: npx prettier --check .
-      - name: ✅ Code linting
-        run: npx eslint . --ext .js,.mjs,.ts,.tsx
+      - name: ✅ Typecheck
+        run: npm run typecheck
 
   deploy:
     name: 🛳 Deploying
@@ -51,12 +47,12 @@ jobs:
       - name: ⎔ Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 24
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
-      - name: 📦 Build the worker
+      - name: 📦 Build the app
         run: npm run build
       - name: 🔥 Publish
-        run: npx wrangler publish
+        run: npx wrangler deploy
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}

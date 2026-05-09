@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/open-sans-v23-latin-300.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/open-sans-v23-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/open-sans-v23-latin-700.woff2') format('woff2');
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply min-h-screen bg-primary font-open-sans text-primary;
+  }
+
+  a {
+    @apply underline-offset-4;
+  }
+}
+
+@layer components {
+  .markdown-content pre code {
+    background: transparent;
+    color: #f8f8f2;
+    display: block;
+    padding: 0;
+  }
+
+  .markdown-content .hljs-comment,
+  .markdown-content .hljs-quote {
+    color: #8b949e;
+  }
+
+  .markdown-content .hljs-keyword,
+  .markdown-content .hljs-selector-tag,
+  .markdown-content .hljs-subst {
+    color: #ff7b72;
+  }
+
+  .markdown-content .hljs-string,
+  .markdown-content .hljs-attr,
+  .markdown-content .hljs-meta .hljs-string {
+    color: #a5d6ff;
+  }
+
+  .markdown-content .hljs-number,
+  .markdown-content .hljs-literal {
+    color: #79c0ff;
+  }
+
+  .markdown-content .hljs-title,
+  .markdown-content .hljs-section,
+  .markdown-content .hljs-built_in {
+    color: #d2a8ff;
+  }
+
+  .markdown-content .hljs-addition {
+    color: #3fb950;
+  }
+
+  .markdown-content .hljs-deletion {
+    color: #f85149;
+  }
+}
