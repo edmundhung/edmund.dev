@@ -53,44 +53,39 @@
 @layer components {
   .markdown-content pre code {
     background: transparent;
-    color: #f8f8f2;
     display: block;
     padding: 0;
   }
 
-  .markdown-content .hljs-comment,
-  .markdown-content .hljs-quote {
-    color: #8b949e;
+  .markdown-content .shiki-diff .diff-line {
+    display: block;
+    margin: 0 -1rem;
+    padding: 0 1rem;
   }
 
-  .markdown-content .hljs-keyword,
-  .markdown-content .hljs-selector-tag,
-  .markdown-content .hljs-subst {
-    color: #ff7b72;
+  .markdown-content .shiki-diff .diff-prefix {
+    display: inline-block;
+    width: 1ch;
+    user-select: none;
   }
 
-  .markdown-content .hljs-string,
-  .markdown-content .hljs-attr,
-  .markdown-content .hljs-meta .hljs-string {
-    color: #a5d6ff;
+  .markdown-content .shiki-diff .diff-addition {
+    background-color: rgb(46 160 67 / 0.16);
   }
 
-  .markdown-content .hljs-number,
-  .markdown-content .hljs-literal {
-    color: #79c0ff;
-  }
-
-  .markdown-content .hljs-title,
-  .markdown-content .hljs-section,
-  .markdown-content .hljs-built_in {
-    color: #d2a8ff;
-  }
-
-  .markdown-content .hljs-addition {
+  .markdown-content .shiki-diff .diff-addition .diff-prefix {
     color: #3fb950;
   }
 
-  .markdown-content .hljs-deletion {
+  .markdown-content .shiki-diff .diff-deletion {
+    background-color: rgb(248 81 73 / 0.16);
+  }
+
+  .markdown-content .shiki-diff .diff-deletion .diff-prefix {
     color: #f85149;
+  }
+
+  .markdown-content .shiki-diff .diff-meta {
+    color: #8b949e;
   }
 }

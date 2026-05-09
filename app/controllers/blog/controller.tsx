@@ -35,7 +35,7 @@ export const blog = {
         <PostPage
           date={post.date}
           description={post.description}
-          html={renderMarkdown(post.markdown)}
+          html={await renderMarkdown(post.markdown)}
           pathname={url.pathname}
           title={post.title}
         />,
