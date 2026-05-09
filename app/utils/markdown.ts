@@ -7,6 +7,7 @@ import githubDarkDefault from '@shikijs/themes/github-dark-default';
 import MarkdownIt, { type Options } from 'markdown-it';
 import type Renderer from 'markdown-it/lib/renderer.mjs';
 import type Token from 'markdown-it/lib/token.mjs';
+import { applyPatch } from 'diff';
 import { createHighlighterCore } from 'shiki/core';
 import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
 
@@ -30,15 +31,27 @@ interface DiffPosition {
   oldLine: number | null;
 }
 
+interface DiffRenderedBlock {
+  html: string;
+  next: string;
+}
+
+interface DiffRow {
+  body: string;
+  kind: DiffLineKind;
+  newLine: number | null;
+  oldLine: number | null;
+  prefix: string;
+}
+
+interface SnapshotState {
+  code: string;
+  language: string;
+}
+
 type DiffLineKind = 'addition' | 'context' | 'deletion' | 'meta';
 
-interface DiffLineDescriptor {
-  body: string;
-  className: string;
-  kind: DiffLineKind;
-  prefix: string;
-  syntax: boolean;
-}
+let currentSnapshots = new Map<string, SnapshotState>();
 
 /** Initialize the Worker-safe highlighter once and keep markdown rendering sync. */
 const highlighter = await createHighlighterCore({
@@ -61,26 +74,41 @@ const highlighter = await createHighlighterCore({
 
 let markdown = new MarkdownIt({
   highlight(code: string, language: string, attrs: string) {
+    let filename = parseSnippetFilename(attrs);
+
     if (language === 'diff') {
       let innerLanguage = resolveDiffLanguageFromFilename(attrs);
+      let previous = filename ? currentSnapshots.get(filename) : null;
 
-      if (innerLanguage) {
+      if (filename && innerLanguage && previous) {
         try {
-          return highlightDiff(code, innerLanguage);
+          let rendered = renderDiffBlock(code, innerLanguage, previous.code);
+          currentSnapshots.set(filename, {
+            code: rendered.next,
+            language: previous.language,
+          });
+          return rendered.html;
         } catch {}
       }
+
+      return highlighter.codeToHtml(code, {
+        lang: 'diff',
+        theme: SHIKI_THEME,
+      });
     }
 
     if (language) {
       try {
-        if (attrs.trim()) {
-          return highlightCodeWithLineNumbers(code, language);
-        }
-
-        return highlighter.codeToHtml(code, {
+        let html = highlighter.codeToHtml(code, {
           lang: language,
           theme: SHIKI_THEME,
         });
+
+        if (filename) {
+          currentSnapshots.set(filename, { code, language });
+        }
+
+        return html;
       } catch {}
     }
 
@@ -105,65 +133,138 @@ markdown.renderer.rules.heading_open = (
 };
 
 export async function renderMarkdown(markdownSource: string) {
-  return markdown.render(markdownSource);
+  currentSnapshots = new Map();
+
+  try {
+    return markdown.render(markdownSource);
+  } finally {
+    currentSnapshots.clear();
+  }
 }
 
-function highlightDiff(code: string, language: string) {
-  let lines = code.endsWith('\n')
-    ? code.slice(0, -1).split('\n')
-    : code.split('\n');
-  let position: DiffPosition = { oldLine: null, newLine: null };
-
-  return `<pre class="shiki shiki-diff ${SHIKI_THEME}" style="background-color:${SHIKI_BACKGROUND};color:${SHIKI_FOREGROUND}" tabindex="0"><code>${lines
-    .map(line => renderDiffLine(line, language, position))
-    .join('')}</code></pre>`;
-}
-
-function highlightCodeWithLineNumbers(code: string, language: string) {
-  let lines = highlighter.codeToTokensBase(code, {
+function renderDiffBlock(
+  code: string,
+  language: string,
+  previous: string,
+): DiffRenderedBlock {
+  let next = applyUnifiedDiff(previous, code);
+  let oldTokens = highlighter.codeToTokensBase(previous, {
     lang: language,
     theme: SHIKI_THEME,
   });
+  let newTokens = highlighter.codeToTokensBase(next, {
+    lang: language,
+    theme: SHIKI_THEME,
+  });
+  let rows = parseDiffRows(code, previous, next);
 
-  return `<pre class="shiki shiki-lines ${SHIKI_THEME}" style="background-color:${SHIKI_BACKGROUND};color:${SHIKI_FOREGROUND}" tabindex="0"><code>${lines
-    .map((tokens, index) => renderCodeLine(tokens ?? [], index + 1))
-    .join('')}</code></pre>`;
+  return {
+    html: `<pre class="shiki shiki-diff ${SHIKI_THEME}" style="background-color:${SHIKI_BACKGROUND};color:${SHIKI_FOREGROUND}" tabindex="0"><code>${rows
+      .map(row => renderDiffRow(row, oldTokens, newTokens))
+      .join('')}</code></pre>`,
+    next,
+  };
 }
 
-function renderCodeLine(tokens: HighlightToken[], lineNumber: number) {
-  return `<span class="line code-line"><span class="code-line-number">${lineNumber}</span><span class="code-line-content">${
-    renderTokens(tokens) || '&#8203;'
-  }</span></span>`;
-}
-
-function renderDiffLine(
-  line: string,
-  language: string,
-  position: DiffPosition,
+function renderDiffRow(
+  row: DiffRow,
+  oldTokens: HighlightToken[][],
+  newTokens: HighlightToken[][],
 ) {
-  let hunkHeader = parseDiffHunkHeader(line);
-  if (hunkHeader) {
-    position.oldLine = hunkHeader.oldStart;
-    position.newLine = hunkHeader.newStart;
-    return '';
-  }
+  let content = getDiffRowContent(row, oldTokens, newTokens);
 
-  let { body, className, kind, prefix, syntax } = classifyDiffLine(line);
-  let lineNumber = getDiffLineNumbers(kind, position);
-  let content = syntax
-    ? renderHighlightedLine(body, language)
-    : escapeHtml(body);
-
-  return `<span class="line diff-line ${className}"><span class="diff-line-number">${
-    lineNumber.oldLine ?? ''
+  return `<span class="line diff-line ${getDiffLineClassName(
+    row.kind,
+  )}"><span class="diff-line-number">${
+    row.oldLine ?? ''
   }</span><span class="diff-line-number">${
-    lineNumber.newLine ?? ''
+    row.newLine ?? ''
   }</span><span class="diff-prefix">${escapeHtml(
-    prefix,
+    row.prefix,
   )}</span><span class="diff-content">${content || '&#8203;'}</span></span>`;
 }
 
-function classifyDiffLine(line: string): DiffLineDescriptor {
+function getDiffRowContent(
+  row: DiffRow,
+  oldTokens: HighlightToken[][],
+  newTokens: HighlightToken[][],
+) {
+  if (row.kind === 'addition') {
+    return renderTokens(newTokens[(row.newLine ?? 1) - 1] ?? []);
+  }
+
+  if (row.kind === 'deletion') {
+    return renderTokens(oldTokens[(row.oldLine ?? 1) - 1] ?? []);
+  }
+
+  if (row.kind === 'context') {
+    return renderTokens(newTokens[(row.newLine ?? 1) - 1] ?? []);
+  }
+
+  return escapeHtml(row.body);
+}
+
+function parseDiffRows(code: string, previous: string, next: string) {
+  let lines = code.endsWith('\n')
+    ? code.slice(0, -1).split('\n')
+    : code.split('\n');
+  let previousLines = previous.endsWith('\n')
+    ? previous.slice(0, -1).split('\n')
+    : previous.split('\n');
+  let nextLines = next.endsWith('\n')
+    ? next.slice(0, -1).split('\n')
+    : next.split('\n');
+  let position: DiffPosition = { oldLine: null, newLine: null };
+  let rows: DiffRow[] = [];
+
+  for (let line of lines) {
+    let hunkHeader = parseDiffHunkHeader(line);
+    if (hunkHeader) {
+      position.oldLine = hunkHeader.oldStart;
+      position.newLine = hunkHeader.newStart;
+      continue;
+    }
+
+    let { body, kind, prefix } = classifyDiffLine(
+      line,
+      position,
+      previousLines,
+      nextLines,
+    );
+    let numbers = getDiffLineNumbers(kind, position);
+
+    rows.push({
+      body,
+      kind,
+      newLine: numbers.newLine,
+      oldLine: numbers.oldLine,
+      prefix,
+    });
+  }
+
+  return rows;
+}
+
+function classifyDiffLine(
+  line: string,
+  position: DiffPosition,
+  previousLines: string[],
+  nextLines: string[],
+) {
+  if (
+    line === '' &&
+    position.oldLine &&
+    position.newLine &&
+    previousLines[position.oldLine - 1] === '' &&
+    nextLines[position.newLine - 1] === ''
+  ) {
+    return {
+      body: '',
+      kind: 'context' as const,
+      prefix: ' ',
+    };
+  }
+
   if (
     line.startsWith('diff ') ||
     line.startsWith('index ') ||
@@ -172,49 +273,39 @@ function classifyDiffLine(line: string): DiffLineDescriptor {
   ) {
     return {
       body: line,
-      className: 'diff-meta',
-      kind: 'meta',
+      kind: 'meta' as const,
       prefix: '',
-      syntax: false,
     };
   }
 
   if (line.startsWith('+')) {
     return {
       body: line.slice(1),
-      className: 'diff-addition',
-      kind: 'addition',
+      kind: 'addition' as const,
       prefix: '+',
-      syntax: true,
     };
   }
 
   if (line.startsWith('-')) {
     return {
       body: line.slice(1),
-      className: 'diff-deletion',
-      kind: 'deletion',
+      kind: 'deletion' as const,
       prefix: '-',
-      syntax: true,
     };
   }
 
   if (line.startsWith(' ')) {
     return {
       body: line.slice(1),
-      className: 'diff-context',
-      kind: 'context',
+      kind: 'context' as const,
       prefix: ' ',
-      syntax: true,
     };
   }
 
   return {
     body: line,
-    className: 'diff-context',
-    kind: 'meta',
+    kind: 'meta' as const,
     prefix: '',
-    syntax: false,
   };
 }
 
@@ -251,13 +342,32 @@ function getDiffLineNumbers(kind: DiffLineKind, position: DiffPosition) {
   return { oldLine: null, newLine: null };
 }
 
-function renderHighlightedLine(line: string, language: string) {
-  let [tokens] = highlighter.codeToTokensBase(line, {
-    lang: language,
-    theme: SHIKI_THEME,
-  });
+function getDiffLineClassName(kind: DiffLineKind) {
+  switch (kind) {
+    case 'addition':
+      return 'diff-addition';
+    case 'context':
+      return 'diff-context';
+    case 'deletion':
+      return 'diff-deletion';
+    case 'meta':
+      return 'diff-meta';
+  }
+}
 
-  return renderTokens(tokens ?? []);
+function applyUnifiedDiff(previous: string, diffCode: string) {
+  if (!diffCode.trim()) return previous;
+
+  let patch = `--- previous\n+++ next\n${
+    diffCode.endsWith('\n') ? diffCode : `${diffCode}\n`
+  }`;
+  let result = applyPatch(previous, patch);
+
+  if (result === false) {
+    throw new Error('Failed to apply diff block while rendering markdown.');
+  }
+
+  return result;
 }
 
 function renderTokens(tokens: HighlightToken[]) {
@@ -287,10 +397,12 @@ function renderTokenStyle(token: HighlightToken) {
 
   if (token.color) styles.push(`color:${token.color}`);
   if (token.bgColor) styles.push(`background-color:${token.bgColor}`);
-  if (token.fontStyle && (token.fontStyle & 1) !== 0)
+  if (token.fontStyle && (token.fontStyle & 1) !== 0) {
     styles.push('font-style:italic');
-  if (token.fontStyle && (token.fontStyle & 2) !== 0)
+  }
+  if (token.fontStyle && (token.fontStyle & 2) !== 0) {
     styles.push('font-weight:bold');
+  }
   if (token.fontStyle && (token.fontStyle & 4) !== 0) {
     styles.push('text-decoration:underline');
   }
@@ -309,8 +421,13 @@ function renderHtmlAttributes(attributes: Record<string, string> | undefined) {
     .join(' ');
 }
 
+function parseSnippetFilename(attrs: string) {
+  let filename = attrs.trim().split(/\s+/, 1)[0];
+  return filename ? filename.toLowerCase() : null;
+}
+
 function resolveDiffLanguageFromFilename(attrs: string) {
-  let filename = attrs.trim().split(/\s+/, 1)[0]?.toLowerCase();
+  let filename = parseSnippetFilename(attrs);
   if (!filename) return null;
 
   let basename = filename.replace(/^.*\//, '');
