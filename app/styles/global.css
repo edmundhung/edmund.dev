@@ -57,16 +57,56 @@
     padding: 0;
   }
 
-  .markdown-content .shiki-diff .diff-line {
-    display: block;
+  .markdown-content .shiki-lines .code-line {
+    align-items: baseline;
+    column-gap: 0.75rem;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
     margin: 0 -1rem;
     padding: 0 1rem;
   }
 
+  .markdown-content .shiki-lines .code-line-number {
+    color: #7d8590;
+    font-size: 0.875em;
+    font-variant-numeric: tabular-nums;
+    line-height: inherit;
+    text-align: right;
+    user-select: none;
+  }
+
+  .markdown-content .shiki-lines .code-line-content {
+    min-width: 0;
+  }
+
+  .markdown-content .shiki-diff .diff-line {
+    align-items: baseline;
+    column-gap: 0.5rem;
+    display: grid;
+    grid-template-columns: 1rem 1rem 1.5rem minmax(0, 1fr);
+    margin: 0 -1rem;
+    padding: 0 0.5rem;
+  }
+
+  .markdown-content .shiki-diff .diff-line-number {
+    color: #7d8590;
+    font-size: 0.875em;
+    font-variant-numeric: tabular-nums;
+    line-height: inherit;
+    text-align: right;
+    user-select: none;
+  }
+
   .markdown-content .shiki-diff .diff-prefix {
     display: inline-block;
+    line-height: inherit;
     width: 1ch;
+    text-align: center;
     user-select: none;
+  }
+
+  .markdown-content .shiki-diff .diff-content {
+    min-width: 0;
   }
 
   .markdown-content .shiki-diff .diff-addition {

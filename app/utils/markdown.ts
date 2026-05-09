@@ -25,6 +25,21 @@ interface HighlightToken {
   htmlStyle?: Record<string, string>;
 }
 
+interface DiffPosition {
+  newLine: number | null;
+  oldLine: number | null;
+}
+
+type DiffLineKind = 'addition' | 'context' | 'deletion' | 'meta';
+
+interface DiffLineDescriptor {
+  body: string;
+  className: string;
+  kind: DiffLineKind;
+  prefix: string;
+  syntax: boolean;
+}
+
 /** Initialize the Worker-safe highlighter once and keep markdown rendering sync. */
 const highlighter = await createHighlighterCore({
   engine: createOnigurumaEngine(import('shiki/onig.wasm')),
@@ -58,6 +73,10 @@ let markdown = new MarkdownIt({
 
     if (language) {
       try {
+        if (attrs.trim()) {
+          return highlightCodeWithLineNumbers(code, language);
+        }
+
         return highlighter.codeToHtml(code, {
           lang: language,
           theme: SHIKI_THEME,
@@ -93,41 +112,78 @@ function highlightDiff(code: string, language: string) {
   let lines = code.endsWith('\n')
     ? code.slice(0, -1).split('\n')
     : code.split('\n');
+  let position: DiffPosition = { oldLine: null, newLine: null };
 
   return `<pre class="shiki shiki-diff ${SHIKI_THEME}" style="background-color:${SHIKI_BACKGROUND};color:${SHIKI_FOREGROUND}" tabindex="0"><code>${lines
-    .map(line => renderDiffLine(line, language))
+    .map(line => renderDiffLine(line, language, position))
     .join('')}</code></pre>`;
 }
 
-function renderDiffLine(line: string, language: string) {
-  let { body, className, prefix, syntax } = classifyDiffLine(line);
+function highlightCodeWithLineNumbers(code: string, language: string) {
+  let lines = highlighter.codeToTokensBase(code, {
+    lang: language,
+    theme: SHIKI_THEME,
+  });
+
+  return `<pre class="shiki shiki-lines ${SHIKI_THEME}" style="background-color:${SHIKI_BACKGROUND};color:${SHIKI_FOREGROUND}" tabindex="0"><code>${lines
+    .map((tokens, index) => renderCodeLine(tokens ?? [], index + 1))
+    .join('')}</code></pre>`;
+}
+
+function renderCodeLine(tokens: HighlightToken[], lineNumber: number) {
+  return `<span class="line code-line"><span class="code-line-number">${lineNumber}</span><span class="code-line-content">${
+    renderTokens(tokens) || '&#8203;'
+  }</span></span>`;
+}
+
+function renderDiffLine(
+  line: string,
+  language: string,
+  position: DiffPosition,
+) {
+  let hunkHeader = parseDiffHunkHeader(line);
+  if (hunkHeader) {
+    position.oldLine = hunkHeader.oldStart;
+    position.newLine = hunkHeader.newStart;
+    return '';
+  }
+
+  let { body, className, kind, prefix, syntax } = classifyDiffLine(line);
+  let lineNumber = getDiffLineNumbers(kind, position);
   let content = syntax
     ? renderHighlightedLine(body, language)
     : escapeHtml(body);
 
-  return `<span class="line diff-line ${className}"><span class="diff-prefix">${escapeHtml(
+  return `<span class="line diff-line ${className}"><span class="diff-line-number">${
+    lineNumber.oldLine ?? ''
+  }</span><span class="diff-line-number">${
+    lineNumber.newLine ?? ''
+  }</span><span class="diff-prefix">${escapeHtml(
     prefix,
-  )}</span>${content || '&#8203;'}</span>`;
+  )}</span><span class="diff-content">${content || '&#8203;'}</span></span>`;
 }
 
-function classifyDiffLine(line: string) {
-  if (line.startsWith('@@')) {
-    return { body: line, className: 'diff-meta', prefix: '', syntax: false };
-  }
-
+function classifyDiffLine(line: string): DiffLineDescriptor {
   if (
     line.startsWith('diff ') ||
     line.startsWith('index ') ||
     line.startsWith('+++') ||
     line.startsWith('---')
   ) {
-    return { body: line, className: 'diff-meta', prefix: '', syntax: false };
+    return {
+      body: line,
+      className: 'diff-meta',
+      kind: 'meta',
+      prefix: '',
+      syntax: false,
+    };
   }
 
   if (line.startsWith('+')) {
     return {
       body: line.slice(1),
       className: 'diff-addition',
+      kind: 'addition',
       prefix: '+',
       syntax: true,
     };
@@ -137,6 +193,7 @@ function classifyDiffLine(line: string) {
     return {
       body: line.slice(1),
       className: 'diff-deletion',
+      kind: 'deletion',
       prefix: '-',
       syntax: true,
     };
@@ -146,12 +203,52 @@ function classifyDiffLine(line: string) {
     return {
       body: line.slice(1),
       className: 'diff-context',
+      kind: 'context',
       prefix: ' ',
       syntax: true,
     };
   }
 
-  return { body: line, className: 'diff-context', prefix: '', syntax: false };
+  return {
+    body: line,
+    className: 'diff-context',
+    kind: 'meta',
+    prefix: '',
+    syntax: false,
+  };
+}
+
+function parseDiffHunkHeader(line: string) {
+  let match = line.match(/^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@(?: .*)?$/);
+  if (!match) return null;
+
+  return {
+    newStart: Number(match[2]),
+    oldStart: Number(match[1]),
+  };
+}
+
+function getDiffLineNumbers(kind: DiffLineKind, position: DiffPosition) {
+  if (kind === 'addition') {
+    let current = { oldLine: null, newLine: position.newLine };
+    position.newLine = (position.newLine ?? 0) + 1;
+    return current;
+  }
+
+  if (kind === 'deletion') {
+    let current = { oldLine: position.oldLine, newLine: null };
+    position.oldLine = (position.oldLine ?? 0) + 1;
+    return current;
+  }
+
+  if (kind === 'context') {
+    let current = { oldLine: position.oldLine, newLine: position.newLine };
+    position.oldLine = (position.oldLine ?? 0) + 1;
+    position.newLine = (position.newLine ?? 0) + 1;
+    return current;
+  }
+
+  return { oldLine: null, newLine: null };
 }
 
 function renderHighlightedLine(line: string, language: string) {
