@@ -8,7 +8,8 @@
     "preview": "vite build && vite preview",
     "deploy": "vite build && wrangler deploy",
     "prepare": "husky install",
-    "test": "tsx --test",
+    "markdown-snippets": "tsx scripts/markdown-snippets.ts",
+    "test": "vitest run --config vitest.config.ts",
     "types": "wrangler types",
     "typecheck": "tsc --noEmit"
   },
@@ -31,6 +32,7 @@
     "@tailwindcss/vite": "^4.3.0",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^24",
+    "diff": "^9.0.0",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",
     "husky": "^8.0.2",
@@ -39,6 +41,7 @@
     "tailwindcss": "^4.3.0",
     "typescript": "^6",
     "vite": "^8",
+    "vitest": "^4.1.5",
     "wrangler": "^4"
   },
   "engines": {

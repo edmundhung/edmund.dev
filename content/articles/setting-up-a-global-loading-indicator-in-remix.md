@@ -14,7 +14,7 @@ Global loading indicator is a common UX pattern notifying your users something i
 
 In this tutorial, we will go through how to make a top loading progress bar using `tailwindcss`. Let's start by creating a dummy `<Progress />` component:
 
-```tsx Progress.tsx
+```tsx progress.tsx
 import type { ReactElement } from 'react';
 
 function Progress(): ReactElement {
@@ -33,18 +33,18 @@ export default Progress;
 
 In this component, we have only two elements with one being the container which is fixed at the top and the inner div presenting the progress with a static 30% width. Next, we need to hook up some logic and make it move:
 
-```diff Progress.tsx
+```diff progress.tsx
 @@ -1,10 +1,19 @@
 -import type { ReactElement } from 'react';
 +import type { ReactElement, MutableRefObject } from 'react';
 +import { useRef } from 'react';
-+
+
 +export function useProgress(): MutableRefObject<HTMLElement> {
 +  const el = useRef<HTMLElement>();
 +
 +  return el;
 +}
-
++
  function Progress(): ReactElement {
 +  const progress = useProgress();
 +
@@ -60,7 +60,7 @@ In this component, we have only two elements with one being the container which 
 
 It might be tempting to make the width a variable. But this is probably not an ideal solution as it adds unnecessary load to React which could block the other part of the UI. With this in mind, we will go with managing the element width by ourselves using `ref`.
 
-```diff Progress.tsx
+```diff progress.tsx
 @@ -1,8 +1,22 @@
  import type { ReactElement, MutableRefObject } from 'react';
 -import { useRef } from 'react';
@@ -70,7 +70,7 @@ It might be tempting to make the width a variable. But this is probably not an i
  export function useProgress(): MutableRefObject<HTMLElement> {
    const el = useRef<HTMLElement>();
 +  const { location } = useTransition();
-+
+
 +  useEffect(() => {
 +    if (!location || !el.current) {
 +      return;
@@ -82,32 +82,29 @@ It might be tempting to make the width a variable. But this is probably not an i
 +      el.current.style.width = `100%`;
 +    };
 +  }, [location]);
-
++
    return el;
  }
 ```
 
 Usually, you might need a query client which keeps track of all outgoing requests for you. However, this gets much simpler with Remix's route driven mechanism. It provides a built-in react hook named `useTransition` which returns the next location whenever a transition is happening. This allows us simply subscribe to the `location` value with useEffect and set the width accordingly.
 
-```diff Progress.tsx
-@@ -4,6 +4,7 @@
-import { useTransition } from 'remix';
-
+```diff progress.tsx
+@@ -5,15 +5,27 @@
  export function useProgress(): MutableRefObject<HTMLElement> {
    const el = useRef<HTMLElement>();
 +  const timeout = useRef<NodeJS.Timeout>();
    const { location } = useTransition();
 
    useEffect(() => {
-@@ -11,10 +12,21 @@
-export function useProgress(): MutableRefObject<HTMLElement> {
+     if (!location || !el.current) {
        return;
      }
-
++
 +    if (timeout.current) {
 +      clearTimeout(timeout.current);
 +    }
-+
+
      el.current.style.width = `0%`;
 
      return () => {
@@ -125,10 +122,8 @@ export function useProgress(): MutableRefObject<HTMLElement> {
 
 For sure, the progress bar should be disappeared after a short time. Let's add a timeout to clear the width after 200ms.
 
-```diff Progress.tsx
-@@ -18,7 +18,26 @@
-export function useProgress(): MutableRefObject<HTMLElement> {
-
+```diff progress.tsx
+@@ -19,6 +19,25 @@
      el.current.style.width = `0%`;
 
 +    let updateWidth = (ms: number) => {
@@ -158,9 +153,8 @@ export function useProgress(): MutableRefObject<HTMLElement> {
 
 Even though we have no idea about the actual progress status, it is better to keep the progress moving as the page loads. To achieve this, we increase the progress slightly every 100ms with a smaller gap each time. There is also an initial delay of 300ms which avoid showing the progress in case the transition finish quickly.
 
-```diff Progress.tsx
+```diff progress.tsx
 @@ -59,7 +59,7 @@
-  function Progress(): ReactElement {
      <div className="fixed top-0 left-0 right-0 h-1 flex">
        <div
          ref={progress}
