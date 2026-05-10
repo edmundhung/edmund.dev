@@ -2,7 +2,7 @@ import type { BuildAction } from 'remix/fetch-router';
 
 import type { BlogPostMetadata } from '../data/blog.server.ts';
 import { getPosts } from '../data/blog.server.ts';
-import { routes } from '../routes.ts';
+import { BlogPosts } from '../ui/blog-posts.tsx';
 import { Layout } from '../ui/layout.tsx';
 import { render } from '../utils/render.tsx';
 
@@ -33,57 +33,11 @@ function HomePage() {
           </p>
         </div>
         {posts.length > 0 ? (
-          <section className="mt-12 border-t border-black/10 pt-8 sm:mt-16 sm:pt-10">
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                Recent writing
-              </h2>
-              <a
-                className="text-sm font-semibold no-underline hover:underline"
-                href={routes.blog.index.href()}
-              >
-                View all posts
-              </a>
-            </div>
-            <div className="mt-6 flex flex-col divide-y divide-black/10">
-              {posts.map(post => (
-                <article
-                  key={post.slug}
-                  className="py-6 md:grid md:grid-cols-4 md:gap-8"
-                >
-                  <time
-                    className="mb-2 text-sm text-zinc-500 md:mb-0"
-                    dateTime={post.date}
-                  >
-                    {formatDate(post.date)}
-                  </time>
-                  <div className="md:col-span-3">
-                    <h3 className="text-lg font-semibold tracking-tight">
-                      <a
-                        className="no-underline hover:underline"
-                        href={routes.blog.show.href({ slug: post.slug })}
-                      >
-                        {post.title}
-                      </a>
-                    </h3>
-                    <p className="mt-2 text-sm leading-7 text-zinc-600 sm:text-base">
-                      {post.description}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
+          <section className="mt-12 sm:mt-16">
+            <BlogPosts posts={posts} />
           </section>
         ) : null}
       </div>
     </Layout>
   );
-}
-
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('en', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
 }
