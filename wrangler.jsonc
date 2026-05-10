@@ -3,6 +3,14 @@
   "name": "edmund-dev",
   "compatibility_date": "2026-05-05",
   "main": "./server.ts",
+  "routes": [
+    {
+      "pattern": "edmund.dev/*",
+      "zone_name": "edmund.dev"
+    }
+  ],
+  "workers_dev": false,
+  "preview_urls": false,
   "kv_namespaces": [
     {
       "binding": "CACHE",

@@ -35,10 +35,17 @@ export function Layout() {
             <span className="sr-only px-4">Edmund Hung</span>
           </a>
         </header>
-        <main className="flex flex-1 flex-col">{children}</main>
-        <nav className="sticky bottom-0 z-30 text-sm font-light bg-black text-white/70 border-white border-y-2 py-1">
+        <main className="flex flex-1 flex-col pb-15">{children}</main>
+        <nav className="sticky bottom-0 z-30 text-sm font-light bg-black text-white/70 py-1">
           <div className="container mx-auto flex justify-between px-4">
             <div className="hidden items-center gap-6 md:flex">
+              <a
+                className="underline-offset-4 decoration-dotted decoration-current hover:decoration-2"
+                href="mailto:contact@edmund.dev"
+              >
+                <Icon className="h-4 w-4 hover:text-white" symbol="email" />
+                <span className="sr-only">Email</span>
+              </a>
               <a
                 className="underline-offset-4 decoration-dotted decoration-current hover:decoration-2"
                 href="https://github.com/edmundhung"
