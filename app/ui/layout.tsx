@@ -96,6 +96,16 @@ export function Layout() {
               >
                 Blog
               </a>
+              <span>/</span>
+              <a
+                aria-current={
+                  pathname === routes.snapshots.href() ? 'page' : undefined
+                }
+                className={navLinkClass(pathname === routes.snapshots.href())}
+                href={routes.snapshots.href()}
+              >
+                Snapshots
+              </a>
             </div>
           </div>
         </nav>

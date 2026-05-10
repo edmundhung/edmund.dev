@@ -18,6 +18,7 @@ export const sitemap: BuildAction<'GET', typeof routes.sitemap> = {
       { changefreq: 'weekly', loc: url.origin, priority: 1 },
       { changefreq: 'monthly', loc: `${url.origin}/about`, priority: 0.5 },
       { changefreq: 'weekly', loc: `${url.origin}/blog`, priority: 0.8 },
+      { changefreq: 'monthly', loc: `${url.origin}/snapshots`, priority: 0.4 },
       ...posts.map(post => ({
         changefreq: 'weekly' as const,
         lastmod: post.date,

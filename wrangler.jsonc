@@ -17,6 +17,13 @@
       "id": "3e46a589dc17470a97cadf3fd8fcf07e"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "SNAPSHOTS",
+      "bucket_name": "snapshots",
+      "remote": true
+    }
+  ],
   "observability": {
     "enabled": true
   }

@@ -4,6 +4,7 @@ import { about } from './controllers/about.tsx';
 import { blog } from './controllers/blog/controller.tsx';
 import { home } from './controllers/home.tsx';
 import { rss } from './controllers/rss.tsx';
+import { snapshots } from './controllers/snapshots.tsx';
 import { sitemap } from './controllers/sitemap.tsx';
 import { routes } from './routes.ts';
 import { NotFoundPage } from './ui/not-found-page.tsx';
@@ -19,6 +20,7 @@ export const router = createRouter({
 
 router.map(routes.home, home);
 router.map(routes.about, about);
+router.map(routes.snapshots, snapshots);
 router.map(routes.blog, blog);
 router.map(routes.rss, rss);
 router.map(routes.sitemap, sitemap);

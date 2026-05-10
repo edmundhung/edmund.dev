@@ -1,6 +1,7 @@
 declare namespace Cloudflare {
   interface Env {
     GITHUB_TOKEN?: string;
+    SNAPSHOTS: R2Bucket;
   }
 }
 

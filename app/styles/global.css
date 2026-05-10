@@ -51,6 +51,30 @@
 }
 
 @layer components {
+  .snapshots-grid {
+    column-gap: 1.5rem;
+    columns: 1;
+  }
+
+  .snapshots-grid-item {
+    break-inside: avoid;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .snapshots-grid {
+      columns: 2;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .snapshots-grid {
+      columns: 3;
+    }
+  }
+
   .markdown-content pre code {
     background: transparent;
     display: block;
